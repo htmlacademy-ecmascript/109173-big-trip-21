@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Дмитрий Носиков](https://up.htmlacademy.ru/ecmascript/21/user/109173).
-* Наставник: `Неизвестно`.
+* Наставник: [Arthur Litovko](https://htmlacademy.ru/profile/id6927).
 
 ---
 
