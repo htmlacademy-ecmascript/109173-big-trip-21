@@ -1,5 +1,8 @@
-import TripPresenter from './presenter/trip-presenter.js';
+import TripHeaderPresenter from './presenter/trip-header-presenter.js';
+import TripContentPresenter from './presenter/trip-content-presenter.js';
 
-const tripPresenter = new TripPresenter();
+const tripHeaderPresenter = new TripHeaderPresenter();
+const tripContentPresenter = new TripContentPresenter();
 
-tripPresenter.init();
+tripHeaderPresenter.init();
+tripContentPresenter.init();
