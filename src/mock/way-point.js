@@ -1,6 +1,16 @@
-import {getRandomArrayElement} from '../utils.js';
+import { getRandomArrayElement } from '../utils.js';
 
-const pointTypes = new Set(['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant']);
+const pointTypes = {
+  TAXI: 'Taxi',
+  BUS: 'Bus',
+  TRAIN: 'Train',
+  SHIP: 'Ship',
+  DRIVE: 'Drive',
+  FLIGHT: 'Flight',
+  CHECK_IN: 'Check-in',
+  SIGHTSEEING: 'Sightseeing',
+  RESTARAUNT: 'Restaurant'
+};
 
 const destinationDescriptions = [
   `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Culpa amet dignissimos quae
@@ -27,12 +37,12 @@ const destinations = [
   {
     name: 'Moskow',
     description: destinationDescriptions[0],
-    photos: ['way/to/photos/1.jpg', 'way/to/photos/2.jpg', 'way/to/photos/3.jpg']
+    photos: ['img/photos/1.jpg', 'img/photos/2.jpg', 'img/photos/3.jpg']
   },
   {
     name: 'London',
     description: destinationDescriptions[0].slice(150),
-    photos: ['way/to/photos/3.jpg']
+    photos: ['img/photos/3.jpg']
   },
   {
     name: 'Amsterdam',
@@ -42,72 +52,107 @@ const destinations = [
   {
     name: 'New Zealand',
     description: destinationDescriptions[1],
-    photos: ['way/to/photos/1.jpg', 'way/to/photos/2.jpg', 'way/to/photos/3.jpg']
+    photos: ['img/photos/1.jpg', 'img/photos/2.jpg', 'img/photos/3.jpg']
   },
 ];
 
-const offers = [
-  {
-    name: 'Transfer',
-    cost: 80,
-    checked: true,
-  },
-  {
-    name: 'Meet in Airport',
-    cost: 100,
-    checked: false,
-  },
-  {
-    name: 'Lunch',
-    cost: 320,
-    checked: true,
-  },
-  {
-    name: 'Extra Luggage',
-    cost: 150,
-    checked: true,
-  },
-  {
-    name: 'Switch to comfort',
-    cost: 80,
-    checked: true,
-  },
-];
+const offers = {
+  [pointTypes.TAXI]: [
+    {
+      name: 'Transfer',
+      cost: 80,
+      checked: true,
+    },
+    {
+      name: 'Meet in Airport',
+      cost: 100,
+      checked: true,
+    }
+  ],
+
+  [pointTypes.FLIGHT]: [
+    {
+      name: 'Extra Luggage',
+      cost: 150,
+      checked: false,
+    }
+  ],
+
+  [pointTypes.CHECK_IN]: [
+    {
+      name: 'Lunch',
+      cost: 320,
+      checked: true,
+    },
+  ],
+
+  [pointTypes.BUS]: [
+    {
+      name: 'Switch to comfort',
+      cost: 80,
+      checked: false,
+    }
+  ],
+};
 
 const mockWayPoints = [
   {
-    type: pointTypes.get('Flight'),
-    destinations: destinations,
+    type: pointTypes.FLIGHT,
+    destination: destinations[3],
     dates: {
       start: '25/12/19 16:00',
       end: '01/08/2020 00:00'
     },
-    offers: offers,
+    offers: offers[pointTypes.FLIGHT],
     cost: 5000,
     isFavorite: true,
   },
 
   {
-    type: pointTypes.get('Ship'),
-    destinations: [],
+    type: pointTypes.SHIP,
+    destination: '',
     dates: {
       start: '10/08/2023 11:39',
       end: '12/08/2023 14:00'
     },
-    offers: [offers[0], offers[1], offers[2]],
+    offers: offers[pointTypes.SHIP],
     cost: 1000,
     isFavorite: false,
   },
 
   {
-    type: pointTypes.get('Check-in'),
-    destination: [destinations[2]],
+    type: pointTypes.CHECK_IN,
+    destination: destinations[0],
     dates: {
       start: '01/02/2021 03:00',
       end: '26/09/2023 03:00'
     },
-    offers: [],
+    offers: offers[pointTypes.CHECK_IN],
     cost: 400,
+    isFavorite: false,
+  },
+
+  {
+    type: pointTypes.TAXI,
+    destination: destinations[1],
+    dates: {
+      start: '25/12/19 16:00',
+      end: '01/08/2020 00:00'
+    },
+    offers: offers[pointTypes.TAXI],
+    cost: 800,
+    isFavorite: false,
+  },
+
+  {
+    type: pointTypes.BUS,
+    destination: destinations[2],
+    dates: {
+      start: '25/12/19 16:00',
+      end: '01/08/2020 00:00'
+    },
+    offers: offers[pointTypes.BUS],
+    cost: 450,
     isFavorite: false,
   },
 ];
