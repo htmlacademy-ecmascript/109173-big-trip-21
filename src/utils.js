@@ -11,8 +11,9 @@ const DATE_FORMATS = {
 };
 
 const TIME_IN_MILLIS = {
-  HOUR: 60 * 60 * 1000,
-  DAY: 24 * 60 * 60 * 1000,
+  MINUTE: 60 * 1000, // 60000
+  HOUR: 3600 * 1000, // 3600000
+  DAY: 24 * 3600 * 1000, // 86400000
 };
 
 function getRandomInt(min = 0, max = Infinity) {
@@ -27,7 +28,7 @@ function getRandomArrayElement(arr) {
 // TODO: Неверно считает - переделать
 function getFormattedDateDiff(date1, date2) {
   const dateDiff = dayjs(date2).diff(date1);
-  let formattedDate = null;
+  let formattedDate = dayjs(dateDiff).format(DATE_FORMATS.MORE_THAN_DAY);
 
   if (dateDiff <= TIME_IN_MILLIS.HOUR) {
     formattedDate = dayjs(dateDiff).format(DATE_FORMATS.LESS_THAN_HOUR);
@@ -41,6 +42,31 @@ function getFormattedDateDiff(date1, date2) {
 
   formattedDate = dayjs(dateDiff).format(DATE_FORMATS.MORE_THAN_DAY);
   return addCharsToDate(formattedDate, 'D', 'H', 'M');
+}
+
+// Функция для получения дней, часов и минут в миллисекундах
+function parseDateFromMillis(millis) {
+  let milliseconds = millis;
+  let days = 0;
+  let hours = 0;
+  let minutes = 0;
+
+  if (milliseconds >= TIME_IN_MILLIS.DAY) {
+    days = Math.round(milliseconds / TIME_IN_MILLIS.DAY);
+    milliseconds -= days * TIME_IN_MILLIS.DAY;
+  }
+
+  if (milliseconds >= TIME_IN_MILLIS.HOUR) {
+    hours = Math.round(milliseconds / TIME_IN_MILLIS.HOUR);
+    milliseconds -= hours * TIME_IN_MILLIS.DAY;
+  }
+
+  if (milliseconds > TIME_IN_MILLIS.MINUTE) {
+    minutes = Math.round(milliseconds / TIME_IN_MILLIS.MINUTE);
+    milliseconds -= hours * TIME_IN_MILLIS.MINUTE;
+  }
+
+  return {days, hours, minutes};
 }
 
 // TODO: Переделать на деструктуризацию
