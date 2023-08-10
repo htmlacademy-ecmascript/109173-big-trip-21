@@ -46,7 +46,7 @@ const destinations = [
   },
   {
     name: 'Amsterdam',
-    description: destinationDescriptions[0].slice(200, 150),
+    description: destinationDescriptions[0].slice(1, 80),
     photos: []
   },
   {
@@ -100,8 +100,8 @@ const mockWayPoints = [
     type: pointTypes.FLIGHT,
     destination: destinations[3],
     dates: {
-      start: '25/12/19 16:00',
-      end: '01/08/2020 00:00'
+      start: '2019-12-25 16:00',
+      end: '2020-08-01 00:00'
     },
     offers: offers[pointTypes.FLIGHT],
     cost: 5000,
@@ -112,8 +112,8 @@ const mockWayPoints = [
     type: pointTypes.SHIP,
     destination: '',
     dates: {
-      start: '10/08/2023 11:39',
-      end: '12/08/2023 14:00'
+      start: '2023-08-10 11:00',
+      end: '2023-08-12 14:00'
     },
     offers: offers[pointTypes.SHIP],
     cost: 1000,
@@ -124,8 +124,8 @@ const mockWayPoints = [
     type: pointTypes.CHECK_IN,
     destination: destinations[0],
     dates: {
-      start: '01/02/2021 03:00',
-      end: '26/09/2023 03:00'
+      start: '2023-02-01 03:00',
+      end: '2023-10-01 03:00'
     },
     offers: offers[pointTypes.CHECK_IN],
     cost: 400,
@@ -136,8 +136,8 @@ const mockWayPoints = [
     type: pointTypes.TAXI,
     destination: destinations[1],
     dates: {
-      start: '25/12/19 16:00',
-      end: '01/08/2020 00:00'
+      start: '2023-12-25 10:00',
+      end: '2023-12-25 18:00'
     },
     offers: offers[pointTypes.TAXI],
     cost: 800,
@@ -148,8 +148,8 @@ const mockWayPoints = [
     type: pointTypes.BUS,
     destination: destinations[2],
     dates: {
-      start: '25/12/19 16:00',
-      end: '01/08/2020 00:00'
+      start: '2023-07-24 00:00',
+      end: '2023-08-11 09:00'
     },
     offers: offers[pointTypes.BUS],
     cost: 450,
@@ -161,5 +161,9 @@ function getRandomPoint() {
   return getRandomArrayElement(mockWayPoints);
 }
 
+function getDestinations() {
+  return destinations;
+}
 
-export {getRandomPoint};
+
+export {getRandomPoint, getDestinations};
