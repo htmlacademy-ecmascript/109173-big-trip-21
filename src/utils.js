@@ -1,4 +1,7 @@
 import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration'; // Расширение для подсчета длительности (https://day.js.org/docs/en/durations/durations)
+
+dayjs.extend(duration); // Добавляем расширение в библиотеку
 
 const DATE_FORMATS = {
   CHOSED_DATE: 'DD/MM/YY HH:mm', // Дата и время начала события
@@ -26,22 +29,25 @@ function getRandomArrayElement(arr) {
 }
 
 // TODO: Неверно считает - переделать
+// function getFormattedDateDiff(date1, date2) {
+//   const dateDiff = Math.abs(dayjs(date2).diff(date1));
+//   let formattedDate = dayjs.duration(dateDiff).format('DD[D] HH[H] mm[M]');
+//   const filterredNums = formattedDate.filter((datePart) => !/00\w/.test(datePart));
+
+//   // console.log(date1, date2, dateDiff, formattedDate);
+//   // console.log(date1, date2, dateDiff, parseDateFromMillis(dateDiff));
+
+//   return filterredNums.join(' ');
+// }
+
+// v.2 (на нативной функции)
 function getFormattedDateDiff(date1, date2) {
-  const dateDiff = dayjs(date2).diff(date1);
-  let formattedDate = dayjs(dateDiff).format(DATE_FORMATS.MORE_THAN_DAY);
+  const dateDiff = Math.abs(dayjs(date2).diff(date1));
+  const formattedDate = parseDateFromMillis(dateDiff);
+  const formattedNums = [`${formattedDate.days}D`, `${formattedDate.hours}H`, `${formattedDate.minutes}M`];
+  const filterredNums = Array.from(formattedNums).filter((datePart) => !/00\w/.test(datePart));
 
-  if (dateDiff <= TIME_IN_MILLIS.HOUR) {
-    formattedDate = dayjs(dateDiff).format(DATE_FORMATS.LESS_THAN_HOUR);
-    return `${formattedDate}M`;
-  }
-
-  if (dateDiff <= TIME_IN_MILLIS.DAY) {
-    formattedDate = dayjs(dateDiff).format(DATE_FORMATS.LESS_THAN_DAY);
-    return addCharsToDate(formattedDate, 'M');
-  }
-
-  formattedDate = dayjs(dateDiff).format(DATE_FORMATS.MORE_THAN_DAY);
-  return addCharsToDate(formattedDate, 'D', 'H', 'M');
+  return filterredNums.join(' ');
 }
 
 // Функция для получения дней, часов и минут в миллисекундах
@@ -66,23 +72,16 @@ function parseDateFromMillis(millis) {
     milliseconds -= hours * TIME_IN_MILLIS.MINUTE;
   }
 
+  // Дополняем строку до двух символов 00D 00H 00M
+  days = getPadded2ZeroNum(days);
+  hours = getPadded2ZeroNum(hours);
+  minutes = getPadded2ZeroNum(minutes);
+
   return {days, hours, minutes};
 }
 
-// TODO: Переделать на деструктуризацию
-function addCharsToDate(date, ...chars) {
-  const splittedDate = date.split(' ');
-  let index = -1;
-
-  return splittedDate.map((dateNum) => {
-    index++;
-
-    if(chars[index]) {
-      return `${dateNum}${chars[index]}`;
-    }
-
-    return dateNum;
-  }).join(' ');
+function getPadded2ZeroNum(num) {
+  return String(num).padStart(2, 0);
 }
 
 export {getRandomArrayElement, getFormattedDateDiff, DATE_FORMATS};
