@@ -20,6 +20,7 @@ export default class TripContentPresenter {
     render(new TripSortView(), this.tripEventsContainer); // Отрисовываем сортировку событий
     render(this.tripEventsListContainer, this.tripEventsContainer); // Отрисовываем контейнер для событий
     render(new EditPointView(this.points[0]), this.tripEventsListContainer.getElement(), RenderPosition.AFTERBEGIN); // Отрисовываем форму редактирования первой точки маршрута
+    // render(new EditPointView(), this.tripEventsListContainer.getElement(), RenderPosition.AFTERBEGIN); // Форма создания новой точки (форма редактирования с пустым конструктором)
 
     for (let i = 1; i < this.points.length; i++) { //Выводим не с первой точки, а со второй т.к. первая отводится под блок редактирования
       render(new TripEventsListItem(this.points[i]), this.tripEventsListContainer.getElement()); // Отрисовываем события

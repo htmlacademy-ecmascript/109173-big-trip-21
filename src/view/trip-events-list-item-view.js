@@ -8,12 +8,13 @@ function createOffersTemplate(offers) {
   }
 
   return offers.map((offer) =>
-    offer.checked ? ( // Выводим только те свойства, которые были выбраны для конкретной точки маршрута
-      `<li class="event__offer">
-          <span class="event__offer-title">${offer.name}</span>
-          &plus;&euro;&nbsp;
-          <span class="event__offer-price">${offer.cost}</span>
-        </li>`) : ''
+  // Выводим только те свойства, которые были выбраны для конкретной точки маршрута
+    offer.checked ? /*html*/`
+      <li class="event__offer">
+        <span class="event__offer-title">${offer.name}</span>
+        &plus;&euro;&nbsp;
+        <span class="event__offer-price">${offer.cost}</span>
+      </li>` : ''
   ).join(''); // т.к. на выходе map мы получаем массив, а нам нужна строка - делаем строку
 }
 
@@ -43,10 +44,11 @@ function createTripEventsListTemplate({type, destination, dates, offers, cost, i
           &euro;&nbsp;<span class="event__price-value">${cost}</span>
         </p>
         <!-- Если у точки есть доп. услуги - выводим их -->
-        ${offersTemplate ? `<h4 class="visually-hidden">Offers:</h4>
-                            <ul class="event__selected-offers">
-                              ${offersTemplate}
-                            </ul>` : ''}
+        ${offersTemplate ? /*html*/`
+          <h4 class="visually-hidden">Offers:</h4>
+          <ul class="event__selected-offers">
+            ${offersTemplate}
+          </ul>` : ''}
         <button class="event__favorite-btn ${isFavorite ? 'event__favorite-btn--active' : ''}" type="button">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">

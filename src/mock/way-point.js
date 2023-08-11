@@ -37,12 +37,22 @@ const destinations = [
   {
     name: 'Moskow',
     description: destinationDescriptions[0],
-    photos: ['img/photos/1.jpg', 'img/photos/2.jpg', 'img/photos/3.jpg']
+    photos: [
+      {
+        src: 'img/photos/1.jpg',
+        alt: 'Event photo 1'
+      },
+    ]
   },
   {
     name: 'London',
     description: destinationDescriptions[0].slice(150),
-    photos: ['img/photos/3.jpg']
+    photos: [
+      {
+        src: 'img/photos/2.jpg',
+        alt: 'Event photo 2'
+      },
+    ]
   },
   {
     name: 'Amsterdam',
@@ -52,7 +62,20 @@ const destinations = [
   {
     name: 'New Zealand',
     description: destinationDescriptions[1],
-    photos: ['img/photos/1.jpg', 'img/photos/2.jpg', 'img/photos/3.jpg']
+    photos: [
+      {
+        src: 'img/photos/1.jpg',
+        alt: 'Event photo 1'
+      },
+      {
+        src: 'img/photos/2.jpg',
+        alt: 'Event photo 2'
+      },
+      {
+        src: 'img/photos/3.jpg',
+        alt: 'Event photo 3'
+      },
+    ]
   },
 ];
 
@@ -66,7 +89,7 @@ const offers = {
     {
       name: 'Meet in Airport',
       cost: 100,
-      checked: true,
+      checked: false,
     }
   ],
 
@@ -93,6 +116,16 @@ const offers = {
       checked: false,
     }
   ],
+};
+
+// Пустая точка (для создания новой точки маршрута)
+const NEW_BLANK_POINT = {
+  type: pointTypes.FLIGHT,
+  destination: '',
+  dates: '',
+  offers: '',
+  cost: 0,
+  isFavorite: false,
 };
 
 const mockWayPoints = [
@@ -157,6 +190,10 @@ const mockWayPoints = [
   },
 ];
 
+function getBlankPoint() {
+  return NEW_BLANK_POINT;
+}
+
 function getRandomPoint() {
   return getRandomArrayElement(mockWayPoints);
 }
@@ -166,4 +203,4 @@ function getDestinations() {
 }
 
 
-export {getRandomPoint, getDestinations};
+export {getBlankPoint, getRandomPoint, getDestinations};
