@@ -4,11 +4,7 @@
   "private": true,
   "description": "Проект «Большое путешествие» от HTML Academy",
   "browserslist": [
-    "last 2 versions",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all",
-    "not < 0.25%"
+    "defaults"
   ],
   "scripts": {
     "lint": "eslint src/",
@@ -29,5 +25,8 @@
   },
   "engines": {
     "node": "18"
+  },
+  "dependencies": {
+    "dayjs": "1.11.9"
   }
 }
