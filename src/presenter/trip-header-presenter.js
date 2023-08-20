@@ -1,4 +1,4 @@
-import {render, RenderPosition} from '../render.js';
+import {render, RenderPosition} from '../framework/render.js';
 import TripInfoView from '../view/trip-info-view.js';
 import TripInfoMain from '../view/trip-info-main-view.js';
 import TripInfoCost from '../view/trip-info-cost-view.js';
@@ -13,8 +13,8 @@ export default class TripHeaderPresenter {
 
   init() {
     render(this.tripInfoContainer, this.tripMainContainer, RenderPosition.AFTERBEGIN); // Отрисовываем контейнер для общей информации о маршруте
-    render(new TripInfoMain(), this.tripInfoContainer.getElement()); // Отрисовываем информацию о маршруте и датах
-    render(new TripInfoCost(), this.tripInfoContainer.getElement()); // Отрисовываем информацию о цене
+    render(new TripInfoMain(), this.tripInfoContainer.element); // Отрисовываем информацию о маршруте и датах
+    render(new TripInfoCost(), this.tripInfoContainer.element); // Отрисовываем информацию о цене
     render(new TripFilterView(), this.tripFilterContainer); // Отрисовываем фильтр событий
   }
 }

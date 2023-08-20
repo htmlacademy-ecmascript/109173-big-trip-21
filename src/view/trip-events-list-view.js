@@ -1,11 +1,9 @@
-import ComponentInterface from './ComponentInterface';
+import AbstractView from '../framework/view/abstract-view.js';
 
-function createTripEventsListTemplate() {
-  return '<ul class="trip-events__list"></ul>';
-}
+const TRIP_EVENTS_LIST_TEMPLATE = '<ul class="trip-events__list"></ul>';
 
-export default class TripEventsList extends ComponentInterface {
-  constructor() {
-    super(createTripEventsListTemplate());
+export default class TripEventsList extends AbstractView {
+  get template() {
+    return TRIP_EVENTS_LIST_TEMPLATE;
   }
 }

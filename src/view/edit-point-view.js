@@ -1,6 +1,5 @@
-import ComponentInterface from './ComponentInterface';
-import { getBlankPoint } from '../mock/way-point.js';
-import { getDestinations } from '../mock/way-point.js';
+import AbstractView from '../framework/view/abstract-view.js';
+import { getBlankPoint , getDestinations} from '../mock/way-point.js';
 import { DateFormats } from '../utils.js';
 import dayjs from 'dayjs';
 
@@ -174,8 +173,20 @@ function createEditPointTemplate({type, destination, dates, offers, cost}) {
     </li>`;
 }
 
-export default class EditPointView extends ComponentInterface {
-  constructor(templateData = getBlankPoint()) { // Если в конструктор не переданы данные - создается новая пустая точка
-    super(createEditPointTemplate(templateData));
+export default class EditPointView extends AbstractView {
+  #templateData = null;
+
+  /**
+   * Создание/Редкатирование точки маршрута
+   * @param {Object} templateData Объект данных для формирования шаблона
+   */
+  constructor(templateData = getBlankPoint()) {
+    super();
+
+    this.#templateData = templateData;
+  }
+
+  get template() {
+    return createEditPointTemplate(this.#templateData);
   }
 }

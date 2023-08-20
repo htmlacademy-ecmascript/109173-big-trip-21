@@ -1,4 +1,4 @@
-import ComponentInterface from './ComponentInterface';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createTripInfoCostTemplate() {
   return /*html*/`
@@ -7,8 +7,8 @@ function createTripInfoCostTemplate() {
     </p>`;
 }
 
-export default class TripInfoCost extends ComponentInterface {
-  constructor() {
-    super(createTripInfoCostTemplate());
+export default class TripInfoCost extends AbstractView {
+  get template() {
+    return createTripInfoCostTemplate();
   }
 }

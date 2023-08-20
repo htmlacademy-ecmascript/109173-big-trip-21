@@ -1,4 +1,4 @@
-import ComponentInterface from './ComponentInterface';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createTripSortTemplate() {
   return /*html*/`
@@ -30,8 +30,8 @@ function createTripSortTemplate() {
     </form>`;
 }
 
-export default class TripSortView extends ComponentInterface {
-  constructor() {
-    super(createTripSortTemplate());
+export default class TripSortView extends AbstractView {
+  get template() {
+    return createTripSortTemplate();
   }
 }
