@@ -3,6 +3,12 @@ import duration from 'dayjs/plugin/duration'; // Расширение для п�
 
 dayjs.extend(duration); // Добавляем расширение в библиотеку
 
+const Duration = {
+  MINUTE: 1440,
+  HOUR: 24,
+  DAY: 30
+};
+
 const DateFormats = {
   DATE_TIME: 'YYYY-MM-DD[T]hh:mm', // Для тега datetime
   CHOSED_DATE: 'DD/MM/YY HH:mm', // Дата и время начала события
@@ -21,11 +27,11 @@ const TimeInMillis = {
 };
 
 function getRandomInt(min = 0, max = Infinity) {
-  return Math.floor(min + Math.random() * (max - min));
+  return Math.floor(min + Math.random() * (max + 1 - min));
 }
 
 function getRandomArrayElement(arr) {
-  const randomIndex = getRandomInt(0, arr.length);
+  const randomIndex = getRandomInt(0, arr.length - 1);
   return arr[randomIndex];
 }
 
@@ -40,6 +46,30 @@ function getRandomArrayElement(arr) {
 
 //   return filterredNums.join(' ');
 // }
+
+// Получаем текущую дату с рандомным смещением в днях (в прошлое)
+let baseDate = dayjs().subtract(getRandomInt(0, Duration.DAY), 'days').toDate();
+
+/**
+ *
+ * @param {Boolean} addOffset Если true - добавляет рандомное смещение в минутах, часах и днях
+ * @returns {String} baseDate Строка со сгенерированной датой
+ */
+function getMockDate(addOffset = false) {
+  if (addOffset) {
+    const minutesOffset = getRandomInt(0, Duration.MINUTE);
+    const hoursOffset = getRandomInt(0, Duration.HOUR);
+    const daysOffset = getRandomInt(0, Duration.DAY);
+
+    baseDate = dayjs(baseDate)
+      .add(minutesOffset, 'm')
+      .add(hoursOffset, 'd')
+      .add(daysOffset, 'h')
+      .toDate();
+  }
+
+  return baseDate;
+}
 
 // v.2 (на нативной функции)
 function getFormattedDateDiff(date1, date2) {
@@ -85,4 +115,10 @@ function getPadded2ZeroNum(num) {
   return String(num).padStart(2, 0);
 }
 
-export {getRandomArrayElement, getFormattedDateDiff, DateFormats};
+export {
+  getRandomInt,
+  getRandomArrayElement,
+  getMockDate,
+  getFormattedDateDiff,
+  DateFormats
+};
