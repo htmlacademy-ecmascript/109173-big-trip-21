@@ -1,7 +1,7 @@
 import ComponentInterface from './ComponentInterface';
 import { getBlankPoint } from '../mock/way-point.js';
 import { getDestinations } from '../mock/way-point.js';
-import { DATE_FORMATS } from '../utils.js';
+import { DateFormats } from '../utils.js';
 import dayjs from 'dayjs';
 
 function createEventTypeTemplate() {
@@ -94,8 +94,8 @@ function createEditPointTemplate({type, destination, dates, offers, cost}) {
   const offersTemplate = createOffersTemplate(offers);
   const destinationsTemplate = createDestinationsTemplate(getDestinations());
   const photosTemplate = destination.photos ? createPhotostemplate(destination.photos) : '';
-  const dateStart = dates.start ? dayjs(dates.start).format(DATE_FORMATS.CHOSED_DATE) : '';
-  const dateEnd = dates.end ? dayjs(dates.end).format(DATE_FORMATS.CHOSED_DATE) : '';
+  const dateStart = dates.start ? dayjs(dates.start).format(DateFormats.CHOSED_DATE) : '';
+  const dateEnd = dates.end ? dayjs(dates.end).format(DateFormats.CHOSED_DATE) : '';
 
   return /*html*/`
     <li class="trip-events__item">
