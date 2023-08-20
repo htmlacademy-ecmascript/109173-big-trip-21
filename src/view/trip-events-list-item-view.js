@@ -1,6 +1,6 @@
 import ComponentInterface from './ComponentInterface';
 import dayjs from 'dayjs';
-import { getFormattedDateDiff, DATE_FORMATS } from '../utils.js';
+import { getFormattedDateDiff, DateFormats } from '../utils.js';
 
 function createOffersTemplate(offers) {
   if (!offers) {
@@ -20,9 +20,11 @@ function createOffersTemplate(offers) {
 
 function createTripEventsListTemplate({type, destination, dates, offers, cost, isFavorite}) {
   const offersTemplate = createOffersTemplate(offers);
-  const dateForPoint = dayjs(dates.start).format(DATE_FORMATS.FOR_POINT);
-  const dateStart = dayjs(dates.start).format(DATE_FORMATS.FOR_POINT_PERIODS);
-  const dateEnd = dayjs(dates.end).format(DATE_FORMATS.FOR_POINT_PERIODS);
+  const dateForPoint = dayjs(dates.start).format(DateFormats.FOR_POINT);
+  const dateStart = dayjs(dates.start).format(DateFormats.FOR_POINT_PERIODS);
+  const dateEnd = dayjs(dates.end).format(DateFormats.FOR_POINT_PERIODS);
+  const dateTimeStart = dayjs(dates.start).format(DateFormats.DATE_TIME);
+  const dateTimeEnd = dayjs(dates.end).format(DateFormats.DATE_TIME);
 
   return /*html*/`
     <li class="trip-events__item">
@@ -34,9 +36,9 @@ function createTripEventsListTemplate({type, destination, dates, offers, cost, i
         <h3 class="event__title">${type} ${destination ? destination.name : ''}</h3>
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="2019-03-18T10:30">${dateStart}</time>
+            <time class="event__start-time" datetime="${dateTimeStart}">${dateStart}</time>
             &mdash;
-            <time class="event__end-time" datetime="2019-03-18T11:00">${dateEnd}</time>
+            <time class="event__end-time" datetime="${dateTimeEnd}">${dateEnd}</time>
           </p>
           <p class="event__duration">${getFormattedDateDiff(dates.start, dates.end)}</p>
         </div>

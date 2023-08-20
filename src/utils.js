@@ -3,7 +3,8 @@ import duration from 'dayjs/plugin/duration'; // Расширение для п�
 
 dayjs.extend(duration); // Добавляем расширение в библиотеку
 
-const DATE_FORMATS = {
+const DateFormats = {
+  DATE_TIME: 'YYYY-MM-DD[T]hh:mm', // Для тега datetime
   CHOSED_DATE: 'DD/MM/YY HH:mm', // Дата и время начала события
   FOR_POINT_PERIODS: 'HH:mm', // Для периодов, выбранных для точки маршрута
   FOR_POINT: 'MMM DD', // Дата для каждой конкретной точки маршрута
@@ -13,7 +14,7 @@ const DATE_FORMATS = {
   MORE_THAN_DAY: 'DD HH mm' // Более суток
 };
 
-const TIME_IN_MILLIS = {
+const TimeInMillis = {
   MINUTE: 60 * 1000, // 60000
   HOUR: 3600 * 1000, // 3600000
   DAY: 24 * 3600 * 1000, // 86400000
@@ -45,9 +46,9 @@ function getFormattedDateDiff(date1, date2) {
   const dateDiff = Math.abs(dayjs(date2).diff(date1));
   const formattedDate = parseDateFromMillis(dateDiff);
   const formattedNums = [`${formattedDate.days}D`, `${formattedDate.hours}H`, `${formattedDate.minutes}M`];
-  const filterredNums = Array.from(formattedNums).filter((datePart) => !/00\w/.test(datePart));
+  const filteredNums = Array.from(formattedNums).filter((datePart) => !/00\w/.test(datePart));
 
-  return filterredNums.join(' ');
+  return filteredNums.join(' ');
 }
 
 // Функция для получения дней, часов и минут в миллисекундах
@@ -57,19 +58,19 @@ function parseDateFromMillis(millis) {
   let hours = 0;
   let minutes = 0;
 
-  if (milliseconds >= TIME_IN_MILLIS.DAY) {
-    days = Math.round(milliseconds / TIME_IN_MILLIS.DAY);
-    milliseconds -= days * TIME_IN_MILLIS.DAY;
+  if (milliseconds >= TimeInMillis.DAY) {
+    days = Math.round(milliseconds / TimeInMillis.DAY);
+    milliseconds -= days * TimeInMillis.DAY;
   }
 
-  if (milliseconds >= TIME_IN_MILLIS.HOUR) {
-    hours = Math.round(milliseconds / TIME_IN_MILLIS.HOUR);
-    milliseconds -= hours * TIME_IN_MILLIS.DAY;
+  if (milliseconds >= TimeInMillis.HOUR) {
+    hours = Math.round(milliseconds / TimeInMillis.HOUR);
+    milliseconds -= hours * TimeInMillis.DAY;
   }
 
-  if (milliseconds > TIME_IN_MILLIS.MINUTE) {
-    minutes = Math.round(milliseconds / TIME_IN_MILLIS.MINUTE);
-    milliseconds -= hours * TIME_IN_MILLIS.MINUTE;
+  if (milliseconds > TimeInMillis.MINUTE) {
+    minutes = Math.round(milliseconds / TimeInMillis.MINUTE);
+    milliseconds -= hours * TimeInMillis.MINUTE;
   }
 
   // Дополняем строку до двух символов 00D 00H 00M
@@ -84,4 +85,4 @@ function getPadded2ZeroNum(num) {
   return String(num).padStart(2, 0);
 }
 
-export {getRandomArrayElement, getFormattedDateDiff, DATE_FORMATS};
+export {getRandomArrayElement, getFormattedDateDiff, DateFormats};
