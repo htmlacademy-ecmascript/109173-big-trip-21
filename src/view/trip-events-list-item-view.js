@@ -66,14 +66,26 @@ function createTripEventsListTemplate({type, destination, dates, offers, cost, i
 
 export default class TripEventsListItem extends AbstractView {
   #templateData = null;
+  pointEditBtn = null;
+  pointEditCallback = null;
 
   constructor(templateData) {
     super();
 
     this.#templateData = templateData;
+    this.pointEditCallback = templateData.pointEditCallback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#pointEditBtnHandler);
   }
 
   get template() {
     return createTripEventsListTemplate(this.#templateData);
   }
+
+  #pointEditBtnHandler = (evt) => {
+    evt.preventDefault();
+
+    if (this.pointEditCallback) {
+      this.pointEditCallback();
+    }
+  };
 }

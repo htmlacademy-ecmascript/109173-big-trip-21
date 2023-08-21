@@ -175,6 +175,8 @@ function createEditPointTemplate({type, destination, dates, offers, cost}) {
 
 export default class EditPointView extends AbstractView {
   #templateData = null;
+  #pointSubmitCallback = null;
+  #pointFinishEditCallback = null;
 
   /**
    * Создание/Редкатирование точки маршрута
@@ -184,9 +186,29 @@ export default class EditPointView extends AbstractView {
     super();
 
     this.#templateData = templateData;
+    this.#pointSubmitCallback = templateData.pointSubmitCallback;
+    this.#pointFinishEditCallback = templateData.pointFinishEditCallback;
+    this.element.querySelector('.event--edit').addEventListener('submit', this.#pointSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#pointFinishEditHandler);
   }
 
   get template() {
     return createEditPointTemplate(this.#templateData);
   }
+
+  #pointSubmitHandler = (evt) => {
+    evt.preventDefault();
+
+    if (this.#pointSubmitCallback) {
+      this.#pointSubmitCallback();
+    }
+  };
+
+  #pointFinishEditHandler = (evt) => {
+    evt.preventDefault();
+
+    if (this.#pointFinishEditCallback) {
+      this.#pointFinishEditCallback();
+    }
+  };
 }

@@ -115,10 +115,15 @@ function getPadded2ZeroNum(num) {
   return String(num).padStart(2, 0);
 }
 
+function isEscKey(evt) {
+  return evt.key === 'Escape';
+}
+
 export {
   getRandomInt,
   getRandomArrayElement,
   getMockDate,
   getFormattedDateDiff,
-  DateFormats
+  DateFormats,
+  isEscKey
 };
