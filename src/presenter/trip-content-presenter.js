@@ -1,4 +1,4 @@
-import { render, replace, RenderPosition } from '../framework/render.js';
+import { render, replace } from '../framework/render.js';
 import TripSortView from '../view/trip-sort-view.js';
 import TripEventsList from '../view/trip-events-list-view.js';
 import TripEventsListItem from '../view/trip-events-list-item-view.js';
