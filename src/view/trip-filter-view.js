@@ -1,10 +1,10 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createTripFilterListTemplate(filters) {
-  return filters.map(({name, checked, disabled}) => {
+  return filters.map(({name, checked, dataLength}) => {
     const loweredName = name.toLowerCase();
     const checkedState = checked ? 'checked' : '';
-    const disabledState = disabled ? 'disabled' : '';
+    const disabledState = dataLength <= 0 ? 'disabled' : '';
 
     return /*html*/`
       <div class="trip-filters__filter">

@@ -2,25 +2,25 @@ const filters = [
   {
     name: 'Everything',
     checked: true,
-    disabled: false,
+    dataLength: 15, // Количество точек маршрута, доступных по данному фильтру
   },
 
   {
     name: 'Future',
     checked: false,
-    disabled: false,
+    dataLength: 10,
   },
 
   {
     name: 'Present',
     checked: false,
-    disabled: false,
+    dataLength: 5,
   },
 
   {
     name: 'Past',
     checked: false,
-    disabled: true,
+    dataLength: 0,
   },
 ];
 

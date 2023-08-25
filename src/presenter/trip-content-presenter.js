@@ -24,7 +24,6 @@ export default class TripContentPresenter {
 
   init() {
     this.#points = this.#pointsModel.points.slice(); // Копируем полученный из модели массив с точками маршрута
-    this.#points = 0;
 
     render(new TripSortView(), this.#tripEventsContainer); // Отрисовываем сортировку событий
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для событий
