@@ -1,6 +1,5 @@
-import ComponentInterface from './ComponentInterface';
-import { getBlankPoint } from '../mock/way-point.js';
-import { getDestinations } from '../mock/way-point.js';
+import AbstractView from '../framework/view/abstract-view.js';
+import { getBlankPoint , getDestinations} from '../mock/way-point.js';
 import { DateFormats } from '../utils.js';
 import dayjs from 'dayjs';
 
@@ -174,8 +173,42 @@ function createEditPointTemplate({type, destination, dates, offers, cost}) {
     </li>`;
 }
 
-export default class EditPointView extends ComponentInterface {
-  constructor(templateData = getBlankPoint()) { // Если в конструктор не переданы данные - создается новая пустая точка
-    super(createEditPointTemplate(templateData));
+export default class EditPointView extends AbstractView {
+  #templateData = null;
+  #pointSubmitCallback = null;
+  #pointFinishEditCallback = null;
+
+  /**
+   * Создание/Редкатирование точки маршрута
+   * @param {Object} templateData Объект данных для формирования шаблона
+   */
+  constructor(templateData = getBlankPoint()) {
+    super();
+
+    this.#templateData = templateData;
+    this.#pointSubmitCallback = templateData.pointSubmitCallback;
+    this.#pointFinishEditCallback = templateData.pointFinishEditCallback;
+    this.element.querySelector('.event--edit').addEventListener('submit', this.#pointSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#pointFinishEditHandler);
   }
+
+  get template() {
+    return createEditPointTemplate(this.#templateData);
+  }
+
+  #pointSubmitHandler = (evt) => {
+    evt.preventDefault();
+
+    if (this.#pointSubmitCallback) {
+      this.#pointSubmitCallback();
+    }
+  };
+
+  #pointFinishEditHandler = (evt) => {
+    evt.preventDefault();
+
+    if (this.#pointFinishEditCallback) {
+      this.#pointFinishEditCallback();
+    }
+  };
 }

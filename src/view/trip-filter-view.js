@@ -1,4 +1,4 @@
-import ComponentInterface from './ComponentInterface';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createTripFilterTemplate() {
   return /*html*/`
@@ -27,8 +27,8 @@ function createTripFilterTemplate() {
   </form>`;
 }
 
-export default class TripFilterView extends ComponentInterface {
-  constructor() {
-    super(createTripFilterTemplate());
+export default class TripFilterView extends AbstractView {
+  get template() {
+    return createTripFilterTemplate();
   }
 }

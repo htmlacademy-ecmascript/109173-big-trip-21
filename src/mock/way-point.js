@@ -1,4 +1,6 @@
-import { getRandomArrayElement } from '../utils.js';
+import { getRandomInt, getRandomArrayElement, getMockDate } from '../utils.js';
+
+const Price = {MIN: 500, MAX: 5000};
 
 const pointTypes = {
   TAXI: 'Taxi',
@@ -35,6 +37,7 @@ const destinationDescriptions = [
 
 const destinations = [
   {
+    id: crypto.randomUUID(),
     name: 'Moskow',
     description: destinationDescriptions[0],
     photos: [
@@ -45,6 +48,7 @@ const destinations = [
     ]
   },
   {
+    id: crypto.randomUUID(),
     name: 'London',
     description: destinationDescriptions[0].slice(150),
     photos: [
@@ -55,11 +59,13 @@ const destinations = [
     ]
   },
   {
+    id: crypto.randomUUID(),
     name: 'Amsterdam',
     description: destinationDescriptions[0].slice(1, 80),
     photos: []
   },
   {
+    id: crypto.randomUUID(),
     name: 'New Zealand',
     description: destinationDescriptions[1],
     photos: [
@@ -82,11 +88,13 @@ const destinations = [
 const offers = {
   [pointTypes.TAXI]: [
     {
+      id: crypto.randomUUID(),
       name: 'Transfer',
       cost: 80,
       checked: true,
     },
     {
+      id: crypto.randomUUID(),
       name: 'Meet in Airport',
       cost: 100,
       checked: false,
@@ -95,6 +103,7 @@ const offers = {
 
   [pointTypes.FLIGHT]: [
     {
+      id: crypto.randomUUID(),
       name: 'Extra Luggage',
       cost: 150,
       checked: false,
@@ -103,6 +112,7 @@ const offers = {
 
   [pointTypes.CHECK_IN]: [
     {
+      id: crypto.randomUUID(),
       name: 'Lunch',
       cost: 320,
       checked: true,
@@ -111,6 +121,7 @@ const offers = {
 
   [pointTypes.BUS]: [
     {
+      id: crypto.randomUUID(),
       name: 'Switch to comfort',
       cost: 80,
       checked: false,
@@ -128,74 +139,28 @@ const NEW_BLANK_POINT = {
   isFavorite: false,
 };
 
-const mockWayPoints = [
-  {
-    type: pointTypes.FLIGHT,
-    destination: destinations[3],
+function getPoint(pointType) {
+  return {
+    type: pointType,
+    destination: getRandomArrayElement(destinations),
     dates: {
-      start: '2019-12-25 16:00',
-      end: '2020-08-01 00:00'
+      start: getMockDate(),
+      end: getMockDate(true)
     },
-    offers: offers[pointTypes.FLIGHT],
-    cost: 5000,
-    isFavorite: true,
-  },
-
-  {
-    type: pointTypes.SHIP,
-    destination: '',
-    dates: {
-      start: '2023-08-10 11:00',
-      end: '2023-08-12 14:00'
-    },
-    offers: offers[pointTypes.SHIP],
-    cost: 1000,
-    isFavorite: false,
-  },
-
-  {
-    type: pointTypes.CHECK_IN,
-    destination: destinations[0],
-    dates: {
-      start: '2023-02-01 03:00',
-      end: '2023-10-01 03:00'
-    },
-    offers: offers[pointTypes.CHECK_IN],
-    cost: 400,
-    isFavorite: false,
-  },
-
-  {
-    type: pointTypes.TAXI,
-    destination: destinations[1],
-    dates: {
-      start: '2023-12-25 10:00',
-      end: '2023-12-25 18:00'
-    },
-    offers: offers[pointTypes.TAXI],
-    cost: 800,
-    isFavorite: false,
-  },
-
-  {
-    type: pointTypes.BUS,
-    destination: destinations[2],
-    dates: {
-      start: '2023-07-24 00:00',
-      end: '2023-08-11 09:00'
-    },
-    offers: offers[pointTypes.BUS],
-    cost: 450,
-    isFavorite: false,
-  },
-];
+    offers: offers[pointType] || [],
+    cost: getRandomInt(Price.MIN, Price.MAX),
+    isFavorite: Boolean(getRandomInt(0, 1)),
+  };
+}
 
 function getBlankPoint() {
   return NEW_BLANK_POINT;
 }
 
 function getRandomPoint() {
-  return getRandomArrayElement(mockWayPoints);
+  const pointType = getRandomArrayElement(Object.values(pointTypes));
+
+  return getPoint(pointType);
 }
 
 function getDestinations() {

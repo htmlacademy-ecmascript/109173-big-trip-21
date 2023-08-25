@@ -1,6 +1,6 @@
-import ComponentInterface from './ComponentInterface';
-import dayjs from 'dayjs';
+import AbstractView from '../framework/view/abstract-view.js';
 import { getFormattedDateDiff, DateFormats } from '../utils.js';
+import dayjs from 'dayjs';
 
 function createOffersTemplate(offers) {
   if (!offers) {
@@ -64,8 +64,28 @@ function createTripEventsListTemplate({type, destination, dates, offers, cost, i
     </li>`;
 }
 
-export default class TripEventsListItem extends ComponentInterface {
+export default class TripEventsListItem extends AbstractView {
+  #templateData = null;
+  pointEditBtn = null;
+  pointEditCallback = null;
+
   constructor(templateData) {
-    super(createTripEventsListTemplate(templateData));
+    super();
+
+    this.#templateData = templateData;
+    this.pointEditCallback = templateData.pointEditCallback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#pointEditBtnHandler);
   }
+
+  get template() {
+    return createTripEventsListTemplate(this.#templateData);
+  }
+
+  #pointEditBtnHandler = (evt) => {
+    evt.preventDefault();
+
+    if (this.pointEditCallback) {
+      this.pointEditCallback();
+    }
+  };
 }

@@ -1,4 +1,4 @@
-import ComponentInterface from './ComponentInterface';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createNewPointTemplate() {
   return /*html*/`
@@ -166,8 +166,8 @@ function createNewPointTemplate() {
     </li>`;
 }
 
-export default class NewPointView extends ComponentInterface {
-  constructor() {
-    super(createNewPointTemplate());
+export default class NewPointView extends AbstractView {
+  get template() {
+    return createNewPointTemplate();
   }
 }
