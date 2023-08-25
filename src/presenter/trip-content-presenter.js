@@ -2,6 +2,7 @@ import { render, replace } from '../framework/render.js';
 import TripSortView from '../view/trip-sort-view.js';
 import TripEventsList from '../view/trip-events-list-view.js';
 import TripEventsListItem from '../view/trip-events-list-item-view.js';
+import TripEventsListEmpty from '../view/trip-events-list-empty-view.js';
 import EditPointView from '../view/edit-point-view.js';
 import { isEscKey } from '../utils.js';
 
@@ -27,8 +28,12 @@ export default class TripContentPresenter {
     render(new TripSortView(), this.#tripEventsContainer); // Отрисовываем сортировку событий
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для событий
 
-    for (let i = 0; i < this.#points.length; i++) { //Выводим не с первой точки, а со второй т.к. первая отводится под блок редактирования
-      this.#renderEventPoint(this.#points[i]); // Отрисовываем события; // Отрисовываем события
+    if (this.#points.length > 0) {
+      for (let i = 0; i < this.#points.length; i++) { //Выводим не с первой точки, а со второй т.к. первая отводится под блок редактирования
+        this.#renderEventPoint(this.#points[i]); // Отрисовываем события; // Отрисовываем события
+      }
+    } else { // Если у нас нет ни одной точки маршрута
+      render(new TripEventsListEmpty(), this.#tripEventsListContainer.element);
     }
   }
 
