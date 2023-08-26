@@ -44,6 +44,10 @@ export default class TripContentPresenter {
     }
   }
 
+  get points() {
+    return this.#points;
+  }
+
   #renderEventPoint(point) {
     // Обработчики событий (через bind из за необходимости hoisting некоторых функций)
     point.pointEditCallback = pointEditHandler.bind(this);

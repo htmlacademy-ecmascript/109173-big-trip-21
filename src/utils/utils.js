@@ -129,6 +129,18 @@ function parseDateFromMillis(millis) {
   return {days, hours, minutes};
 }
 
+function isPastDate(dateTo) {
+  return dateTo && dayjs().isAfter(dateTo, 'H');
+}
+
+function isPresentDate(dateTo) {
+  return dateTo && dayjs().isSame(dateTo, 'H');
+}
+
+function isFutureDate(dateTo) {
+  return dateTo && dayjs().isBefore(dateTo, 'H');
+}
+
 function getPadded2ZeroNum(num) {
   return String(num).padStart(2, 0);
 }
@@ -149,6 +161,9 @@ export {
   getMockDate,
   getFormattedDateDiff,
   DateFormats,
+  isPastDate,
+  isPresentDate,
+  isFutureDate,
   findObjectByID,
   isEscKey
 };

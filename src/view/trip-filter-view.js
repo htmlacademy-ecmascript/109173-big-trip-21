@@ -9,7 +9,7 @@ function createTripFilterListTemplate(filters) {
     return /*html*/`
       <div class="trip-filters__filter">
         <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${loweredName}" ${checkedState} ${disabledState}>
-        <label class="trip-filters__filter-label" for="filter-${loweredName}">${name}</label>
+        <label class="trip-filters__filter-label" for="filter-${loweredName}">${name} ( ${dataLength} )</label>
       </div>`;
   }).join('');
 }

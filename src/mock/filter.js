@@ -1,31 +1,11 @@
-const filters = [
-  {
-    name: 'Everything',
-    checked: true,
-    dataLength: 15, // Количество точек маршрута, доступных по данному фильтру
-  },
+import { filterss } from '../utils/filters.js';
 
-  {
-    name: 'Past',
+function createFilters(points) {
+  return Object.entries(filterss).map(([filterName, filterFunc]) => ({
+    name: filterName,
     checked: false,
-    dataLength: 0,
-  },
-
-  {
-    name: 'Present',
-    checked: false,
-    dataLength: 5,
-  },
-
-  {
-    name: 'Future',
-    checked: false,
-    dataLength: 10,
-  },
-];
-
-function getFilters() {
-  return filters;
+    dataLength: filterFunc(points)?.length
+  }));
 }
 
-export { getFilters };
+export { createFilters };
