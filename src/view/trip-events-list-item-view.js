@@ -1,26 +1,34 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getFormattedDateDiff, DateFormats } from '../utils/utils.js';
-import dayjs from 'dayjs';
+import { getOffers} from '../mock/way-point.js';
+import { getFormattedDateDiff, DateFormats, findObjectByID } from '../utils/utils.js';
 
-function createOffersTemplate(offers) {
-  if (!offers) {
+function createOffersTemplate(offerIDs) {
+  if (!offerIDs) {
     return;
   }
 
-  return offers.map((offer) =>
-  // Выводим только те свойства, которые были выбраны для конкретной точки маршрута
-    offer.checked ? /*html*/`
-      <li class="event__offer">
-        <span class="event__offer-title">${offer.name}</span>
-        &plus;&euro;&nbsp;
-        <span class="event__offer-price">${offer.cost}</span>
-      </li>` : ''
-  ).join(''); // т.к. на выходе map мы получаем массив, а нам нужна строка - делаем строку
+  const offersList = getOffers();
+
+  return offerIDs.map((offerID) => {
+    const {name, cost, checked} = findObjectByID(offerID, offersList);
+
+    if (checked) {
+      return /* html */`
+        <li class="event__offer">
+          <span class="event__offer-title">${name}</span>
+          &plus;&euro;&nbsp;
+          <span class="event__offer-price">${cost}</span>
+        </li>
+      `;
+    }
+
+    return '';
+  }).join(''); // т.к. на выходе map мы получаем массив, а нам нужна строка - делаем строку
 }
 
 function createTripEventsListTemplate({type, destination, dates, offers, cost, isFavorite}) {
   const offersTemplate = createOffersTemplate(offers);
-  const dateForPoint = dayjs(dates.start).format(DateFormats.FOR_POINT);
+  const dateForPoint = dates.start.format(DateFormats.FOR_POINT);
   const dateStart = dates.start.format(DateFormats.FOR_POINT_PERIODS);
   const dateEnd = dates.end.format(DateFormats.FOR_POINT_PERIODS);
   const dateTimeStart = dates.start.format(DateFormats.DATE_TIME);
@@ -29,7 +37,7 @@ function createTripEventsListTemplate({type, destination, dates, offers, cost, i
   return /*html*/`
     <li class="trip-events__item">
       <div class="event">
-        <time class="event__date" datetime="${dayjs(dates.start)}">${dateForPoint}</time>
+        <time class="event__date" datetime="${dates.start}">${dateForPoint}</time>
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
         </div>

@@ -35,6 +35,21 @@ function getRandomArrayElement(arr) {
   return arr[randomIndex];
 }
 
+function getUniqRandomArrayElements(arr) {
+  const elements = [];
+  const elementsCount = getRandomInt(0, arr.length);
+
+  for(let i = 0; i < elementsCount; i++) {
+    const currentElem = getRandomArrayElement(arr);
+
+    if (!elements.includes(currentElem)) {
+      elements.push(currentElem);
+    }
+  }
+
+  return elements;
+}
+
 function getRandomBoolean() {
   return Boolean(getRandomInt(0, 1));
 }
@@ -118,6 +133,10 @@ function getPadded2ZeroNum(num) {
   return String(num).padStart(2, 0);
 }
 
+function findObjectByID(id, obj) {
+  return obj.find((item) => item.id === id);
+}
+
 function isEscKey(evt) {
   return evt.key === 'Escape';
 }
@@ -125,9 +144,11 @@ function isEscKey(evt) {
 export {
   getRandomInt,
   getRandomArrayElement,
+  getUniqRandomArrayElements,
   getRandomBoolean,
   getMockDate,
   getFormattedDateDiff,
   DateFormats,
+  findObjectByID,
   isEscKey
 };
