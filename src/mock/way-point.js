@@ -1,23 +1,19 @@
-import { getRandomInt, getRandomArrayElement, getRandomBoolean, getMockDate } from '../utils/utils.js';
+import {
+  getRandomInt,
+  getRandomArrayElement,
+  getUniqRandomArrayElements,
+  getRandomBoolean,
+  getMockDate,
+} from '../utils/utils.js';
 
 const IMG_FOLDER = 'img/photos';
 const Price = {MIN: 500, MAX: 5000};
-const OfferPrice = {MIN: 50, MAX: 500};
+const pointTypes = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
 const offerNames = ['Transfer', 'Meet in Airport', 'Extra Luggage', 'Lunch', 'Switch to comfort'];
-const pointTypes = {
-  TAXI: 'Taxi',
-  BUS: 'Bus',
-  TRAIN: 'Train',
-  SHIP: 'Ship',
-  DRIVE: 'Drive',
-  FLIGHT: 'Flight',
-  CHECK_IN: 'Check-in',
-  SIGHTSEEING: 'Sightseeing',
-  RESTARAUNT: 'Restaurant'
-};
+const OfferPrice = {MIN: 50, MAX: 500};
 /** Пустая точка (для создания новой точки маршрута) */
-const NEW_BLANK_POINT = {
-  type: pointTypes.FLIGHT,
+const newBlankPoint = {
+  type: pointTypes[5],
   destination: '',
   dates: '',
   offers: '',
@@ -96,23 +92,26 @@ const destinations = [
   },
 ];
 
-const offers = {
-  [pointTypes.TAXI]: Array.from({length: getRandomInt(0, 5)}, getOffer),
-  [pointTypes.FLIGHT]: Array.from({length: getRandomInt(0, 5)}, getOffer),
-  [pointTypes.CHECK_IN]: Array.from({length: getRandomInt(0, 5)}, getOffer),
-  [pointTypes.BUS]: Array.from({length: getRandomInt(0, 5)}, getOffer),
-};
+const offers = createOffers();
 
-function getOffer() {
-  return {
+function createOffers() {
+  return offerNames.slice().map((offerName) => ({
     id: crypto.randomUUID(),
-    name: getRandomArrayElement(offerNames),
+    name: offerName,
     cost: getRandomInt(OfferPrice.MIN, OfferPrice.MAX),
     checked: getRandomBoolean(),
-  }
-};
+  }));
+}
 
-function getPoint(pointType) {
+function getOffers() {
+  return offers;
+}
+
+function getOfferIDs() {
+  return offers.map((offer) => offer.id);
+}
+
+function createPoint(pointType) {
   return {
     type: pointType,
     destination: getRandomArrayElement(destinations),
@@ -120,20 +119,20 @@ function getPoint(pointType) {
       start: getMockDate(),
       end: getMockDate(true)
     },
-    offers: offers[pointType] || [],
+    offers: getUniqRandomArrayElements(getOfferIDs()) || [],
     cost: getRandomInt(Price.MIN, Price.MAX),
     isFavorite: getRandomBoolean(),
   };
 }
 
 function getBlankPoint() {
-  return NEW_BLANK_POINT;
+  return newBlankPoint;
 }
 
 function getRandomPoint() {
-  const pointType = getRandomArrayElement(Object.values(pointTypes));
+  const pointType = getRandomArrayElement(pointTypes);
 
-  return getPoint(pointType);
+  return createPoint(pointType);
 }
 
 function getDestinations() {
@@ -141,4 +140,10 @@ function getDestinations() {
 }
 
 
-export {getBlankPoint, getRandomPoint, getDestinations};
+export {
+  pointTypes,
+  getBlankPoint,
+  getRandomPoint,
+  getDestinations,
+  getOffers
+};

@@ -1,73 +1,40 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getBlankPoint , getDestinations} from '../mock/way-point.js';
-import { DateFormats } from '../utils/utils.js';
-import dayjs from 'dayjs';
+import { pointTypes, getBlankPoint , getDestinations, getOffers} from '../mock/way-point.js';
+import { DateFormats, findObjectByID } from '../utils/utils.js';
 
-function createEventTypeTemplate() {
-  return /*html*/`
-    <div class="event__type-item">
-      <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
-      <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
-    </div>
+const offersList = getOffers();
 
-    <div class="event__type-item">
-      <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
-      <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
-    </div>
+function createEventTypeTemplate(currentPointType) {
+  return pointTypes.map((pointType) => {
+    const checked = pointType === currentPointType ? 'checked' : '';
+    const loweredPointTypeName = pointType.toLowerCase();
 
-    <div class="event__type-item">
-      <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
-      <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
-      <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
-      <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" checked>
-      <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
-      <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
-      <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
-      <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
-    </div>`;
+    return /*html*/`
+      <div class="event__type-item">
+        <input id="event-type-${loweredPointTypeName}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${loweredPointTypeName}" ${checked}>
+        <label class="event__type-label  event__type-label--${loweredPointTypeName}" for="event-type-${loweredPointTypeName}-1">${pointType}</label>
+      </div>
+    `;
+  }).join('');
 }
 
-function createOffersTemplate(offers) {
-  if (!offers) {
+function createOffersTemplate(offerIDs) {
+  if (!offerIDs) {
     return;
   }
 
-  return offers.map((offer) => {
-    const offerName = offer.name;
-    const loweredOfferName = offerName.toLowerCase();
-    const offerChecked = offer.checked ? 'checked' : '';
+  return offerIDs.map((offerID) => {
+    const {name, cost, checked} = findObjectByID(offerID, offersList);
+    const loweredOfferName = name.toLowerCase();
+    const offerChecked = checked ? 'checked' : '';
 
     return /*html*/`
       <div class="event__offer-selector">
         <input class="event__offer-checkbox  visually-hidden" id="event-offer-${loweredOfferName}-1" type="checkbox" name="event-offer-${loweredOfferName}" ${offerChecked}>
         <label class="event__offer-label" for="event-offer-${loweredOfferName}-1">
-          <span class="event__offer-title">${offerName}</span>
+          <span class="event__offer-title">${name}</span>
           &plus;&euro;&nbsp;
-          <span class="event__offer-price">${offer.cost}</span>
+          <span class="event__offer-price">${cost}</span>
         </label>
       </div>`;
   }).join('');
@@ -89,7 +56,7 @@ function createPhotostemplate(photos) {
 }
 
 function createEditPointTemplate({type, destination, dates, offers, cost}) {
-  const eventTypeTemplate = createEventTypeTemplate();
+  const eventTypeTemplate = createEventTypeTemplate(type);
   const offersTemplate = createOffersTemplate(offers);
   const destinationsTemplate = createDestinationsTemplate(getDestinations());
   const photosTemplate = destination.photos ? createPhotostemplate(destination.photos) : '';
