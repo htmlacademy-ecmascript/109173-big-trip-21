@@ -18,7 +18,7 @@ function getTripEventsListEmptyTemplate({filterType = 'EVERYTHING'}) {
  * @param {object} templateData Объект с данными для формирования шаблона
  * @param {string} templateData.filterType Название применяемого фильтра
  */
-export default class TripEventsListEmpty extends AbstractView {
+export default class TripEventsListEmptyView extends AbstractView {
   #templateData = null;
 
   constructor(templateData = {}) {

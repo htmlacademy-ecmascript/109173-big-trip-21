@@ -9,7 +9,7 @@ function createTripInfoMainTemplate() {
     </div>`;
 }
 
-export default class TripInfoMain extends AbstractView {
+export default class TripInfoMainView extends AbstractView {
   #templateData = null;
 
   constructor(templateData) {
