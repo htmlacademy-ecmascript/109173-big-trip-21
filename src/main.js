@@ -5,4 +5,4 @@ const tripHeaderPresenter = new TripHeaderPresenter();
 const tripContentPresenter = new TripContentPresenter();
 
 tripContentPresenter.init();
-tripHeaderPresenter.init(tripContentPresenter.points);
+tripHeaderPresenter.init(tripContentPresenter);

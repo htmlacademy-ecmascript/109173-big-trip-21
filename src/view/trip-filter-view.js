@@ -1,5 +1,10 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
+const CSSClasses = {
+  FILTER_BTN_CONTAINER: '.trip-filters__filter',
+  FILTER_BTN_INPUT: '.trip-filters__filter-input',
+};
+
 function createTripFilterListTemplate(filters) {
   return filters.map(({name, checked, dataLength}) => {
     const loweredName = name.toLowerCase();
@@ -8,7 +13,7 @@ function createTripFilterListTemplate(filters) {
 
     return /*html*/`
       <div class="trip-filters__filter">
-        <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${loweredName}" ${checkedState} ${disabledState}>
+        <input id="filter-${loweredName}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${loweredName}" ${checkedState} ${disabledState}>
         <label class="trip-filters__filter-label" for="filter-${loweredName}">${name} ( ${dataLength} )</label>
       </div>`;
   }).join('');
@@ -26,14 +31,32 @@ function createTripFilterTemplate(filters) {
 
 export default class TripFilterView extends AbstractView {
   #templateData = null;
+  #filtersClickCallback = null;
 
   constructor(templateData) {
     super();
 
     this.#templateData = templateData;
+    this.#filtersClickCallback = templateData.filtersClickCallback;
+    this.element.addEventListener('click', this.#clickFilterBtnHandler.bind(this));
   }
 
   get template() {
-    return createTripFilterTemplate(this.#templateData);
+    return createTripFilterTemplate(this.#templateData.filters);
+  }
+
+  #clickFilterBtnHandler(evt) {
+    evt.preventDefault();
+
+    const parent = evt.target.closest(CSSClasses.FILTER_BTN_CONTAINER);
+    const filterBtn = parent.querySelector(CSSClasses.FILTER_BTN_INPUT);
+
+    if (!parent || filterBtn.disabled) {
+      return;
+    }
+
+    const filterType = filterBtn.value;
+
+    this.#filtersClickCallback(filterType);
   }
 }

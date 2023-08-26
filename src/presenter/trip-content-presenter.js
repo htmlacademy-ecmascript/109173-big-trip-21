@@ -36,9 +36,7 @@ export default class TripContentPresenter {
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для событий
 
     if (this.#points.length > 0) {
-      for (let i = 0; i < this.#points.length; i++) { //Выводим не с первой точки, а со второй т.к. первая отводится под блок редактирования
-        this.#renderEventPoint(this.#points[i]); // Отрисовываем события; // Отрисовываем события
-      }
+      this.#renderEventPoints(this.#points);
     } else { // Если у нас нет ни одной точки маршрута
       render(new TripEventsListEmptyView(), this.#tripEventsListContainer.element);
     }
@@ -46,6 +44,12 @@ export default class TripContentPresenter {
 
   get points() {
     return this.#points;
+  }
+
+  #renderEventPoints(points) {
+    for (let i = 0; i < points.length; i++) { //Выводим не с первой точки, а со второй т.к. первая отводится под блок редактирования
+      this.#renderEventPoint(points[i]); // Отрисовываем события; // Отрисовываем события
+    }
   }
 
   #renderEventPoint(point) {
@@ -59,6 +63,11 @@ export default class TripContentPresenter {
     const bindedDocumentKeyDownHandler = documentKeyDownHandler.bind(this);
 
     function documentKeyDownHandler(evt) {
+      // Запрещаем сработку ESC, если не открыто редактирование точки
+      if (this.#previousEditingPoint === null) {
+        return;
+      }
+
       if (isEscKey(evt)) {
         evt.preventDefault();
         this.#previousEditingPoint = null;
@@ -110,6 +119,16 @@ export default class TripContentPresenter {
       replace(pointComponent, editPointComponent);
     }
 
+    // Отрисовка точки маршрута
     render(pointComponent, this.#tripEventsListContainer.element);
+  }
+
+  #clearEventPoints() {
+    this.#tripEventsListContainer.element.innerHTML = '';
+  }
+
+  rerenderEventPoints(points) {
+    this.#clearEventPoints();
+    this.#renderEventPoints(points);
   }
 }
