@@ -6,6 +6,7 @@ import {
   getMockDate,
 } from '../utils/utils.js';
 
+const RANDOM_PHOTOS_SERVICE_URL = 'https://loremflickr.com/248/152?random=';
 const PointPrice = {MIN: 500, MAX: 5000};
 const OfferPrice = {MIN: 50, MAX: 500};
 const PhotoCount = {MIN: 0, MAX: 4};
@@ -90,7 +91,7 @@ function createDestinations() {
 function getRandomPhoto() {
   const randomAlt = getRandomArrayElement(destinationDescriptions);
   return {
-    src: `https://loremflickr.com/248/152?random=${crypto.randomUUID()}`,
+    src: `${RANDOM_PHOTOS_SERVICE_URL}${crypto.randomUUID()}`,
     alt: randomAlt.slice(0, getRandomInt(PhotoAltLength.MIN, PhotoAltLength.MAX)),
   };
 }

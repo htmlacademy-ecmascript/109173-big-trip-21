@@ -10,11 +10,12 @@ function createTripFilterListTemplate(filters) {
     const loweredName = name.toLowerCase();
     const checkedState = checked ? 'checked' : '';
     const disabledState = dataLength <= 0 ? 'disabled' : '';
+    const pointsCount = dataLength > 0 ? `( ${dataLength} )` : '';
 
     return /*html*/`
       <div class="trip-filters__filter">
         <input id="filter-${loweredName}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${loweredName}" ${checkedState} ${disabledState}>
-        <label class="trip-filters__filter-label" for="filter-${loweredName}">${name} ( ${dataLength} )</label>
+        <label class="trip-filters__filter-label" for="filter-${loweredName}">${name} ${pointsCount}</label>
       </div>`;
   }).join('');
 }

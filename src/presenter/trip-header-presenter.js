@@ -29,7 +29,6 @@ export default class TripHeaderPresenter {
     this.#contentPresenter = contentPresenter;
     this.#filtersData = {
       filters: createFilters(this.#contentPresenter.points),
-      points: this.#contentPresenter.points,
       filtersClickCallback: this.#filtersClickHandler.bind(this),
     };
 
