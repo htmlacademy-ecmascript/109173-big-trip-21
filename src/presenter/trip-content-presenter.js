@@ -4,7 +4,7 @@ import TripEventsList from '../view/trip-events-list-view.js';
 import TripEventsListItem from '../view/trip-events-list-item-view.js';
 import TripEventsListEmpty from '../view/trip-events-list-empty-view.js';
 import EditPointView from '../view/edit-point-view.js';
-import { isEscKey } from '../utils.js';
+import { isEscKey } from '../utils/utils.js';
 
 // Модели
 import PointsModel from '../model/points-model.js';

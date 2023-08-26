@@ -35,6 +35,10 @@ function getRandomArrayElement(arr) {
   return arr[randomIndex];
 }
 
+function getRandomBoolean() {
+  return Boolean(getRandomInt(0, 1));
+}
+
 // TODO: Неверно считает - переделать
 // function getFormattedDateDiff(date1, date2) {
 //   const dateDiff = Math.abs(dayjs(date2).diff(date1));
@@ -48,7 +52,7 @@ function getRandomArrayElement(arr) {
 // }
 
 // Получаем текущую дату с рандомным смещением в днях (в прошлое)
-let baseDate = dayjs().subtract(getRandomInt(0, Duration.DAY), 'days').toDate();
+let baseDate = dayjs().subtract(getRandomInt(0, Duration.DAY), 'days');
 
 /**
  *
@@ -64,8 +68,7 @@ function getMockDate(addOffset = false) {
     baseDate = dayjs(baseDate)
       .add(minutesOffset, 'm')
       .add(hoursOffset, 'd')
-      .add(daysOffset, 'h')
-      .toDate();
+      .add(daysOffset, 'h');
   }
 
   return baseDate;
@@ -122,6 +125,7 @@ function isEscKey(evt) {
 export {
   getRandomInt,
   getRandomArrayElement,
+  getRandomBoolean,
   getMockDate,
   getFormattedDateDiff,
   DateFormats,
