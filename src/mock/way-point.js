@@ -6,13 +6,15 @@ import {
   getMockDate,
 } from '../utils/utils.js';
 
-const IMG_FOLDER = 'img/photos';
-const Price = {MIN: 500, MAX: 5000};
-const pointTypes = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
-const offerNames = ['Transfer', 'Meet in Airport', 'Extra Luggage', 'Lunch', 'Switch to comfort'];
+const PointPrice = {MIN: 500, MAX: 5000};
 const OfferPrice = {MIN: 50, MAX: 500};
+const PhotoCount = {MIN: 0, MAX: 4};
+const PhotoAltLength = {MIN: 30, MAX: 100};
+const pointTypes = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
+const cityNames = ['Moskow', 'London', 'Amsterdam', 'New Zealand'];
+const offerNames = ['Transfer', 'Meet in Airport', 'Extra Luggage', 'Lunch', 'Switch to comfort'];
 /** Пустая точка (для создания новой точки маршрута) */
-const newBlankPoint = {
+const blankPoint = {
   type: pointTypes[5],
   destination: '',
   dates: '',
@@ -24,10 +26,13 @@ const newBlankPoint = {
 const destinationDescriptions = [
   `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Culpa amet dignissimos quae
   placeat aut ipsum, labore facere cum nulla maxime repudiandae voluptate modi harum hic
-  adipisci nobis molestiae impedit dicta eligendi officia corrupti quibusdam, eaque alias.
-  Facere dolorum esse, tempora quo non consequatur officiis repellat ratione. Facilis
+  adipisci nobis molestiae impedit dicta eligendi officia corrupti quibusdam, eaque alias.`,
+
+  `Facere dolorum esse, tempora quo non consequatur officiis repellat ratione. Facilis
   incidunt quae odit accusantium commodi perferendis vero voluptates quidem officia qui
-  sint, consectetur consequatur soluta error. Porro quisquam eligendi assumenda incidunt
+  sint, consectetur consequatur soluta error.`,
+
+  `Porro quisquam eligendi assumenda incidunt
   eveniet laboriosam veritatis iusto iure adipisci ut dolores debitis, eum voluptatum.
   Tempore debitis alias iste quia temporibus beatae quasi illo rerum, error aliquid dolorem ab.
   Sequi facilis laudantium temporibus dicta ratione delectus?`,
@@ -42,57 +47,53 @@ const destinationDescriptions = [
   city is Wellington, and its most populous city is Auckland.`
 ];
 
-const destinations = [
-  {
-    id: crypto.randomUUID(),
-    name: 'Moskow',
-    description: destinationDescriptions[0],
-    photos: [
-      {
-        src: `${IMG_FOLDER}/1.jpg`,
-        alt: 'Event photo 1'
-      },
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: 'London',
-    description: destinationDescriptions[0].slice(150),
-    photos: [
-      {
-        src: `${IMG_FOLDER}/2.jpg`,
-        alt: 'Event photo 2'
-      },
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: 'Amsterdam',
-    description: destinationDescriptions[0].slice(1, 80),
-    photos: []
-  },
-  {
-    id: crypto.randomUUID(),
-    name: 'New Zealand',
-    description: destinationDescriptions[1],
-    photos: [
-      {
-        src: `${IMG_FOLDER}/1.jpg`,
-        alt: 'Event photo 1'
-      },
-      {
-        src: `${IMG_FOLDER}/2.jpg`,
-        alt: 'Event photo 2'
-      },
-      {
-        src: `${IMG_FOLDER}/3.jpg`,
-        alt: 'Event photo 3'
-      },
-    ]
-  },
-];
-
 const offers = createOffers();
+const destinations = createDestinations();
+
+function createPoint(pointType) {
+  return {
+    type: pointType,
+    destination: getRandomArrayElement(destinations),
+    dates: {
+      start: getMockDate(),
+      end: getMockDate(true)
+    },
+    offers: getUniqRandomArrayElements(getOfferIDs()) || [],
+    cost: getRandomInt(PointPrice.MIN, PointPrice.MAX),
+    isFavorite: getRandomBoolean(),
+  };
+}
+
+function getBlankPoint() {
+  return blankPoint;
+}
+
+function getRandomPoint() {
+  const pointType = getRandomArrayElement(pointTypes);
+
+  return createPoint(pointType);
+}
+
+function getDestinations() {
+  return destinations;
+}
+
+function createDestinations() {
+  return cityNames.slice().map((city) => ({
+    id: crypto.randomUUID(),
+    name: city,
+    description: getRandomArrayElement(destinationDescriptions),
+    photos: Array.from({length: getRandomInt(PhotoCount.MIN, PhotoCount.MAX)}, getRandomPhoto)
+  }));
+}
+
+function getRandomPhoto() {
+  const randomAlt = getRandomArrayElement(destinationDescriptions);
+  return {
+    src: `https://loremflickr.com/248/152?random=${crypto.randomUUID()}`,
+    alt: randomAlt.slice(0, getRandomInt(PhotoAltLength.MIN, PhotoAltLength.MAX)),
+  };
+}
 
 function createOffers() {
   return offerNames.slice().map((offerName) => ({
@@ -109,34 +110,6 @@ function getOffers() {
 
 function getOfferIDs() {
   return offers.map((offer) => offer.id);
-}
-
-function createPoint(pointType) {
-  return {
-    type: pointType,
-    destination: getRandomArrayElement(destinations),
-    dates: {
-      start: getMockDate(),
-      end: getMockDate(true)
-    },
-    offers: getUniqRandomArrayElements(getOfferIDs()) || [],
-    cost: getRandomInt(Price.MIN, Price.MAX),
-    isFavorite: getRandomBoolean(),
-  };
-}
-
-function getBlankPoint() {
-  return newBlankPoint;
-}
-
-function getRandomPoint() {
-  const pointType = getRandomArrayElement(pointTypes);
-
-  return createPoint(pointType);
-}
-
-function getDestinations() {
-  return destinations;
 }
 
 

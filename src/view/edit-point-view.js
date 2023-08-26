@@ -3,15 +3,16 @@ import { pointTypes, getBlankPoint , getDestinations, getOffers} from '../mock/w
 import { DateFormats, findObjectByID } from '../utils/utils.js';
 
 const offersList = getOffers();
+const CSSClasses = {EVENT_EDIT: '.event--edit', ROLLUP_BTN: '.event__rollup-btn'};
 
 function createEventTypeTemplate(currentPointType) {
   return pointTypes.map((pointType) => {
-    const checked = pointType === currentPointType ? 'checked' : '';
+    const checkedState = pointType === currentPointType ? 'checked' : '';
     const loweredPointTypeName = pointType.toLowerCase();
 
     return /*html*/`
       <div class="event__type-item">
-        <input id="event-type-${loweredPointTypeName}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${loweredPointTypeName}" ${checked}>
+        <input id="event-type-${loweredPointTypeName}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${loweredPointTypeName}" ${checkedState}>
         <label class="event__type-label  event__type-label--${loweredPointTypeName}" for="event-type-${loweredPointTypeName}-1">${pointType}</label>
       </div>
     `;
@@ -139,7 +140,6 @@ function createEditPointTemplate({type, destination, dates, offers, cost}) {
       </form>
     </li>`;
 }
-
 export default class EditPointView extends AbstractView {
   #templateData = null;
   #pointSubmitCallback = null;
@@ -155,8 +155,8 @@ export default class EditPointView extends AbstractView {
     this.#templateData = templateData;
     this.#pointSubmitCallback = templateData.pointSubmitCallback;
     this.#pointFinishEditCallback = templateData.pointFinishEditCallback;
-    this.element.querySelector('.event--edit').addEventListener('submit', this.#pointSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#pointFinishEditHandler);
+    this.element.querySelector(CSSClasses.EVENT_EDIT).addEventListener('submit', this.#pointSubmitHandler);
+    this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointFinishEditHandler);
   }
 
   get template() {

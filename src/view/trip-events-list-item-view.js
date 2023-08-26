@@ -2,6 +2,8 @@ import AbstractView from '../framework/view/abstract-view.js';
 import { getOffers} from '../mock/way-point.js';
 import { getFormattedDateDiff, DateFormats, findObjectByID } from '../utils/utils.js';
 
+const CSSClasses = {ROLLUP_BTN: '.event__rollup-btn'};
+
 function createOffersTemplate(offerIDs) {
   if (!offerIDs) {
     return;
@@ -72,7 +74,7 @@ function createTripEventsListTemplate({type, destination, dates, offers, cost, i
     </li>`;
 }
 
-export default class TripEventsListItem extends AbstractView {
+export default class TripEventsListItemView extends AbstractView {
   #templateData = null;
   pointEditBtn = null;
   pointEditCallback = null;
@@ -82,7 +84,7 @@ export default class TripEventsListItem extends AbstractView {
 
     this.#templateData = templateData;
     this.pointEditCallback = templateData.pointEditCallback;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#pointEditBtnHandler);
+    this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointEditBtnHandler);
   }
 
   get template() {
