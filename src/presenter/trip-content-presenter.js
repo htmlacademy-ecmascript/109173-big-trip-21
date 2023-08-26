@@ -19,12 +19,9 @@ export default class TripContentPresenter {
    * @property {Object | null} previousEditingPoint Объект с информацией о предыдущей редактируемой точке
    * @property {TripEventsListItemView} previousEditingPoint.point View точки маршрута
    * @property {EditPointView} previousEditingPoint.form View формы редактированияточки маршрута
-   * @property {Object}  previousEditingPoint.handler KeyDownHandler точки маршрыта
+   * @property {Object}  previousEditingPoint.handler KeyDownHandler точки маршрута
    */
   #previousEditingPoint = null;
-  // #previousEditingPoint = null; // Редактируемая в текущий момент точка
-  #previousEditingForm = null; // Форма редактирования предыдущего компонента
-  #previousKeyDownHandler = null;
 
   constructor() {
     this.#tripEventsContainer = document.querySelector('.trip-events'); // Общий контейнер для событий
@@ -48,7 +45,7 @@ export default class TripContentPresenter {
   }
 
   #renderEventPoint(point) {
-    // Обработчики событий
+    // Обработчики событий (через bind из за необходимости hoisting некоторых функций)
     point.pointEditCallback = pointEditHandler.bind(this);
     point.pointFinishEditCallback = pointFinishEditHandler.bind(this);
     point.pointSubmitCallback = pointSubmitHandler.bind(this);
@@ -68,8 +65,9 @@ export default class TripContentPresenter {
     }
 
     function pointEditHandler() {
+      // Если во время редактирования точки маршрута попытаться открыть другую - закроем текущую.
       if (this.#previousEditingPoint !== null &&
-          this.#previousEditingPoint.point !== pointComponent) { // Пока запрещаем открытие доп. окон редактирования
+          this.#previousEditingPoint.point !== pointComponent) {
         replace(this.#previousEditingPoint.point, this.#previousEditingPoint.form);
         document.removeEventListener('keydown', this.#previousEditingPoint.handler);
       }
