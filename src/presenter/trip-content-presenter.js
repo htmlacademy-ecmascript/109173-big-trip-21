@@ -8,7 +8,6 @@ import { isEscKey } from '../utils/utils.js';
 
 // Модели
 import PointsModel from '../model/points-model.js';
-
 export default class TripContentPresenter {
   #tripEventsContainer = null;
   #tripEventsListContainer = null;
@@ -128,7 +127,10 @@ export default class TripContentPresenter {
   }
 
   rerenderEventPoints(points) {
+
     this.#clearEventPoints();
+    document.removeEventListener('keydown', this.#previousEditingPoint?.handler);
+    this.#previousEditingPoint = null;
     this.#renderEventPoints(points);
   }
 }
