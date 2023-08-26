@@ -6,9 +6,9 @@ const filters = [
   },
 
   {
-    name: 'Future',
+    name: 'Past',
     checked: false,
-    dataLength: 10,
+    dataLength: 0,
   },
 
   {
@@ -18,9 +18,9 @@ const filters = [
   },
 
   {
-    name: 'Past',
+    name: 'Future',
     checked: false,
-    dataLength: 0,
+    dataLength: 10,
   },
 ];
 

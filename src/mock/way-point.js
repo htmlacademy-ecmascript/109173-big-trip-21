@@ -1,7 +1,9 @@
-import { getRandomInt, getRandomArrayElement, getMockDate } from '../utils.js';
+import { getRandomInt, getRandomArrayElement, getRandomBoolean, getMockDate } from '../utils/utils.js';
 
+const IMG_FOLDER = 'img/photos';
 const Price = {MIN: 500, MAX: 5000};
-
+const OfferPrice = {MIN: 50, MAX: 500};
+const offerNames = ['Transfer', 'Meet in Airport', 'Extra Luggage', 'Lunch', 'Switch to comfort'];
 const pointTypes = {
   TAXI: 'Taxi',
   BUS: 'Bus',
@@ -12,6 +14,15 @@ const pointTypes = {
   CHECK_IN: 'Check-in',
   SIGHTSEEING: 'Sightseeing',
   RESTARAUNT: 'Restaurant'
+};
+/** Пустая точка (для создания новой точки маршрута) */
+const NEW_BLANK_POINT = {
+  type: pointTypes.FLIGHT,
+  destination: '',
+  dates: '',
+  offers: '',
+  cost: 0,
+  isFavorite: false,
 };
 
 const destinationDescriptions = [
@@ -42,7 +53,7 @@ const destinations = [
     description: destinationDescriptions[0],
     photos: [
       {
-        src: 'img/photos/1.jpg',
+        src: `${IMG_FOLDER}/1.jpg`,
         alt: 'Event photo 1'
       },
     ]
@@ -53,7 +64,7 @@ const destinations = [
     description: destinationDescriptions[0].slice(150),
     photos: [
       {
-        src: 'img/photos/2.jpg',
+        src: `${IMG_FOLDER}/2.jpg`,
         alt: 'Event photo 2'
       },
     ]
@@ -70,15 +81,15 @@ const destinations = [
     description: destinationDescriptions[1],
     photos: [
       {
-        src: 'img/photos/1.jpg',
+        src: `${IMG_FOLDER}/1.jpg`,
         alt: 'Event photo 1'
       },
       {
-        src: 'img/photos/2.jpg',
+        src: `${IMG_FOLDER}/2.jpg`,
         alt: 'Event photo 2'
       },
       {
-        src: 'img/photos/3.jpg',
+        src: `${IMG_FOLDER}/3.jpg`,
         alt: 'Event photo 3'
       },
     ]
@@ -86,57 +97,19 @@ const destinations = [
 ];
 
 const offers = {
-  [pointTypes.TAXI]: [
-    {
-      id: crypto.randomUUID(),
-      name: 'Transfer',
-      cost: 80,
-      checked: true,
-    },
-    {
-      id: crypto.randomUUID(),
-      name: 'Meet in Airport',
-      cost: 100,
-      checked: false,
-    }
-  ],
-
-  [pointTypes.FLIGHT]: [
-    {
-      id: crypto.randomUUID(),
-      name: 'Extra Luggage',
-      cost: 150,
-      checked: false,
-    }
-  ],
-
-  [pointTypes.CHECK_IN]: [
-    {
-      id: crypto.randomUUID(),
-      name: 'Lunch',
-      cost: 320,
-      checked: true,
-    },
-  ],
-
-  [pointTypes.BUS]: [
-    {
-      id: crypto.randomUUID(),
-      name: 'Switch to comfort',
-      cost: 80,
-      checked: false,
-    }
-  ],
+  [pointTypes.TAXI]: Array.from({length: getRandomInt(0, 5)}, getOffer),
+  [pointTypes.FLIGHT]: Array.from({length: getRandomInt(0, 5)}, getOffer),
+  [pointTypes.CHECK_IN]: Array.from({length: getRandomInt(0, 5)}, getOffer),
+  [pointTypes.BUS]: Array.from({length: getRandomInt(0, 5)}, getOffer),
 };
 
-// Пустая точка (для создания новой точки маршрута)
-const NEW_BLANK_POINT = {
-  type: pointTypes.FLIGHT,
-  destination: '',
-  dates: '',
-  offers: '',
-  cost: 0,
-  isFavorite: false,
+function getOffer() {
+  return {
+    id: crypto.randomUUID(),
+    name: getRandomArrayElement(offerNames),
+    cost: getRandomInt(OfferPrice.MIN, OfferPrice.MAX),
+    checked: getRandomBoolean(),
+  }
 };
 
 function getPoint(pointType) {
@@ -149,7 +122,7 @@ function getPoint(pointType) {
     },
     offers: offers[pointType] || [],
     cost: getRandomInt(Price.MIN, Price.MAX),
-    isFavorite: Boolean(getRandomInt(0, 1)),
+    isFavorite: getRandomBoolean(),
   };
 }
 
