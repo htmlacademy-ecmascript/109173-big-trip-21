@@ -7,7 +7,7 @@ function createTripInfoCostTemplate() {
     </p>`;
 }
 
-export default class TripInfoCost extends AbstractView {
+export default class TripInfoCostView extends AbstractView {
   get template() {
     return createTripInfoCostTemplate();
   }

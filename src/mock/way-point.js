@@ -1,26 +1,39 @@
-import { getRandomInt, getRandomArrayElement, getMockDate } from '../utils.js';
+import {
+  getRandomInt,
+  getRandomArrayElement,
+  getUniqRandomArrayElements,
+  getRandomBoolean,
+  getMockDate,
+} from '../utils/utils.js';
 
-const Price = {MIN: 500, MAX: 5000};
-
-const pointTypes = {
-  TAXI: 'Taxi',
-  BUS: 'Bus',
-  TRAIN: 'Train',
-  SHIP: 'Ship',
-  DRIVE: 'Drive',
-  FLIGHT: 'Flight',
-  CHECK_IN: 'Check-in',
-  SIGHTSEEING: 'Sightseeing',
-  RESTARAUNT: 'Restaurant'
+const RANDOM_PHOTOS_SERVICE_URL = 'https://loremflickr.com/248/152?random=';
+const PointPrice = {MIN: 500, MAX: 5000};
+const OfferPrice = {MIN: 50, MAX: 500};
+const PhotoCount = {MIN: 0, MAX: 4};
+const PhotoAltLength = {MIN: 30, MAX: 100};
+const pointTypes = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
+const cityNames = ['Moskow', 'London', 'Amsterdam', 'New Zealand'];
+const offerNames = ['Transfer', 'Meet in Airport', 'Extra Luggage', 'Lunch', 'Switch to comfort'];
+/** Пустая точка (для создания новой точки маршрута) */
+const blankPoint = {
+  type: pointTypes[5],
+  destination: '',
+  dates: '',
+  offers: '',
+  cost: 0,
+  isFavorite: false,
 };
 
 const destinationDescriptions = [
   `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Culpa amet dignissimos quae
   placeat aut ipsum, labore facere cum nulla maxime repudiandae voluptate modi harum hic
-  adipisci nobis molestiae impedit dicta eligendi officia corrupti quibusdam, eaque alias.
-  Facere dolorum esse, tempora quo non consequatur officiis repellat ratione. Facilis
+  adipisci nobis molestiae impedit dicta eligendi officia corrupti quibusdam, eaque alias.`,
+
+  `Facere dolorum esse, tempora quo non consequatur officiis repellat ratione. Facilis
   incidunt quae odit accusantium commodi perferendis vero voluptates quidem officia qui
-  sint, consectetur consequatur soluta error. Porro quisquam eligendi assumenda incidunt
+  sint, consectetur consequatur soluta error.`,
+
+  `Porro quisquam eligendi assumenda incidunt
   eveniet laboriosam veritatis iusto iure adipisci ut dolores debitis, eum voluptatum.
   Tempore debitis alias iste quia temporibus beatae quasi illo rerum, error aliquid dolorem ab.
   Sequi facilis laudantium temporibus dicta ratione delectus?`,
@@ -35,111 +48,10 @@ const destinationDescriptions = [
   city is Wellington, and its most populous city is Auckland.`
 ];
 
-const destinations = [
-  {
-    id: crypto.randomUUID(),
-    name: 'Moskow',
-    description: destinationDescriptions[0],
-    photos: [
-      {
-        src: 'img/photos/1.jpg',
-        alt: 'Event photo 1'
-      },
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: 'London',
-    description: destinationDescriptions[0].slice(150),
-    photos: [
-      {
-        src: 'img/photos/2.jpg',
-        alt: 'Event photo 2'
-      },
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: 'Amsterdam',
-    description: destinationDescriptions[0].slice(1, 80),
-    photos: []
-  },
-  {
-    id: crypto.randomUUID(),
-    name: 'New Zealand',
-    description: destinationDescriptions[1],
-    photos: [
-      {
-        src: 'img/photos/1.jpg',
-        alt: 'Event photo 1'
-      },
-      {
-        src: 'img/photos/2.jpg',
-        alt: 'Event photo 2'
-      },
-      {
-        src: 'img/photos/3.jpg',
-        alt: 'Event photo 3'
-      },
-    ]
-  },
-];
+const offers = createOffers();
+const destinations = createDestinations();
 
-const offers = {
-  [pointTypes.TAXI]: [
-    {
-      id: crypto.randomUUID(),
-      name: 'Transfer',
-      cost: 80,
-      checked: true,
-    },
-    {
-      id: crypto.randomUUID(),
-      name: 'Meet in Airport',
-      cost: 100,
-      checked: false,
-    }
-  ],
-
-  [pointTypes.FLIGHT]: [
-    {
-      id: crypto.randomUUID(),
-      name: 'Extra Luggage',
-      cost: 150,
-      checked: false,
-    }
-  ],
-
-  [pointTypes.CHECK_IN]: [
-    {
-      id: crypto.randomUUID(),
-      name: 'Lunch',
-      cost: 320,
-      checked: true,
-    },
-  ],
-
-  [pointTypes.BUS]: [
-    {
-      id: crypto.randomUUID(),
-      name: 'Switch to comfort',
-      cost: 80,
-      checked: false,
-    }
-  ],
-};
-
-// Пустая точка (для создания новой точки маршрута)
-const NEW_BLANK_POINT = {
-  type: pointTypes.FLIGHT,
-  destination: '',
-  dates: '',
-  offers: '',
-  cost: 0,
-  isFavorite: false,
-};
-
-function getPoint(pointType) {
+function createPoint(pointType) {
   return {
     type: pointType,
     destination: getRandomArrayElement(destinations),
@@ -147,25 +59,65 @@ function getPoint(pointType) {
       start: getMockDate(),
       end: getMockDate(true)
     },
-    offers: offers[pointType] || [],
-    cost: getRandomInt(Price.MIN, Price.MAX),
-    isFavorite: Boolean(getRandomInt(0, 1)),
+    offers: getUniqRandomArrayElements(getOfferIDs()) || [],
+    cost: getRandomInt(PointPrice.MIN, PointPrice.MAX),
+    isFavorite: getRandomBoolean(),
   };
 }
 
 function getBlankPoint() {
-  return NEW_BLANK_POINT;
+  return blankPoint;
 }
 
 function getRandomPoint() {
-  const pointType = getRandomArrayElement(Object.values(pointTypes));
+  const pointType = getRandomArrayElement(pointTypes);
 
-  return getPoint(pointType);
+  return createPoint(pointType);
 }
 
 function getDestinations() {
   return destinations;
 }
 
+function createDestinations() {
+  return cityNames.slice().map((city) => ({
+    id: crypto.randomUUID(),
+    name: city,
+    description: getRandomArrayElement(destinationDescriptions),
+    photos: Array.from({length: getRandomInt(PhotoCount.MIN, PhotoCount.MAX)}, getRandomPhoto)
+  }));
+}
 
-export {getBlankPoint, getRandomPoint, getDestinations};
+function getRandomPhoto() {
+  const randomAlt = getRandomArrayElement(destinationDescriptions);
+  return {
+    src: `${RANDOM_PHOTOS_SERVICE_URL}${crypto.randomUUID()}`,
+    alt: randomAlt.slice(0, getRandomInt(PhotoAltLength.MIN, PhotoAltLength.MAX)),
+  };
+}
+
+function createOffers() {
+  return offerNames.slice().map((offerName) => ({
+    id: crypto.randomUUID(),
+    name: offerName,
+    cost: getRandomInt(OfferPrice.MIN, OfferPrice.MAX),
+    checked: getRandomBoolean(),
+  }));
+}
+
+function getOffers() {
+  return offers;
+}
+
+function getOfferIDs() {
+  return offers.map((offer) => offer.id);
+}
+
+
+export {
+  pointTypes,
+  getBlankPoint,
+  getRandomPoint,
+  getDestinations,
+  getOffers
+};
