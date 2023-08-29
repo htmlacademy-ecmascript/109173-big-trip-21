@@ -4,7 +4,7 @@ function createFilters(points) {
   return Object.entries(filters).map(([filterName, filterFunc]) => ({
     name: filterName,
     checked: false,
-    dataLength: filterFunc(points)?.length
+    dataLength: points ? filterFunc(points).length : 0,
   }));
 }
 

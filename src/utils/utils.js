@@ -158,7 +158,7 @@ function isEscKey(evt) {
   return evt.key === 'Escape';
 }
 
-function ucFirst(str) {
+function upperCaseFirst(str) {
   return `${str.charAt(0).toUpperCase()}${str.slice(1)}`;
 }
 
@@ -174,6 +174,6 @@ export {
   isPresentDate,
   isFutureDate,
   findObjectByID,
-  ucFirst,
+  upperCaseFirst,
   isEscKey
 };
