@@ -19,13 +19,17 @@ export default class TripPointPresenter {
   init(point) {
     this.#point = point;
 
-    // Обработчики событий (через bind из за необходимости hoisting некоторых функций)
-    this.#bindedDocumentKeyDownHandler = this.#documentKeyDownHandler.bind(this);
-    this.#point.pointEditCallback = this.#pointEditHandler.bind(this);
-    this.#point.pointFinishEditCallback = this.#pointFinishEditHandler.bind(this);
-    this.#point.pointSubmitCallback = this.#pointSubmitHandler.bind(this);
-    this.#point.pointFavoriteCallback = this.#favoriteClickHandler.bind(this);
+    // Обработчики событий
+    this.#point.pointEditCallback = this.#pointEditHandler;
+    this.#point.pointFinishEditCallback = this.#pointFinishEditHandler;
+    this.#point.pointSubmitCallback = this.#pointSubmitHandler;
+    this.#point.pointFavoriteCallback = this.#favoriteClickHandler;
 
+    // Компоненты предыдущей точки маршрута
+    this.#prevPointComponent = this.#pointComponent;
+    this.#prevEditPointComponent = this.#editPointComponent;
+
+    // Компоненты текущей точки маршрута
     this.#pointComponent = new TripEventsListItemView(this.#point); // Точка маршрута
     this.#editPointComponent = new EditPointView(this.#point); // Форма редактирования точки маршрута
 
@@ -39,34 +43,40 @@ export default class TripPointPresenter {
     this.#reRenderPoint();
   }
 
-  #documentKeyDownHandler(evt) {
+  destroy(pointComponent = this.#pointComponent, pointEditComponent = this.#editPointComponent) {
+    remove(pointComponent);
+    remove(pointEditComponent);
+  }
+
+  #documentKeyDownHandler = (evt) => {
     if (isEscKey(evt)) {
       evt.preventDefault();
       // this.#previousEditingPoint = null;
       this.#replaceFormToPoint();
     }
 
-    document.removeEventListener('keydown', this.#bindedDocumentKeyDownHandler);
-  }
+    document.removeEventListener('keydown', this.#documentKeyDownHandler);
+  };
 
-  #pointEditHandler() {
-    document.addEventListener('keydown', this.#bindedDocumentKeyDownHandler);
+  #pointEditHandler = () => {
+    document.addEventListener('keydown', this.#documentKeyDownHandler);
     this.#replacePointToForm();
-  }
+  };
 
-  #pointFinishEditHandler() { // Пока Callback такой же, как и для отправки формы, но, наверняка дальше они будут разными
+  #pointFinishEditHandler = () => { // Пока Callback такой же, как и для отправки формы, но, наверняка дальше они будут разными
     // this.#previousEditingPoint = null;
     this.#replaceFormToPoint();
-  }
+  };
 
-  #favoriteClickHandler() {
-    console.log('Добавили в избранное');
-  }
+  #favoriteClickHandler = () => {
+    this.#point.isFavorite = !this.#point.isFavorite;
+    this.#point.pointChangeCallback(this.#point);
+  };
 
-  #pointSubmitHandler() {
+  #pointSubmitHandler = () => {
     // this.#previousEditingPoint = null;
     this.#replaceFormToPoint();
-  }
+  };
 
   // Используем функцию, т.к. нужно поднятие
   #replacePointToForm() {
@@ -78,19 +88,14 @@ export default class TripPointPresenter {
   }
 
   #reRenderPoint() {
-    if(this.#pointsContainer.contains(this.#prevPointComponent)) {
+    if(this.#pointsContainer.contains(this.#prevPointComponent.element)) {
       replace(this.#pointComponent, this.#prevPointComponent);
     }
 
-    if(this.#pointsContainer.contains(this.#prevEditPointComponent)) {
+    if(this.#pointsContainer.contains(this.#prevEditPointComponent.element)) {
       replace(this.#editPointComponent, this.#prevEditPointComponent);
     }
 
-    this.#destroy(this.#prevPointComponent, this.#prevEditPointComponent);
-  }
-
-  #destroy(pointComponent = this.#pointComponent, pointEditComponent = this.#editPointComponent) {
-    remove(pointComponent);
-    remove(pointEditComponent);
+    this.destroy(this.#prevPointComponent, this.#prevEditPointComponent);
   }
 }

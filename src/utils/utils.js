@@ -154,6 +154,10 @@ function findObjectByID(id, obj) {
   return obj.find((item) => item.id === id);
 }
 
+function updateItem(items, updatedItem) {
+  return items.map((item) => item.id === updatedItem.id ? updateItem : item);
+}
+
 function isEscKey(evt) {
   return evt.key === 'Escape';
 }
@@ -174,6 +178,7 @@ export {
   isPresentDate,
   isFutureDate,
   findObjectByID,
+  updateItem,
   upperCaseFirst,
   isEscKey
 };

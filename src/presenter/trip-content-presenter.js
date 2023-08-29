@@ -1,4 +1,5 @@
 import { render } from '../framework/render.js';
+import { updateItem } from '../utils/utils.js';
 import TripSortView from '../view/trip-sort-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import TripEventsListView from '../view/trip-events-list-view.js';
@@ -39,10 +40,17 @@ export default class TripContentPresenter {
     return this.#points;
   }
 
+  #pointChangeHandler = (changedPoint) => {
+    this.#points = updateItem(this.#points, changedPoint); // Обновляем информацию о точке в общем списке
+    this.#pointPresenters.get(changedPoint.id).init(changedPoint); // Перерисовываем точку
+  };
+
   #renderTripBoard() {
     this.#renderSort(); // Отрисовываем сортировку точек маршрута
 
     // Отрисовываем точки маршрута или надпись-предложение, если ни одной точки нет
+    render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
+
     if (this.#points.length > 0) {
       this.#renderEventPoints(this.#points);
     } else {
@@ -59,8 +67,6 @@ export default class TripContentPresenter {
   }
 
   #renderEventPoints(points) {
-    render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
-
     for (let i = 0; i < points.length; i++) { //Выводим не с первой точки, а со второй т.к. первая отводится под блок редактирования
       this.#renderEventPoint(points[i]); // Отрисовываем события; // Отрисовываем события
     }
@@ -69,12 +75,15 @@ export default class TripContentPresenter {
   #renderEventPoint(point) {
     const pointPresenter = new TripPointPresenter(this.#tripEventsListContainer.element);
 
+    point.pointChangeCallback = this.#pointChangeHandler;
+
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 
   #clearEventPoints() {
-    this.#tripEventsListContainer.element.innerHTML = '';
+    this.#pointPresenters.forEach((pointPresenter) => pointPresenter.destroy());
+    this.#pointPresenters.clear();
   }
 
   reRenderEventPoints(points) {
