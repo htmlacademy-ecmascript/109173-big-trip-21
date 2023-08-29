@@ -45,6 +45,14 @@ export default class TripContentPresenter {
     this.#pointPresenters.get(changedPoint.id).init(changedPoint); // Перерисовываем точку
   };
 
+  #pointBeforeEditHandler = () => {
+    this.#pointPresenters.forEach((pointPresenter) => {
+      if (pointPresenter.isEditing()) {
+        pointPresenter.reset();
+      }
+    });
+  };
+
   #renderTripBoard() {
     this.#renderSort(); // Отрисовываем сортировку точек маршрута
 
@@ -76,6 +84,7 @@ export default class TripContentPresenter {
     const pointPresenter = new TripPointPresenter(this.#tripEventsListContainer.element);
 
     point.pointChangeCallback = this.#pointChangeHandler;
+    point.pointBeforeEditCallback = this.#pointBeforeEditHandler;
 
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);

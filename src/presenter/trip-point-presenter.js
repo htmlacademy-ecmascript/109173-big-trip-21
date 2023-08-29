@@ -11,6 +11,7 @@ export default class TripPointPresenter {
   #bindedDocumentKeyDownHandler = null;
   #prevPointComponent = null;
   #prevEditPointComponent = null;
+  #pointIsEditing = false;
 
   constructor(container) {
     this.#pointsContainer = container;
@@ -43,15 +44,25 @@ export default class TripPointPresenter {
     this.#reRenderPoint();
   }
 
+  reset() {
+    if (!this.#pointIsEditing) {
+      return;
+    }
+    this.#replaceFormToPoint();
+  }
+
   destroy(pointComponent = this.#pointComponent, pointEditComponent = this.#editPointComponent) {
     remove(pointComponent);
     remove(pointEditComponent);
   }
 
+  isEditing() {
+    return this.#pointIsEditing;
+  }
+
   #documentKeyDownHandler = (evt) => {
-    if (isEscKey(evt)) {
+    if (isEscKey(evt) && this.#pointIsEditing) {
       evt.preventDefault();
-      // this.#previousEditingPoint = null;
       this.#replaceFormToPoint();
     }
 
@@ -60,11 +71,11 @@ export default class TripPointPresenter {
 
   #pointEditHandler = () => {
     document.addEventListener('keydown', this.#documentKeyDownHandler);
+    this.#point.pointBeforeEditCallback(); // Вызываем колбэк общего презентера (для закрытия всех форм редактирования перед открытием новой)
     this.#replacePointToForm();
   };
 
   #pointFinishEditHandler = () => { // Пока Callback такой же, как и для отправки формы, но, наверняка дальше они будут разными
-    // this.#previousEditingPoint = null;
     this.#replaceFormToPoint();
   };
 
@@ -74,17 +85,20 @@ export default class TripPointPresenter {
   };
 
   #pointSubmitHandler = () => {
-    // this.#previousEditingPoint = null;
     this.#replaceFormToPoint();
   };
 
   // Используем функцию, т.к. нужно поднятие
   #replacePointToForm() {
     replace(this.#editPointComponent, this.#pointComponent);
+
+    this.#pointIsEditing = true;
   }
 
   #replaceFormToPoint() {
     replace(this.#pointComponent, this.#editPointComponent);
+
+    this.#pointIsEditing = false;
   }
 
   #reRenderPoint() {
