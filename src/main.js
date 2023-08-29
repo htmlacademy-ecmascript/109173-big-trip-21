@@ -4,5 +4,5 @@ import TripContentPresenter from './presenter/trip-content-presenter.js';
 const tripHeaderPresenter = new TripHeaderPresenter();
 const tripContentPresenter = new TripContentPresenter();
 
-tripHeaderPresenter.init();
 tripContentPresenter.init();
+tripHeaderPresenter.init(tripContentPresenter);

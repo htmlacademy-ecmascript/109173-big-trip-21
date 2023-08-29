@@ -1,7 +1,12 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration'; // Расширение для подсчета длительности (https://day.js.org/docs/en/durations/durations)
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'; // (https://day.js.org/docs/en/plugin/is-same-or-before)
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'; // (https://day.js.org/docs/en/plugin/is-same-or-after)
 
-dayjs.extend(duration); // Добавляем расширение в библиотеку
+// Добавляем расширение в библиотеку
+dayjs.extend(duration);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 const Duration = {
   MINUTE: 1440,
@@ -129,6 +134,18 @@ function parseDateFromMillis(millis) {
   return {days, hours, minutes};
 }
 
+function isPastDate(dateTo) {
+  return dateTo && dayjs().isAfter(dateTo, 'H');
+}
+
+function isPresentDate(dateFrom, dateTo) {
+  return dayjs().isSameOrAfter(dateFrom, 'H') && dayjs().isSameOrBefore(dateTo, 'H');
+}
+
+function isFutureDate(dateTo) {
+  return dateTo && dayjs().isBefore(dateTo, 'H');
+}
+
 function getPadded2ZeroNum(num) {
   return String(num).padStart(2, 0);
 }
@@ -141,6 +158,10 @@ function isEscKey(evt) {
   return evt.key === 'Escape';
 }
 
+function ucFirst(str) {
+  return `${str.charAt(0).toUpperCase()}${str.slice(1)}`;
+}
+
 export {
   getRandomInt,
   getRandomArrayElement,
@@ -149,6 +170,10 @@ export {
   getMockDate,
   getFormattedDateDiff,
   DateFormats,
+  isPastDate,
+  isPresentDate,
+  isFutureDate,
   findObjectByID,
+  ucFirst,
   isEscKey
 };
