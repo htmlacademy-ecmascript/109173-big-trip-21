@@ -50,6 +50,6 @@ export default class TripHeaderPresenter {
     const filteredPoints = filters[filterName](this.#contentPresenter.points);
 
     this.#previousFilterType = filterType;
-    this.#contentPresenter.rerenderEventPoints(filteredPoints);
+    this.#contentPresenter.reRenderEventPoints(filteredPoints);
   }
 }

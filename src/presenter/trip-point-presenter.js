@@ -1,14 +1,16 @@
-import { render, replace } from '../framework/render.js';
+import { render, replace, remove } from '../framework/render.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
 import { isEscKey } from '../utils/utils.js';
 
 export default class TripPointPresenter {
-  #pointsContainer = null;
   #point = null;
+  #pointsContainer = null;
   #pointComponent = null;
   #editPointComponent = null;
   #bindedDocumentKeyDownHandler = null;
+  #prevPointComponent = null;
+  #prevEditPointComponent = null;
 
   constructor(container) {
     this.#pointsContainer = container;
@@ -18,6 +20,7 @@ export default class TripPointPresenter {
     this.#point = point;
 
     // Обработчики событий (через bind из за необходимости hoisting некоторых функций)
+    this.#bindedDocumentKeyDownHandler = this.#documentKeyDownHandler.bind(this);
     this.#point.pointEditCallback = this.#pointEditHandler.bind(this);
     this.#point.pointFinishEditCallback = this.#pointFinishEditHandler.bind(this);
     this.#point.pointSubmitCallback = this.#pointSubmitHandler.bind(this);
@@ -25,9 +28,15 @@ export default class TripPointPresenter {
 
     this.#pointComponent = new TripEventsListItemView(this.#point); // Точка маршрута
     this.#editPointComponent = new EditPointView(this.#point); // Форма редактирования точки маршрута
-    this.#bindedDocumentKeyDownHandler = this.#documentKeyDownHandler.bind(this);
-    // Отрисовка точки маршрута
-    render(this.#pointComponent, this.#pointsContainer);
+
+    if(this.#prevPointComponent === null && this.#prevEditPointComponent === null) {
+      // Отрисовка новой точки маршрута
+      render(this.#pointComponent, this.#pointsContainer);
+      return;
+    }
+
+    // Замена точки маршрута новой (если она отрисована в DOM-дереве)
+    this.#reRenderPoint();
   }
 
   #documentKeyDownHandler(evt) {
@@ -66,5 +75,22 @@ export default class TripPointPresenter {
 
   #replaceFormToPoint() {
     replace(this.#pointComponent, this.#editPointComponent);
+  }
+
+  #reRenderPoint() {
+    if(this.#pointsContainer.contains(this.#prevPointComponent)) {
+      replace(this.#pointComponent, this.#prevPointComponent);
+    }
+
+    if(this.#pointsContainer.contains(this.#prevEditPointComponent)) {
+      replace(this.#editPointComponent, this.#prevEditPointComponent);
+    }
+
+    this.#destroy(this.#prevPointComponent, this.#prevEditPointComponent);
+  }
+
+  #destroy(pointComponent = this.#pointComponent, pointEditComponent = this.#editPointComponent) {
+    remove(pointComponent);
+    remove(pointEditComponent);
   }
 }

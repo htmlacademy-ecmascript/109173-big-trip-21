@@ -13,6 +13,7 @@ export default class TripContentPresenter {
   #tripEventsListContainer = null;
   #pointsModel = null;
   #points = null;
+  #pointPresenters = new Map();
 
   /**
    * @property {Object | null} previousEditingPoint Объект с информацией о предыдущей редактируемой точке
@@ -31,18 +32,26 @@ export default class TripContentPresenter {
   init() {
     this.#points = this.#pointsModel.points.slice(); // Копируем полученный из модели массив с точками маршрута
 
-    render(new TripSortView(), this.#tripEventsContainer); // Отрисовываем сортировку событий
-    render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для событий
-
-    if (this.#points.length > 0) {
-      this.#renderEventPoints(this.#points);
-    } else { // Если у нас нет ни одной точки маршрута
-      this.#renderNoPoints();
-    }
+    this.#renderTripBoard();
   }
 
   get points() {
     return this.#points;
+  }
+
+  #renderTripBoard() {
+    this.#renderSort(); // Отрисовываем сортировку точек маршрута
+
+    // Отрисовываем точки маршрута или надпись-предложение, если ни одной точки нет
+    if (this.#points.length > 0) {
+      this.#renderEventPoints(this.#points);
+    } else {
+      this.#renderNoPoints();
+    }
+  }
+
+  #renderSort() {
+    render(new TripSortView(), this.#tripEventsContainer);
   }
 
   #renderNoPoints() {
@@ -50,6 +59,8 @@ export default class TripContentPresenter {
   }
 
   #renderEventPoints(points) {
+    render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
+
     for (let i = 0; i < points.length; i++) { //Выводим не с первой точки, а со второй т.к. первая отводится под блок редактирования
       this.#renderEventPoint(points[i]); // Отрисовываем события; // Отрисовываем события
     }
@@ -59,14 +70,14 @@ export default class TripContentPresenter {
     const pointPresenter = new TripPointPresenter(this.#tripEventsListContainer.element);
 
     pointPresenter.init(point);
+    this.#pointPresenters.set(point.id, pointPresenter);
   }
 
   #clearEventPoints() {
     this.#tripEventsListContainer.element.innerHTML = '';
   }
 
-  rerenderEventPoints(points) {
-
+  reRenderEventPoints(points) {
     this.#clearEventPoints();
     // document.removeEventListener('keydown', this.#previousEditingPoint?.handler);
     this.#previousEditingPoint = null;
