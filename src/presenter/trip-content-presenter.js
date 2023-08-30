@@ -1,5 +1,6 @@
 import { render } from '../framework/render.js';
-import { updateItem } from '../utils/utils.js';
+import { upperCaseFirst, updateItem } from '../utils/utils.js';
+import { FilterType, filters } from '../utils/filters.js';
 import TripSortView from '../view/trip-sort-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import TripEventsListView from '../view/trip-events-list-view.js';
@@ -15,6 +16,7 @@ export default class TripContentPresenter {
   #pointsModel = null;
   #points = null;
   #pointPresenters = new Map();
+  #previousFilterType = FilterType.EVERYTHING; // Предыдущий выбранный фильтр (по-умолчанию - EVERYTHING);
 
   /**
    * @property {Object | null} previousEditingPoint Объект с информацией о предыдущей редактируемой точке
@@ -51,6 +53,20 @@ export default class TripContentPresenter {
         pointPresenter.reset();
       }
     });
+  };
+
+  #filterChangeHandler = (filterType) => {
+    const filterName = upperCaseFirst(filterType);
+
+    // Исключаем клик по одному и тому же фильтру
+    if (this.#previousFilterType === filterName) {
+      return;
+    }
+
+    const filteredPoints = filters[filterName](this.points);
+
+    this.#previousFilterType = filterType;
+    this.reRenderEventPoints(filteredPoints);
   };
 
   #renderTripBoard() {
@@ -97,7 +113,6 @@ export default class TripContentPresenter {
 
   reRenderEventPoints(points) {
     this.#clearEventPoints();
-    // document.removeEventListener('keydown', this.#previousEditingPoint?.handler);
     this.#previousEditingPoint = null;
     this.#renderEventPoints(points);
   }

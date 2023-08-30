@@ -155,7 +155,7 @@ function findObjectByID(id, obj) {
 }
 
 function updateItem(items, updatedItem) {
-  return items.map((item) => item.id === updatedItem.id ? updateItem : item);
+  return items.map((item) => (item.id === updatedItem.id) ? updatedItem : item);
 }
 
 function isEscKey(evt) {
