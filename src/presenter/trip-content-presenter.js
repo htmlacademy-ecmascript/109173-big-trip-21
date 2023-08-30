@@ -1,6 +1,7 @@
 import { render } from '../framework/render.js';
 import { upperCaseFirst, updateItem } from '../utils/utils.js';
 import { FilterType, filters } from '../utils/filters.js';
+import { SortType, sorts } from '../utils/sort.js';
 import TripSortView from '../view/trip-sort-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import TripEventsListView from '../view/trip-events-list-view.js';
@@ -17,6 +18,7 @@ export default class TripContentPresenter {
   #points = null;
   #pointPresenters = new Map();
   #previousFilterType = FilterType.EVERYTHING; // Предыдущий выбранный фильтр (по-умолчанию - EVERYTHING);
+  #previousSortType = SortType.DAY; // Предыдущая сортировка (по-умолчанию - DAY);
 
   /**
    * @property {Object | null} previousEditingPoint Объект с информацией о предыдущей редактируемой точке
@@ -34,6 +36,7 @@ export default class TripContentPresenter {
 
   init() {
     this.#points = this.#pointsModel.points.slice(); // Копируем полученный из модели массив с точками маршрута
+    this.#points = sorts[this.#previousSortType](this.#points); // Сортируем (по-умолчанию - по дате)
 
     this.#renderTripBoard();
   }
@@ -69,6 +72,17 @@ export default class TripContentPresenter {
     this.reRenderEventPoints(filteredPoints);
   };
 
+  #sortChangeHandler = (sortType) => {
+    if(this.#previousSortType === sortType) {
+      return;
+    }
+
+    const sortedPoints = sorts[sortType](this.#points);
+
+    this.#previousSortType = sortType;
+    this.reRenderEventPoints(sortedPoints);
+  };
+
   #renderTripBoard() {
     this.#renderSort(); // Отрисовываем сортировку точек маршрута
 
@@ -83,7 +97,9 @@ export default class TripContentPresenter {
   }
 
   #renderSort() {
-    render(new TripSortView(), this.#tripEventsContainer);
+    const sortData = {pointSortCallback: this.#sortChangeHandler};
+
+    render(new TripSortView(sortData), this.#tripEventsContainer);
   }
 
   #renderNoPoints() {

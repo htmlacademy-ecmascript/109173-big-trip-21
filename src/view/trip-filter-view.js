@@ -47,16 +47,14 @@ export default class TripFilterView extends AbstractView {
   }
 
   #clickFilterBtnHandler(evt) {
-    evt.preventDefault();
-
     const parent = evt.target.closest(CSSClasses.FILTER_BTN_CONTAINER);
-    const filterBtn = parent.querySelector(CSSClasses.FILTER_BTN_INPUT);
+    const filterInput = parent.querySelector(CSSClasses.FILTER_BTN_INPUT);
 
-    if (!parent || filterBtn.disabled) {
+    if (!parent || filterInput.disabled) {
       return;
     }
 
-    const filterType = filterBtn.value;
+    const filterType = filterInput.value;
 
     this.#filtersClickCallback(filterType);
   }
