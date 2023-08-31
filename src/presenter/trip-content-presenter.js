@@ -20,14 +20,6 @@ export default class TripContentPresenter {
   #previousFilterType = FilterType.EVERYTHING; // Предыдущий выбранный фильтр (по-умолчанию - EVERYTHING);
   #previousSortType = SortType.DAY; // Предыдущая сортировка (по-умолчанию - DAY);
 
-  /**
-   * @property {Object | null} previousEditingPoint Объект с информацией о предыдущей редактируемой точке
-   * @property {TripEventsListItemView} previousEditingPoint.point View точки маршрута
-   * @property {EditPointView} previousEditingPoint.form View формы редактированияточки маршрута
-   * @property {Function}  previousEditingPoint.handler KeyDownHandler точки маршрута
-   */
-  #previousEditingPoint = null;
-
   constructor() {
     this.#tripEventsContainer = document.querySelector(CSSClasses.TRIP_EVENTS); // Общий контейнер для событий
     this.#tripEventsListContainer = new TripEventsListView(); // Контейнер для списка точек маршрута
@@ -129,7 +121,6 @@ export default class TripContentPresenter {
 
   reRenderEventPoints(points) {
     this.#clearEventPoints();
-    this.#previousEditingPoint = null;
     this.#renderEventPoints(points);
   }
 }

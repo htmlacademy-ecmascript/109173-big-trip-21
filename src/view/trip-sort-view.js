@@ -11,8 +11,8 @@ function createTripSortItemsTemplate() {
 
     return /*html*/`
       <div class="trip-sort__item  trip-sort__item--${loweredSortType}">
-        <input id="sort-${loweredSortType}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${loweredSortType}" ${checkedState} ${disabledState}>
-        <label class="trip-sort__btn" data-sort-type="${name}" for="sort-${loweredSortType}">${name}</label>
+        <input id="sort-${loweredSortType}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" data-sort-type="${name}" value="sort-${loweredSortType}" ${checkedState} ${disabledState}>
+        <label class="trip-sort__btn" for="sort-${loweredSortType}">${name}</label>
       </div>
     `;
   }).join('');
@@ -33,7 +33,7 @@ export default class TripSortView extends AbstractView {
     super();
     this.#templateData = templateData;
     this.#pointSortCallback = templateData.pointSortCallback;
-    this.element.addEventListener('click', this.#pointSortHandler);
+    this.element.addEventListener('change', this.#pointSortHandler);
   }
 
   get template() {
@@ -41,17 +41,8 @@ export default class TripSortView extends AbstractView {
   }
 
   #pointSortHandler = (evt) => {
-    const target = evt.target;
-    const parent = target.closest(CSSClases.SORT_BTN_CONTAINER);
-    const sortInput = parent.querySelector(CSSClases.SORT_BTN_INPUT);
-
-    if (!target.className.includes(CSSClases.SORT_BTN.slice(1)) ||
-        !parent ||
-        sortInput.disabled) {
-      return;
-    }
-
-    const sortType = evt.target.dataset.sortType;
+    const input = evt.target;
+    const sortType = input.dataset.sortType;
 
     if(this.#pointSortCallback) {
       this.#pointSortCallback(sortType);

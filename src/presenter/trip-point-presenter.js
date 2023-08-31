@@ -71,6 +71,7 @@ export default class TripPointPresenter {
 
   #pointEditHandler = () => {
     document.addEventListener('keydown', this.#documentKeyDownHandler);
+
     this.#point.pointBeforeEditCallback(); // Вызываем колбэк общего презентера (для закрытия всех форм редактирования перед открытием новой)
     this.#replacePointToForm();
   };

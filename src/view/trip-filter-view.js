@@ -39,23 +39,17 @@ export default class TripFilterView extends AbstractView {
 
     this.#templateData = templateData;
     this.#filtersClickCallback = templateData.filtersClickCallback;
-    this.element.addEventListener('click', this.#clickFilterBtnHandler.bind(this));
+    this.element.addEventListener('change', this.#clickFilterBtnHandler);
   }
 
   get template() {
     return createTripFilterTemplate(this.#templateData.filters);
   }
 
-  #clickFilterBtnHandler(evt) {
-    const parent = evt.target.closest(CSSClasses.FILTER_BTN_CONTAINER);
-    const filterInput = parent.querySelector(CSSClasses.FILTER_BTN_INPUT);
-
-    if (!parent || filterInput.disabled) {
-      return;
-    }
-
-    const filterType = filterInput.value;
+  #clickFilterBtnHandler = (evt) => {
+    const input = evt.target;
+    const filterType = input.value;
 
     this.#filtersClickCallback(filterType);
-  }
+  };
 }
