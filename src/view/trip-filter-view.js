@@ -1,10 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-const CSSClasses = {
-  FILTER_BTN_CONTAINER: '.trip-filters__filter',
-  FILTER_BTN_INPUT: '.trip-filters__filter-input',
-};
-
 function createTripFilterListTemplate(filters) {
   return filters.map(({name, checked, dataLength}) => {
     const loweredName = name.toLowerCase();
