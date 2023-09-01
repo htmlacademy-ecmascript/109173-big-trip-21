@@ -1,29 +1,33 @@
-import { render, replace } from '../framework/render.js';
+import { render } from '../framework/render.js';
+import { upperCaseFirst, updateItem } from '../utils/utils.js';
+import { FilterType, filters } from '../utils/filters.js';
 import TripSortView from '../view/trip-sort-view.js';
+import TripPointPresenter from './trip-point-presenter.js';
 import TripEventsListView from '../view/trip-events-list-view.js';
-import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import TripEventsListEmptyView from '../view/trip-events-list-empty-view.js';
-import EditPointView from '../view/edit-point-view.js';
-import { isEscKey } from '../utils/utils.js';
 
 // Модели
 import PointsModel from '../model/points-model.js';
+
+const CSSClasses = {TRIP_EVENTS: '.trip-events'};
 export default class TripContentPresenter {
   #tripEventsContainer = null;
   #tripEventsListContainer = null;
   #pointsModel = null;
   #points = null;
+  #pointPresenters = new Map();
+  #previousFilterType = FilterType.EVERYTHING; // Предыдущий выбранный фильтр (по-умолчанию - EVERYTHING);
 
   /**
    * @property {Object | null} previousEditingPoint Объект с информацией о предыдущей редактируемой точке
    * @property {TripEventsListItemView} previousEditingPoint.point View точки маршрута
    * @property {EditPointView} previousEditingPoint.form View формы редактированияточки маршрута
-   * @property {Object}  previousEditingPoint.handler KeyDownHandler точки маршрута
+   * @property {Function}  previousEditingPoint.handler KeyDownHandler точки маршрута
    */
   #previousEditingPoint = null;
 
   constructor() {
-    this.#tripEventsContainer = document.querySelector('.trip-events'); // Общий контейнер для событий
+    this.#tripEventsContainer = document.querySelector(CSSClasses.TRIP_EVENTS); // Общий контейнер для событий
     this.#tripEventsListContainer = new TripEventsListView(); // Контейнер для списка точек маршрута
     this.#pointsModel = new PointsModel(); // Модель для получения данных о точках маршрута
   }
@@ -31,18 +35,59 @@ export default class TripContentPresenter {
   init() {
     this.#points = this.#pointsModel.points.slice(); // Копируем полученный из модели массив с точками маршрута
 
-    render(new TripSortView(), this.#tripEventsContainer); // Отрисовываем сортировку событий
-    render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для событий
-
-    if (this.#points.length > 0) {
-      this.#renderEventPoints(this.#points);
-    } else { // Если у нас нет ни одной точки маршрута
-      render(new TripEventsListEmptyView(), this.#tripEventsListContainer.element);
-    }
+    this.#renderTripBoard();
   }
 
   get points() {
     return this.#points;
+  }
+
+  #pointChangeHandler = (changedPoint) => {
+    this.#points = updateItem(this.#points, changedPoint); // Обновляем информацию о точке в общем списке
+    this.#pointPresenters.get(changedPoint.id).init(changedPoint); // Перерисовываем точку
+  };
+
+  #pointBeforeEditHandler = () => {
+    this.#pointPresenters.forEach((pointPresenter) => {
+      if (pointPresenter.isEditing()) {
+        pointPresenter.reset();
+      }
+    });
+  };
+
+  #filterChangeHandler = (filterType) => {
+    const filterName = upperCaseFirst(filterType);
+
+    // Исключаем клик по одному и тому же фильтру
+    if (this.#previousFilterType === filterName) {
+      return;
+    }
+
+    const filteredPoints = filters[filterName](this.points);
+
+    this.#previousFilterType = filterType;
+    this.reRenderEventPoints(filteredPoints);
+  };
+
+  #renderTripBoard() {
+    this.#renderSort(); // Отрисовываем сортировку точек маршрута
+
+    // Отрисовываем точки маршрута или надпись-предложение, если ни одной точки нет
+    render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
+
+    if (this.#points.length > 0) {
+      this.#renderEventPoints(this.#points);
+    } else {
+      this.#renderNoPoints();
+    }
+  }
+
+  #renderSort() {
+    render(new TripSortView(), this.#tripEventsContainer);
+  }
+
+  #renderNoPoints() {
+    render(new TripEventsListEmptyView(), this.#tripEventsListContainer.element);
   }
 
   #renderEventPoints(points) {
@@ -52,84 +97,22 @@ export default class TripContentPresenter {
   }
 
   #renderEventPoint(point) {
-    // Обработчики событий (через bind из за необходимости hoisting некоторых функций)
-    point.pointEditCallback = pointEditHandler.bind(this);
-    point.pointFinishEditCallback = pointFinishEditHandler.bind(this);
-    point.pointSubmitCallback = pointSubmitHandler.bind(this);
+    const pointPresenter = new TripPointPresenter(this.#tripEventsListContainer.element);
 
-    const pointComponent = new TripEventsListItemView(point); // Точка маршрута
-    const editPointComponent = new EditPointView(point); // Форма редактирования точки маршрута
-    const bindedDocumentKeyDownHandler = documentKeyDownHandler.bind(this);
+    point.pointChangeCallback = this.#pointChangeHandler;
+    point.pointBeforeEditCallback = this.#pointBeforeEditHandler;
 
-    function documentKeyDownHandler(evt) {
-      // Запрещаем сработку ESC, если не открыто редактирование точки
-      if (this.#previousEditingPoint === null) {
-        return;
-      }
-
-      if (isEscKey(evt)) {
-        evt.preventDefault();
-        this.#previousEditingPoint = null;
-        replaceFormToPoint();
-      }
-
-      document.removeEventListener('keydown', bindedDocumentKeyDownHandler);
-    }
-
-    function pointEditHandler() {
-      // Если во время редактирования точки маршрута попытаться открыть другую - закроем текущую.
-      if (this.#previousEditingPoint !== null &&
-          this.#previousEditingPoint.point !== pointComponent) {
-        replace(this.#previousEditingPoint.point, this.#previousEditingPoint.form);
-        document.removeEventListener('keydown', this.#previousEditingPoint.handler);
-      }
-
-      /*
-        Каждый раз сохраняем компоненты редактирования
-        для возможности обратиться к ним при редактировании следующей точки
-        (чтобы иметь возможность закрыть текущую редактируемую точку и открыть новую)
-      */
-      this.#previousEditingPoint = {
-        point: pointComponent,
-        form: editPointComponent,
-        handler: bindedDocumentKeyDownHandler
-      };
-
-      document.addEventListener('keydown', bindedDocumentKeyDownHandler);
-      replacePointToForm();
-    }
-
-    function pointFinishEditHandler() { // Пока Callback такой же, как и для отправки формы, но, наверняка дальше они будут разными
-      this.#previousEditingPoint = null;
-      replaceFormToPoint();
-    }
-
-    function pointSubmitHandler() {
-      this.#previousEditingPoint = null;
-      replaceFormToPoint();
-    }
-
-    // Используем функцию, т.к. нужно поднятие
-    function replacePointToForm() {
-      replace(editPointComponent, pointComponent);
-    }
-
-    function replaceFormToPoint() {
-      replace(pointComponent, editPointComponent);
-    }
-
-    // Отрисовка точки маршрута
-    render(pointComponent, this.#tripEventsListContainer.element);
+    pointPresenter.init(point);
+    this.#pointPresenters.set(point.id, pointPresenter);
   }
 
   #clearEventPoints() {
-    this.#tripEventsListContainer.element.innerHTML = '';
+    this.#pointPresenters.forEach((pointPresenter) => pointPresenter.destroy());
+    this.#pointPresenters.clear();
   }
 
-  rerenderEventPoints(points) {
-
+  reRenderEventPoints(points) {
     this.#clearEventPoints();
-    document.removeEventListener('keydown', this.#previousEditingPoint?.handler);
     this.#previousEditingPoint = null;
     this.#renderEventPoints(points);
   }

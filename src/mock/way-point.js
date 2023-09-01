@@ -53,6 +53,7 @@ const destinations = createDestinations();
 
 function createPoint(pointType) {
   return {
+    id: crypto.randomUUID(),
     type: pointType,
     destination: getRandomArrayElement(destinations),
     dates: {

@@ -154,11 +154,15 @@ function findObjectByID(id, obj) {
   return obj.find((item) => item.id === id);
 }
 
+function updateItem(items, updatedItem) {
+  return items.map((item) => (item.id === updatedItem.id) ? updatedItem : item);
+}
+
 function isEscKey(evt) {
   return evt.key === 'Escape';
 }
 
-function ucFirst(str) {
+function upperCaseFirst(str) {
   return `${str.charAt(0).toUpperCase()}${str.slice(1)}`;
 }
 
@@ -174,6 +178,7 @@ export {
   isPresentDate,
   isFutureDate,
   findObjectByID,
-  ucFirst,
+  updateItem,
+  upperCaseFirst,
   isEscKey
 };

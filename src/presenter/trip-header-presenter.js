@@ -4,7 +4,7 @@ import TripInfoMainView from '../view/trip-info-main-view.js';
 import TripInfoCostView from '../view/trip-info-cost-view.js';
 import TripFilterView from '../view/trip-filter-view.js';
 import { createFilters } from '../mock/filter.js';
-import { ucFirst } from '../utils/utils.js';
+import { upperCaseFirst } from '../utils/utils.js';
 import { FilterType, filters } from '../utils/filters.js';
 
 const CSSClasses = {
@@ -17,7 +17,8 @@ export default class TripHeaderPresenter {
   #tripFilterContainer = null;
   #filtersData = null; // Фильтры
   #previousFilterType = FilterType.EVERYTHING; // Предыдущий выбранный фильтр (по-умолчанию - EVERYTHING)
-  #contentPresenter = null; // Экземпляр презентера конткнта
+  /** @type {import("./trip-content-presenter.js").default} Экземпляр презентера контента */
+  #contentPresenter = null;
 
   constructor() {
     this.#tripMainContainer = document.querySelector(CSSClasses.TRIP_MAIN_CONTAINER); // Контейнер для отрисовки общей информации о путешествии
@@ -39,7 +40,7 @@ export default class TripHeaderPresenter {
   }
 
   #filtersClickHandler(filterType) {
-    const filterName = ucFirst(filterType);
+    const filterName = upperCaseFirst(filterType);
 
     // Исключаем клик по одному и тому же фильтру
     if (this.#previousFilterType === filterName) {
@@ -49,6 +50,6 @@ export default class TripHeaderPresenter {
     const filteredPoints = filters[filterName](this.#contentPresenter.points);
 
     this.#previousFilterType = filterType;
-    this.#contentPresenter.rerenderEventPoints(filteredPoints);
+    this.#contentPresenter.reRenderEventPoints(filteredPoints);
   }
 }

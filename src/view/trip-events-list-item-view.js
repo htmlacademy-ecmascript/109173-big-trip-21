@@ -2,7 +2,7 @@ import AbstractView from '../framework/view/abstract-view.js';
 import { getOffers} from '../mock/way-point.js';
 import { getFormattedDateDiff, DateFormats, findObjectByID } from '../utils/utils.js';
 
-const CSSClasses = {ROLLUP_BTN: '.event__rollup-btn'};
+const CSSClasses = {ROLLUP_BTN: '.event__rollup-btn', FAVORITE_BTN: '.event__favorite-btn'};
 
 function createOffersTemplate(offerIDs) {
   if (!offerIDs) {
@@ -78,13 +78,16 @@ export default class TripEventsListItemView extends AbstractView {
   #templateData = null;
   pointEditBtn = null;
   pointEditCallback = null;
+  pointFavoriteCallback = null;
 
   constructor(templateData) {
     super();
 
     this.#templateData = templateData;
     this.pointEditCallback = templateData.pointEditCallback;
+    this.pointFavoriteCallback = templateData.pointFavoriteCallback;
     this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointEditBtnHandler);
+    this.element.querySelector(CSSClasses.FAVORITE_BTN).addEventListener('click', this.#pointFavoriteClickHandler);
   }
 
   get template() {
@@ -96,6 +99,14 @@ export default class TripEventsListItemView extends AbstractView {
 
     if (this.pointEditCallback) {
       this.pointEditCallback();
+    }
+  };
+
+  #pointFavoriteClickHandler = (evt) => {
+    evt.preventDefault();
+
+    if (this.pointFavoriteCallback) {
+      this.pointFavoriteCallback();
     }
   };
 }
