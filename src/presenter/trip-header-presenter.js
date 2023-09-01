@@ -16,7 +16,7 @@ export default class TripHeaderPresenter {
   #tripInfoContainer = null;
   #tripFilterContainer = null;
   #filtersData = null; // Фильтры
-  #previousFilterType = FilterType.EVERYTHING; // Предыдущий выбранный фильтр (по-умолчанию - EVERYTHING)
+  #currentFilterType = FilterType.EVERYTHING; // Предыдущий выбранный фильтр (по-умолчанию - EVERYTHING)
   /** @type {import("./trip-content-presenter.js").default} Экземпляр презентера контента */
   #contentPresenter = null;
 
@@ -29,8 +29,8 @@ export default class TripHeaderPresenter {
   init(contentPresenter) {
     this.#contentPresenter = contentPresenter;
     this.#filtersData = {
-      filters: createFilters(this.#contentPresenter.points),
-      filtersClickCallback: this.#filtersClickHandler.bind(this),
+      items: createFilters(this.#contentPresenter.points),
+      onChangeCallback: this.#filtersClickHandler.bind(this),
     };
 
     render(this.#tripInfoContainer, this.#tripMainContainer, RenderPosition.AFTERBEGIN); // Отрисовываем контейнер для общей информации о маршруте
@@ -43,13 +43,13 @@ export default class TripHeaderPresenter {
     const filterName = upperCaseFirst(filterType);
 
     // Исключаем клик по одному и тому же фильтру
-    if (this.#previousFilterType === filterName) {
+    if (this.#currentFilterType === filterName) {
       return;
     }
 
     const filteredPoints = filters[filterName](this.#contentPresenter.points);
 
-    this.#previousFilterType = filterType;
+    this.#currentFilterType = filterType;
     this.#contentPresenter.reRenderEventPoints(filteredPoints);
   }
 }

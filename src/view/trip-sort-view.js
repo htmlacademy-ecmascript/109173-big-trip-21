@@ -1,17 +1,14 @@
-import AbstractView from '../framework/view/abstract-view.js';
-import { sortObj } from '../utils/sort.js';
-
-const CSSClases = {SORT_BTN: '.trip-sort__btn', SORT_BTN_CONTAINER: '.trip-sort__item ', SORT_BTN_INPUT: '.trip-sort__input'};
+import AbstractFiltersView from './abstract-filters-view.js';
+import { createSorts } from '../mock/sort.js';
 
 function createTripSortItemsTemplate() {
-  return sortObj.map(({name, checked, disabled}) => {
+  const sorts = createSorts();
+  return sorts.map(({name, checked, disabled}) => {
     const loweredSortType = name.toLowerCase();
-    const checkedState = checked ? 'checked' : '';
-    const disabledState = disabled ? 'disabled' : '';
 
     return /*html*/`
       <div class="trip-sort__item  trip-sort__item--${loweredSortType}">
-        <input id="sort-${loweredSortType}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" data-sort-type="${name}" value="sort-${loweredSortType}" ${checkedState} ${disabledState}>
+        <input id="sort-${loweredSortType}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" data-filter-type="${name}" value="sort-${loweredSortType}" ${checked} ${disabled}>
         <label class="trip-sort__btn" for="sort-${loweredSortType}">${name}</label>
       </div>
     `;
@@ -25,27 +22,8 @@ function createTripSortTemplate() {
       ${sortItemsTemplate}
     </form>`;
 }
-export default class TripSortView extends AbstractView {
-  #templateData = null;
-  #pointSortCallback = null;
-
-  constructor(templateData) {
-    super();
-    this.#templateData = templateData;
-    this.#pointSortCallback = templateData.pointSortCallback;
-    this.element.addEventListener('change', this.#pointSortHandler);
-  }
-
+export default class TripSortView extends AbstractFiltersView {
   get template() {
     return createTripSortTemplate();
   }
-
-  #pointSortHandler = (evt) => {
-    const input = evt.target;
-    const sortType = input.dataset.sortType;
-
-    if(this.#pointSortCallback) {
-      this.#pointSortCallback(sortType);
-    }
-  };
 }

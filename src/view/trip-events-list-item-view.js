@@ -76,16 +76,17 @@ function createTripEventsListTemplate({type, destination, dates, offers, cost, i
 
 export default class TripEventsListItemView extends AbstractView {
   #templateData = null;
-  pointEditBtn = null;
-  pointEditCallback = null;
-  pointFavoriteCallback = null;
+  #pointEditBtn = null;
+  #onEditCallback = null;
+  #onFavoriteCallback = null;
 
-  constructor(templateData) {
+  constructor({point, onEditCallback, onFavoriteCallback}) {
     super();
 
-    this.#templateData = templateData;
-    this.pointEditCallback = templateData.pointEditCallback;
-    this.pointFavoriteCallback = templateData.pointFavoriteCallback;
+    this.#templateData = point;
+    this.#onEditCallback = onEditCallback;
+    this.#onFavoriteCallback = onFavoriteCallback;
+
     this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointEditBtnHandler);
     this.element.querySelector(CSSClasses.FAVORITE_BTN).addEventListener('click', this.#pointFavoriteClickHandler);
   }
@@ -97,16 +98,12 @@ export default class TripEventsListItemView extends AbstractView {
   #pointEditBtnHandler = (evt) => {
     evt.preventDefault();
 
-    if (this.pointEditCallback) {
-      this.pointEditCallback();
-    }
+    this.#onEditCallback?.();
   };
 
   #pointFavoriteClickHandler = (evt) => {
     evt.preventDefault();
 
-    if (this.pointFavoriteCallback) {
-      this.pointFavoriteCallback();
-    }
+    this.#onFavoriteCallback?.();
   };
 }

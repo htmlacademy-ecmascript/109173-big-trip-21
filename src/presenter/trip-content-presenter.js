@@ -43,11 +43,7 @@ export default class TripContentPresenter {
   };
 
   #pointBeforeEditHandler = () => {
-    this.#pointPresenters.forEach((pointPresenter) => {
-      if (pointPresenter.isEditing()) {
-        pointPresenter.reset();
-      }
-    });
+    this.#pointPresenters.forEach((pointPresenter) => pointPresenter.reset());
   };
 
   #filterChangeHandler = (filterType) => {
@@ -89,7 +85,7 @@ export default class TripContentPresenter {
   }
 
   #renderSort() {
-    const sortData = {pointSortCallback: this.#sortChangeHandler};
+    const sortData = {onChangeCallback: this.#sortChangeHandler};
 
     render(new TripSortView(sortData), this.#tripEventsContainer);
   }
@@ -105,10 +101,12 @@ export default class TripContentPresenter {
   }
 
   #renderEventPoint(point) {
-    const pointPresenter = new TripPointPresenter(this.#tripEventsListContainer.element);
-
-    point.pointChangeCallback = this.#pointChangeHandler;
-    point.pointBeforeEditCallback = this.#pointBeforeEditHandler;
+    const pointPresenterData = {
+      container: this.#tripEventsListContainer.element,
+      onChangeCallback: this.#pointChangeHandler,
+      onBeforeEditCallback: this.#pointBeforeEditHandler,
+    };
+    const pointPresenter = new TripPointPresenter(pointPresenterData);
 
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
