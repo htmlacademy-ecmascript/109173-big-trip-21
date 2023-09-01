@@ -37,39 +37,10 @@ export default class TripContentPresenter {
     return this.#points;
   }
 
-  #pointChangeHandler = (changedPoint) => {
-    this.#points = updateItem(this.#points, changedPoint); // Обновляем информацию о точке в общем списке
-    this.#pointPresenters.get(changedPoint.id).init(changedPoint); // Перерисовываем точку
-  };
-
-  #pointBeforeEditHandler = () => {
-    this.#pointPresenters.forEach((pointPresenter) => pointPresenter.reset());
-  };
-
-  #filterChangeHandler = (filterType) => {
-    const filterName = upperCaseFirst(filterType);
-
-    // Исключаем клик по одному и тому же фильтру
-    if (this.#previousFilterType === filterName) {
-      return;
-    }
-
-    const filteredPoints = filters[filterName](this.points);
-
-    this.#previousFilterType = filterType;
-    this.reRenderEventPoints(filteredPoints);
-  };
-
-  #sortChangeHandler = (sortType) => {
-    if(this.#previousSortType === sortType) {
-      return;
-    }
-
-    const sortedPoints = sorts[sortType](this.#points);
-
-    this.#previousSortType = sortType;
-    this.reRenderEventPoints(sortedPoints);
-  };
+  reRenderEventPoints(points) {
+    this.#clearEventPoints();
+    this.#renderEventPoints(points);
+  }
 
   #renderTripBoard() {
     this.#renderSort(); // Отрисовываем сортировку точек маршрута
@@ -117,8 +88,38 @@ export default class TripContentPresenter {
     this.#pointPresenters.clear();
   }
 
-  reRenderEventPoints(points) {
-    this.#clearEventPoints();
-    this.#renderEventPoints(points);
-  }
+  /** Обработчики */
+  #pointChangeHandler = (changedPoint) => {
+    this.#points = updateItem(this.#points, changedPoint); // Обновляем информацию о точке в общем списке
+    this.#pointPresenters.get(changedPoint.id).init(changedPoint); // Перерисовываем точку
+  };
+
+  #pointBeforeEditHandler = () => {
+    this.#pointPresenters.forEach((pointPresenter) => pointPresenter.reset());
+  };
+
+  #filterChangeHandler = (filterType) => {
+    const filterName = upperCaseFirst(filterType);
+
+    // Исключаем клик по одному и тому же фильтру
+    if (this.#previousFilterType === filterName) {
+      return;
+    }
+
+    const filteredPoints = filters[filterName](this.points);
+
+    this.#previousFilterType = filterType;
+    this.reRenderEventPoints(filteredPoints);
+  };
+
+  #sortChangeHandler = (sortType) => {
+    if(this.#previousSortType === sortType) {
+      return;
+    }
+
+    const sortedPoints = sorts[sortType](this.#points);
+
+    this.#previousSortType = sortType;
+    this.reRenderEventPoints(sortedPoints);
+  };
 }

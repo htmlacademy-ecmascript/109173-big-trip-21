@@ -74,35 +74,6 @@ export default class TripPointPresenter {
     return this.#pointIsEditing;
   }
 
-  #documentKeyDownHandler = (evt) => {
-    if (isEscKey(evt) && this.#pointIsEditing) {
-      evt.preventDefault();
-      this.#replaceFormToPoint();
-    }
-
-    document.removeEventListener('keydown', this.#documentKeyDownHandler);
-  };
-
-  #pointEditHandler = () => {
-    document.addEventListener('keydown', this.#documentKeyDownHandler);
-
-    this.#onBeforeEditCallback(); // Вызываем колбэк общего презентера (для закрытия всех форм редактирования перед открытием новой)
-    this.#replacePointToForm();
-  };
-
-  #pointFinishEditHandler = () => { // Пока Callback такой же, как и для отправки формы, но, наверняка дальше они будут разными
-    this.#replaceFormToPoint();
-  };
-
-  #favoriteClickHandler = () => {
-    this.#point.isFavorite = !this.#point.isFavorite;
-    this.#onChangeCallback(this.#point);
-  };
-
-  #pointSubmitHandler = () => {
-    this.#replaceFormToPoint();
-  };
-
   // Используем функцию, т.к. нужно поднятие
   #replacePointToForm() {
     replace(this.#editPointComponent, this.#pointComponent);
@@ -127,4 +98,34 @@ export default class TripPointPresenter {
 
     this.destroy(this.#prevPointComponent, this.#prevEditPointComponent);
   }
+
+  #documentKeyDownHandler = (evt) => {
+    if (isEscKey(evt) && this.#pointIsEditing) {
+      evt.preventDefault();
+      this.#replaceFormToPoint();
+    }
+
+    document.removeEventListener('keydown', this.#documentKeyDownHandler);
+  };
+
+  /** Обработчики */
+  #pointEditHandler = () => {
+    document.addEventListener('keydown', this.#documentKeyDownHandler);
+
+    this.#onBeforeEditCallback(); // Вызываем колбэк общего презентера (для закрытия всех форм редактирования перед открытием новой)
+    this.#replacePointToForm();
+  };
+
+  #pointFinishEditHandler = () => { // Пока Callback такой же, как и для отправки формы, но, наверняка дальше они будут разными
+    this.#replaceFormToPoint();
+  };
+
+  #favoriteClickHandler = () => {
+    this.#point.isFavorite = !this.#point.isFavorite;
+    this.#onChangeCallback(this.#point);
+  };
+
+  #pointSubmitHandler = () => {
+    this.#replaceFormToPoint();
+  };
 }
