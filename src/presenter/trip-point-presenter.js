@@ -26,26 +26,22 @@ export default class TripPointPresenter {
   init(point) {
     this.#point = point;
 
-    // Обработчики событий
-    const poinEditData = {
-      point: this.#point,
-      onFinishEditCallback: this.#pointFinishEditHandler,
-      onSubmitCallback: this.#pointSubmitHandler,
-    };
-
-    const pointData = {
-      point: this.#point,
-      onEditCallback: this.#pointEditHandler,
-      onFavoriteCallback: this.#favoriteClickHandler,
-    };
-
     // Компоненты предыдущей точки маршрута
     this.#prevPointComponent = this.#pointComponent;
     this.#prevEditPointComponent = this.#editPointComponent;
 
     // Компоненты текущей точки маршрута
-    this.#pointComponent = new TripEventsListItemView(pointData); // Точка маршрута
-    this.#editPointComponent = new EditPointView(poinEditData); // Форма редактирования точки маршрута
+    this.#pointComponent = new TripEventsListItemView({
+      point: this.#point,
+      onEditCallback: this.#pointEditHandler,
+      onFavoriteCallback: this.#favoriteClickHandler,
+    }); // Точка маршрута
+
+    this.#editPointComponent = new EditPointView({
+      point: this.#point,
+      onFinishEditCallback: this.#pointFinishEditHandler,
+      onSubmitCallback: this.#pointSubmitHandler,
+    }); // Форма редактирования точки маршрута
 
     if(this.#prevPointComponent === null && this.#prevEditPointComponent === null) {
       // Отрисовка новой точки маршрута

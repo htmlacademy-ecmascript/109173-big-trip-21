@@ -72,12 +72,11 @@ export default class TripContentPresenter {
   }
 
   #renderEventPoint(point) {
-    const pointPresenterData = {
+    const pointPresenter = new TripPointPresenter({
       container: this.#tripEventsListContainer.element,
       onChangeCallback: this.#pointChangeHandler,
       onBeforeEditCallback: this.#pointBeforeEditHandler,
-    };
-    const pointPresenter = new TripPointPresenter(pointPresenterData);
+    });
 
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
