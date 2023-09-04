@@ -51,17 +51,19 @@ const destinationDescriptions = [
 const offers = createOffers();
 const destinations = createDestinations();
 
+// TODO - поменять структуру согласно https://21.objects.pages.academy/spec/big-trip#get-/big-trip/points
 function createPoint(pointType) {
   return {
     id: crypto.randomUUID(),
     type: pointType,
-    destination: getRandomArrayElement(destinations),
-    dates: {
+    // destination: getRandomArrayElement(destinations), // <- Заменить на айдишники пунктов назначения
+    destination: getRandomDestination(),
+    dates: { // <- Заменить на date_from , date_to
       start: getMockDate(),
       end: getMockDate(true)
     },
-    offers: getUniqRandomArrayElements(getOfferIDs()) || [],
-    cost: getRandomInt(PointPrice.MIN, PointPrice.MAX),
+    offers:getRandomOffers() || [],
+    cost: getRandomInt(PointPrice.MIN, PointPrice.MAX), // <- заменить на base_price
     isFavorite: getRandomBoolean(),
   };
 }
@@ -80,12 +82,16 @@ function getDestinations() {
   return destinations;
 }
 
+function getRandomDestination() {
+  return getRandomArrayElement(getIDs(destinations));
+}
+
 function createDestinations() {
   return cityNames.slice().map((city) => ({
     id: crypto.randomUUID(),
     name: city,
     description: getRandomArrayElement(destinationDescriptions),
-    photos: Array.from({length: getRandomInt(PhotoCount.MIN, PhotoCount.MAX)}, getRandomPhoto)
+    pictures: Array.from({length: getRandomInt(PhotoCount.MIN, PhotoCount.MAX)}, getRandomPhoto)
   }));
 }
 
@@ -110,8 +116,12 @@ function getOffers() {
   return offers;
 }
 
-function getOfferIDs() {
-  return offers.map((offer) => offer.id);
+function getRandomOffers() {
+  return getUniqRandomArrayElements(getIDs(offers));
+}
+
+function getIDs(itemsObj) {
+  return itemsObj.map((item) => item.id);
 }
 
 

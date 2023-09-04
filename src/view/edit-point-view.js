@@ -1,9 +1,11 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { pointTypes, getBlankPoint , getDestinations, getOffers} from '../mock/way-point.js';
-import { DateFormats, findObjectByID } from '../utils/utils.js';
+import { DateFormats, findObjectByID, upperCaseFirst } from '../utils/utils.js';
 
 const offersList = getOffers();
-const CSSClasses = {EVENT_EDIT: '.event--edit', ROLLUP_BTN: '.event__rollup-btn'};
+const destinationsList = getDestinations();
+const CSSIDs = {DEFAULT_POINT_TYPE: '#event-type-toggle-1'};
+const CSSClasses = {EVENT_EDIT: '.event--edit', ROLLUP_BTN: '.event__rollup-btn', POINT_TYPE: '.event__header'};
 
 function createEventTypeTemplate(currentPointType) {
   return pointTypes.map((pointType) => {
@@ -45,7 +47,7 @@ function createDestinationsTemplate(destinations) {
   return destinations.map((dest) => `<option value="${dest.name}"></option>`).join('');
 }
 
-function createPhotostemplate(photos) {
+function createPhotosTemplate(photos) {
   const photosArr = photos.slice();
 
   return /*html*/`
@@ -59,8 +61,9 @@ function createPhotostemplate(photos) {
 function createEditPointTemplate({type, destination, dates, offers, cost}) {
   const eventTypeTemplate = createEventTypeTemplate(type);
   const offersTemplate = createOffersTemplate(offers);
-  const destinationsTemplate = createDestinationsTemplate(getDestinations());
-  const photosTemplate = destination.photos ? createPhotostemplate(destination.photos) : '';
+  const currentDestination = findObjectByID(destination, destinationsList);
+  const destinationsTemplate = createDestinationsTemplate(destinationsList);
+  const photosTemplate = currentDestination.pictures ? createPhotosTemplate(currentDestination.pictures) : '';
   const dateStart = dates.start.format(DateFormats.CHOSED_DATE);
   const dateEnd = dates.end.format(DateFormats.CHOSED_DATE);
 
@@ -140,28 +143,35 @@ function createEditPointTemplate({type, destination, dates, offers, cost}) {
       </form>
     </li>`;
 }
-export default class EditPointView extends AbstractView {
+export default class EditPointView extends AbstractStatefulView {
   #templateData = null;
   #onSubmitCallback = null;
   #onFinishEditCallback = null;
+  #onTypeChangeCallback = null;
 
   /**
    * Создание/Редкатирование точки маршрута
    * @param {Object} templateData Объект данных для формирования шаблона
    */
-  constructor({point = getBlankPoint(), onSubmitCallback, onFinishEditCallback}) {
+  constructor({point = getBlankPoint(), onSubmitCallback, onFinishEditCallback, onTypeChangeCallback}) {
     super();
 
     this.#templateData = point;
     this.#onSubmitCallback = onSubmitCallback;
     this.#onFinishEditCallback = onFinishEditCallback;
+    this.#onTypeChangeCallback = onTypeChangeCallback;
 
     this.element.querySelector(CSSClasses.EVENT_EDIT).addEventListener('submit', this.#pointSubmitHandler);
     this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointFinishEditHandler);
+    this.element.querySelector(CSSClasses.POINT_TYPE).addEventListener('change', this.#pointTypeChangeHandler);
   }
 
   get template() {
     return createEditPointTemplate(this.#templateData);
+  }
+
+  _restoreHandlers() {
+    return true;
   }
 
   #pointSubmitHandler = (evt) => {
@@ -174,5 +184,19 @@ export default class EditPointView extends AbstractView {
     evt.preventDefault();
 
     this.#onFinishEditCallback?.();
+  };
+
+  #pointTypeChangeHandler = (evt) => {
+    evt.preventDefault();
+
+    const target = evt.target;
+
+    if(target.id === CSSIDs.DEFAULT_POINT_TYPE.slice(1)) {
+      return;
+    }
+
+    const chosedPointType = upperCaseFirst(evt.target.value);
+
+    this.#onTypeChangeCallback?.(chosedPointType);
   };
 }

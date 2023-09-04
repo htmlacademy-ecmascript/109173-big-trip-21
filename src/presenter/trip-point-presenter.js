@@ -16,6 +16,7 @@ export default class TripPointPresenter {
 
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
+  #onTypeChangeCallback = null;
 
   constructor(pointPresenterData) {
     this.#pointsContainer = pointPresenterData.container;
@@ -41,6 +42,7 @@ export default class TripPointPresenter {
       point: this.#point,
       onFinishEditCallback: this.#pointFinishEditHandler,
       onSubmitCallback: this.#pointSubmitHandler,
+      onTypeChangeCallback: this.#pointTypeChangeHandler,
     }); // Форма редактирования точки маршрута
 
     if(this.#prevPointComponent === null && this.#prevEditPointComponent === null) {
@@ -118,6 +120,12 @@ export default class TripPointPresenter {
 
   #favoriteClickHandler = () => {
     this.#point.isFavorite = !this.#point.isFavorite;
+    this.#onChangeCallback(this.#point);
+  };
+
+  #pointTypeChangeHandler = (pointType) => {
+    // TODO: Помимо типа точки, нужно также менять набор офферов для корректной перерисовки
+    this.#point.type = pointType;
     this.#onChangeCallback(this.#point);
   };
 
