@@ -1,6 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { POINT_TYPES, getBlankPoint } from '../mock/way-point.js';
 import { DateFormats, upperCaseFirst, findObjectByID } from '../utils/utils.js';
+import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
@@ -163,9 +164,12 @@ function createEditPointTemplate({
 }
 export default class EditPointView extends AbstractStatefulView {
   #templateData = null;
+
   #onSubmitCallback = null;
   #onFinishEditCallback = null;
   #onTypeChangeCallback = null;
+  #onDatesChangeCallback = null;
+
   #datepickrStart = null;
   #datepickrEnd = null;
 
@@ -179,13 +183,15 @@ export default class EditPointView extends AbstractStatefulView {
     offersList,
     onSubmitCallback,
     onFinishEditCallback,
-    onTypeChangeCallback}) {
+    onTypeChangeCallback,
+    onDatesChangeCallback}) {
     super();
 
     this.#templateData = {...point, destinationsList, offersList};
     this.#onSubmitCallback = onSubmitCallback;
     this.#onFinishEditCallback = onFinishEditCallback;
     this.#onTypeChangeCallback = onTypeChangeCallback;
+    this.#onDatesChangeCallback = onDatesChangeCallback;
 
     this.#initDatepickr();
     this._restoreHandlers();
@@ -207,8 +213,18 @@ export default class EditPointView extends AbstractStatefulView {
     const dateStartElem = this.element.querySelector(CSSIDs.DATE_TIME_START);
     const dateEndElem = this.element.querySelector(CSSIDs.DATE_TIME_END);
 
-    this.#datepickrStart = flatpickr(dateStartElem, {...FLATPIKR_SETTINGS, defaultDate: defaultDateStart});
-    this.#datepickrEnd = flatpickr(dateEndElem, {...FLATPIKR_SETTINGS, defaultDate: defaultDateEnd});
+    this.#datepickrStart = flatpickr(dateStartElem, {
+      ...FLATPIKR_SETTINGS,
+      defaultDate:
+      defaultDateStart,
+      onChange: this.#pointDatesChangeHandler
+    });
+    this.#datepickrEnd = flatpickr(dateEndElem, {
+      ...FLATPIKR_SETTINGS,
+      defaultDate:
+      defaultDateEnd,
+      onChange: this.#pointDatesChangeHandler
+    });
   }
 
   #pointSubmitHandler = (evt) => {
@@ -228,8 +244,6 @@ export default class EditPointView extends AbstractStatefulView {
 
     const target = evt.target;
 
-    console.log(target);
-
     if(target.id === CSSIDs.DEFAULT_POINT_TYPE.slice(1)) {
       return;
     }
@@ -237,5 +251,25 @@ export default class EditPointView extends AbstractStatefulView {
     const chosedPointType = upperCaseFirst(evt.target.value);
 
     this.#onTypeChangeCallback?.(chosedPointType);
+  };
+
+  #pointDatesChangeHandler = (_, dateStr, instance) => {
+    const dates = this.#templateData.dates;
+    const target = instance.input;
+
+    switch(target.id) {
+      case CSSIDs.DATE_TIME_START.slice(1): {
+        dates.start = dayjs(dateStr);
+        break;
+      }
+      case CSSIDs.DATE_TIME_END.slice(1): {
+        dates.end = dayjs(dateStr);
+        break;
+      }
+    }
+
+    console.log(dates, dateStr);
+
+    this.#onDatesChangeCallback?.(dates);
   };
 }

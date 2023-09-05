@@ -52,6 +52,7 @@ export default class TripPointPresenter {
       onFinishEditCallback: this.#pointFinishEditHandler,
       onSubmitCallback: this.#pointSubmitHandler,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
+      onDatesChangeCallback: this.#pointDatesChangeHandler,
     }); // Форма редактирования точки маршрута
 
     if(this.#prevPointComponent === null && this.#prevEditPointComponent === null) {
@@ -139,6 +140,11 @@ export default class TripPointPresenter {
     this.#point.offers = newOffers;
     this.#onChangeCallback(this.#point);
   };
+
+  #pointDatesChangeHandler = (newDates) => {
+    this.#point.dates = newDates;
+    this.#onChangeCallback(this.#point);
+  }
 
   #pointSubmitHandler = () => {
     this.#replaceFormToPoint();
