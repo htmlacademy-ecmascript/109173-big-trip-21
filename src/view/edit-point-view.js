@@ -1,14 +1,16 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { pointTypes, getBlankPoint , getDestinations, getOffers} from '../mock/way-point.js';
-import { DateFormats, findObjectByID, upperCaseFirst } from '../utils/utils.js';
+import { POINT_TYPES, getBlankPoint } from '../mock/way-point.js';
+import { DateFormats, upperCaseFirst } from '../utils/utils.js';
 
-const offersList = getOffers();
-const destinationsList = getDestinations();
 const CSSIDs = {DEFAULT_POINT_TYPE: '#event-type-toggle-1'};
-const CSSClasses = {EVENT_EDIT: '.event--edit', ROLLUP_BTN: '.event__rollup-btn', POINT_TYPE: '.event__header'};
+const CSSClasses = {
+  EVENT_EDIT: '.event--edit',
+  ROLLUP_BTN: '.event__rollup-btn',
+  POINT_TYPE: '.event__header'
+};
 
 function createEventTypeTemplate(currentPointType) {
-  return pointTypes.map((pointType) => {
+  return POINT_TYPES.map((pointType) => {
     const checkedState = pointType === currentPointType ? 'checked' : '';
     const loweredPointTypeName = pointType.toLowerCase();
 
@@ -21,23 +23,22 @@ function createEventTypeTemplate(currentPointType) {
   }).join('');
 }
 
-function createOffersTemplate(offerIDs) {
-  if (!offerIDs) {
+function createOffersTemplate(offers) {
+  if (!offers) {
     return;
   }
 
-  return offerIDs.map((offerID) => {
-    const {name, cost, checked} = findObjectByID(offerID, offersList);
-    const loweredOfferName = name.toLowerCase();
+  return offers.map(({title, price, checked}) => {
+    const loweredOfferTitle = title.toLowerCase();
     const offerChecked = checked ? 'checked' : '';
 
     return /*html*/`
       <div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${loweredOfferName}-1" type="checkbox" name="event-offer-${loweredOfferName}" ${offerChecked}>
-        <label class="event__offer-label" for="event-offer-${loweredOfferName}-1">
-          <span class="event__offer-title">${name}</span>
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${loweredOfferTitle}-1" type="checkbox" name="event-offer-${loweredOfferTitle}" ${offerChecked}>
+        <label class="event__offer-label" for="event-offer-${loweredOfferTitle}-1">
+          <span class="event__offer-title">${title}</span>
           &plus;&euro;&nbsp;
-          <span class="event__offer-price">${cost}</span>
+          <span class="event__offer-price">${price}</span>
         </label>
       </div>`;
   }).join('');
@@ -58,12 +59,11 @@ function createPhotosTemplate(photos) {
     </div>`;
 }
 
-function createEditPointTemplate({type, destination, dates, offers, cost}) {
+function createEditPointTemplate({type, destination, dates, offers, cost}, destinationsList) {
   const eventTypeTemplate = createEventTypeTemplate(type);
   const offersTemplate = createOffersTemplate(offers);
-  const currentDestination = findObjectByID(destination, destinationsList);
   const destinationsTemplate = createDestinationsTemplate(destinationsList);
-  const photosTemplate = currentDestination.pictures ? createPhotosTemplate(currentDestination.pictures) : '';
+  const photosTemplate = destination.pictures ? createPhotosTemplate(destination.pictures) : '';
   const dateStart = dates.start.format(DateFormats.CHOSED_DATE);
   const dateEnd = dates.end.format(DateFormats.CHOSED_DATE);
 
@@ -145,6 +145,7 @@ function createEditPointTemplate({type, destination, dates, offers, cost}) {
 }
 export default class EditPointView extends AbstractStatefulView {
   #templateData = null;
+  #destinationsList = null;
   #onSubmitCallback = null;
   #onFinishEditCallback = null;
   #onTypeChangeCallback = null;
@@ -153,10 +154,16 @@ export default class EditPointView extends AbstractStatefulView {
    * Создание/Редкатирование точки маршрута
    * @param {Object} templateData Объект данных для формирования шаблона
    */
-  constructor({point = getBlankPoint(), onSubmitCallback, onFinishEditCallback, onTypeChangeCallback}) {
+  constructor({
+    point = getBlankPoint(),
+    destinationsList,
+    onSubmitCallback,
+    onFinishEditCallback,
+    onTypeChangeCallback}) {
     super();
 
     this.#templateData = point;
+    this.#destinationsList = destinationsList;
     this.#onSubmitCallback = onSubmitCallback;
     this.#onFinishEditCallback = onFinishEditCallback;
     this.#onTypeChangeCallback = onTypeChangeCallback;
@@ -167,7 +174,7 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   get template() {
-    return createEditPointTemplate(this.#templateData);
+    return createEditPointTemplate(this.#templateData, this.#destinationsList);
   }
 
   _restoreHandlers() {

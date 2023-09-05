@@ -1,11 +1,13 @@
 import { render, replace, remove } from '../framework/render.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
-import { isEscKey } from '../utils/utils.js';
+import { POINT_TYPES, getBlankPoint , getDestinations} from '../mock/way-point.js';
+import { findObjectByID, isEscKey } from '../utils/utils.js';
 
 export default class TripPointPresenter {
   #point = null;
   #pointsContainer = null;
+  #destinationsList = null;
 
   #pointComponent = null;
   #editPointComponent = null;
@@ -19,6 +21,7 @@ export default class TripPointPresenter {
   #onTypeChangeCallback = null;
 
   constructor(pointPresenterData) {
+    this.#destinationsList = getDestinations();
     this.#pointsContainer = pointPresenterData.container;
     this.#onChangeCallback = pointPresenterData.onChangeCallback;
     this.#onBeforeEditCallback = pointPresenterData.onBeforeEditCallback;
@@ -26,6 +29,8 @@ export default class TripPointPresenter {
 
   init(point) {
     this.#point = point;
+    this.#point.destination = findObjectByID(this.#point.destination, this.#destinationsList); // Находим по ID описание пункта назначения
+
 
     // Компоненты предыдущей точки маршрута
     this.#prevPointComponent = this.#pointComponent;
@@ -40,6 +45,7 @@ export default class TripPointPresenter {
 
     this.#editPointComponent = new EditPointView({
       point: this.#point,
+      destinationsList: this.#destinationsList,
       onFinishEditCallback: this.#pointFinishEditHandler,
       onSubmitCallback: this.#pointSubmitHandler,
       onTypeChangeCallback: this.#pointTypeChangeHandler,

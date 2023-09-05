@@ -1,25 +1,20 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getOffers} from '../mock/way-point.js';
-import { getFormattedDateDiff, DateFormats, findObjectByID } from '../utils/utils.js';
+import { getFormattedDateDiff, DateFormats } from '../utils/utils.js';
 
 const CSSClasses = {ROLLUP_BTN: '.event__rollup-btn', FAVORITE_BTN: '.event__favorite-btn'};
 
-function createOffersTemplate(offerIDs) {
-  if (!offerIDs) {
+function createOffersTemplate(offers) {
+  if (!offers) {
     return;
   }
 
-  const offersList = getOffers();
-
-  return offerIDs.map((offerID) => {
-    const {name, cost, checked} = findObjectByID(offerID, offersList);
-
+  return offers.map(({title, price, checked}) => {
     if (checked) {
       return /* html */`
         <li class="event__offer">
-          <span class="event__offer-title">${name}</span>
+          <span class="event__offer-title">${title}</span>
           &plus;&euro;&nbsp;
-          <span class="event__offer-price">${cost}</span>
+          <span class="event__offer-price">${price}</span>
         </li>
       `;
     }
