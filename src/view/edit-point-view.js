@@ -1,6 +1,6 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { POINT_TYPES, getBlankPoint } from '../mock/way-point.js';
-import { DateFormats, upperCaseFirst } from '../utils/utils.js';
+import { DateFormats, upperCaseFirst, findObjectByID } from '../utils/utils.js';
 
 const CSSIDs = {DEFAULT_POINT_TYPE: '#event-type-toggle-1'};
 const CSSClasses = {
@@ -59,11 +59,12 @@ function createPhotosTemplate(photos) {
     </div>`;
 }
 
-function createEditPointTemplate({type, destination, dates, offers, cost}, destinationsList) {
+function createEditPointTemplate({type, destination, dates, offers, cost, destinationsList}) {
   const eventTypeTemplate = createEventTypeTemplate(type);
   const offersTemplate = createOffersTemplate(offers);
+  const destinationInfo = findObjectByID(destination, destinationsList);
   const destinationsTemplate = createDestinationsTemplate(destinationsList);
-  const photosTemplate = destination.pictures ? createPhotosTemplate(destination.pictures) : '';
+  const photosTemplate = destinationInfo.pictures ? createPhotosTemplate(destinationInfo.pictures) : '';
   const dateStart = dates.start.format(DateFormats.CHOSED_DATE);
   const dateEnd = dates.end.format(DateFormats.CHOSED_DATE);
 
@@ -91,7 +92,7 @@ function createEditPointTemplate({type, destination, dates, offers, cost}, desti
             <label class="event__label  event__type-output" for="event-destination-1">
               ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination ? destination.name : ''}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destinationInfo ? destinationInfo.name : ''}" list="destination-list-1">
             <datalist id="destination-list-1">
               ${destinationsTemplate}
             </datalist>
@@ -131,10 +132,10 @@ function createEditPointTemplate({type, destination, dates, offers, cost}, desti
             </section>` : ''}
 
           <!-- Есть есть пункт назначения - показываем блок -->
-          ${destination ? `
+          ${destinationInfo ? `
             <section class="event__section  event__section--destination">
               <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-              <p class="event__destination-description">${destination.description}</p>
+              <p class="event__destination-description">${destinationInfo.description}</p>
 
               <!-- Вывод фотографий точки маршрута -->
               ${photosTemplate}
@@ -162,7 +163,7 @@ export default class EditPointView extends AbstractStatefulView {
     onTypeChangeCallback}) {
     super();
 
-    this.#templateData = point;
+    this.#templateData = {...point, destinationsList};
     this.#destinationsList = destinationsList;
     this.#onSubmitCallback = onSubmitCallback;
     this.#onFinishEditCallback = onFinishEditCallback;
@@ -174,7 +175,7 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   get template() {
-    return createEditPointTemplate(this.#templateData, this.#destinationsList);
+    return createEditPointTemplate(this.#templateData);
   }
 
   _restoreHandlers() {

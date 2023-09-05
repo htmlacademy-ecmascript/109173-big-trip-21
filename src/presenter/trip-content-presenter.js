@@ -28,7 +28,7 @@ export default class TripContentPresenter {
 
   init() {
     this.#points = this.#pointsModel.points.slice(); // Копируем полученный из модели массив с точками маршрута
-    this.#points = sorts[this.#previousSortType](this.#points); // Сортируем (по-умолчанию - по дате)
+    this.#points = sorts[this.#previousSortType](this.#points);
 
     this.#renderTripBoard();
   }
@@ -45,7 +45,6 @@ export default class TripContentPresenter {
   #renderTripBoard() {
     this.#renderSort(); // Отрисовываем сортировку точек маршрута
 
-    // Отрисовываем точки маршрута или надпись-предложение, если ни одной точки нет
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
 
     if (this.#points.length > 0) {
@@ -65,9 +64,10 @@ export default class TripContentPresenter {
     render(new TripEventsListEmptyView(), this.#tripEventsListContainer.element);
   }
 
+  // Отрисовываем события;
   #renderEventPoints(points) {
-    for (let i = 0; i < points.length; i++) { //Выводим не с первой точки, а со второй т.к. первая отводится под блок редактирования
-      this.#renderEventPoint(points[i]); // Отрисовываем события; // Отрисовываем события
+    for (let i = 0; i < points.length; i++) {
+      this.#renderEventPoint(points[i]);
     }
   }
 

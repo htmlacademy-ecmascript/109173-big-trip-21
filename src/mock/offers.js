@@ -23,17 +23,17 @@ function createOffers() {
   });
 }
 
-function createOffersByType(pointTypes) {
-  const offersByType = [];
+function createOffersWithType(pointTypes) {
+  const offersWithType = [];
 
   pointTypes.forEach((pointType) => {
-    offersByType.push({
+    offersWithType.push({
       type: pointType,
       offers: getRandomOffers(offers) || []
     });
   });
 
-  return offersByType;
+  return offersWithType;
 }
 
 function getRandomOffers(offersList) {
@@ -46,7 +46,7 @@ function getOfferIDs() {
 
 export {
   createOffers,
-  createOffersByType,
+  createOffersWithType,
   getRandomOffers,
   getOfferIDs
 };

@@ -1,8 +1,8 @@
 import { render, replace, remove } from '../framework/render.js';
+import { isEscKey } from '../utils/utils.js';
+import { getOffersByType, getDestinations} from '../mock/way-point.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
-import { POINT_TYPES, getBlankPoint , getDestinations} from '../mock/way-point.js';
-import { findObjectByID, isEscKey } from '../utils/utils.js';
 
 export default class TripPointPresenter {
   #point = null;
@@ -29,8 +29,6 @@ export default class TripPointPresenter {
 
   init(point) {
     this.#point = point;
-    this.#point.destination = findObjectByID(this.#point.destination, this.#destinationsList); // Находим по ID описание пункта назначения
-
 
     // Компоненты предыдущей точки маршрута
     this.#prevPointComponent = this.#pointComponent;
@@ -39,6 +37,7 @@ export default class TripPointPresenter {
     // Компоненты текущей точки маршрута
     this.#pointComponent = new TripEventsListItemView({
       point: this.#point,
+      destinationsList: this.#destinationsList,
       onEditCallback: this.#pointEditHandler,
       onFavoriteCallback: this.#favoriteClickHandler,
     }); // Точка маршрута
@@ -130,8 +129,10 @@ export default class TripPointPresenter {
   };
 
   #pointTypeChangeHandler = (pointType) => {
-    // TODO: Помимо типа точки, нужно также менять набор офферов для корректной перерисовки
+    const newOffers = getOffersByType(pointType).offers;
+
     this.#point.type = pointType;
+    this.#point.offers = newOffers;
     this.#onChangeCallback(this.#point);
   };
 

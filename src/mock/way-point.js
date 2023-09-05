@@ -6,7 +6,7 @@ import {
 } from '../utils/utils.js';
 
 import {createDestinations, getRandomDestination } from '../mock/destinations.js';
-import { createOffersByType } from '../mock/offers.js';
+import { createOffersWithType } from '../mock/offers.js';
 
 /** Пустая точка (для создания новой точки маршрута) */
 const POINT_TYPES = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
@@ -19,7 +19,7 @@ const BLANK_POINT = {
   isFavorite: false,
 };
 const PointPrice = {MIN: 500, MAX: 5000};
-const offersByType = createOffersByType(POINT_TYPES);
+const offersWithType = createOffersWithType(POINT_TYPES);
 const destinations = createDestinations();
 
 
@@ -53,7 +53,11 @@ function getRandomPoint() {
 }
 
 function getOffers() {
-  return offersByType;
+  return offersWithType;
+}
+
+function getOffersByType(pointType) {
+  return offersWithType.find((offer) => offer.type === pointType);
 }
 
 function getDestinations() {
@@ -61,13 +65,14 @@ function getDestinations() {
 }
 
 function getPointOffers(pointType) {
-  return offersByType.find((offer) => offer.type === pointType)?.offers || [];
+  return offersWithType.find((offer) => offer.type === pointType)?.offers || [];
 }
 
 export {
   POINT_TYPES,
   getBlankPoint,
   getRandomPoint,
+  getOffersByType,
   getOffers,
   getDestinations
 };
