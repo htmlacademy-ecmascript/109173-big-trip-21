@@ -1,12 +1,23 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { POINT_TYPES, getBlankPoint } from '../mock/way-point.js';
 import { DateFormats, upperCaseFirst, findObjectByID } from '../utils/utils.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
-const CSSIDs = {DEFAULT_POINT_TYPE: '#event-type-toggle-1'};
+const CSSIDs = {
+  DATE_TIME_START: '#event-start-time-1',
+  DATE_TIME_END: '#event-end-time-1',
+  DEFAULT_POINT_TYPE: '#event-type-toggle-1'
+};
 const CSSClasses = {
   EVENT_EDIT: '.event--edit',
   ROLLUP_BTN: '.event__rollup-btn',
-  POINT_TYPE: '.event__header'
+  POINT_TYPE: '.event__type-list'
+};
+
+const FLATPIKR_SETTINGS = {
+  enableTime: true,
+  dateFormat: DateFormats.FLATPICKR,
 };
 
 function createEventTypeTemplate(currentPointType) {
@@ -152,10 +163,11 @@ function createEditPointTemplate({
 }
 export default class EditPointView extends AbstractStatefulView {
   #templateData = null;
-  #destinationsList = null;
   #onSubmitCallback = null;
   #onFinishEditCallback = null;
   #onTypeChangeCallback = null;
+  #datepickrStart = null;
+  #datepickrEnd = null;
 
   /**
    * Создание/Редкатирование точки маршрута
@@ -171,14 +183,12 @@ export default class EditPointView extends AbstractStatefulView {
     super();
 
     this.#templateData = {...point, destinationsList, offersList};
-    this.#destinationsList = destinationsList;
     this.#onSubmitCallback = onSubmitCallback;
     this.#onFinishEditCallback = onFinishEditCallback;
     this.#onTypeChangeCallback = onTypeChangeCallback;
 
-    this.element.querySelector(CSSClasses.EVENT_EDIT).addEventListener('submit', this.#pointSubmitHandler);
-    this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointFinishEditHandler);
-    this.element.querySelector(CSSClasses.POINT_TYPE).addEventListener('change', this.#pointTypeChangeHandler);
+    this.#initDatepickr();
+    this._restoreHandlers();
   }
 
   get template() {
@@ -186,7 +196,19 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   _restoreHandlers() {
-    return true;
+    this.element.querySelector(CSSClasses.EVENT_EDIT).addEventListener('submit', this.#pointSubmitHandler);
+    this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointFinishEditHandler);
+    this.element.querySelector(CSSClasses.POINT_TYPE).addEventListener('change', this.#pointTypeChangeHandler);
+  }
+
+  #initDatepickr() {
+    const defaultDateStart = this.#templateData.dates.start.format(DateFormats.CHOSED_DATE);
+    const defaultDateEnd = this.#templateData.dates.end.format(DateFormats.CHOSED_DATE);
+    const dateStartElem = this.element.querySelector(CSSIDs.DATE_TIME_START);
+    const dateEndElem = this.element.querySelector(CSSIDs.DATE_TIME_END);
+
+    this.#datepickrStart = flatpickr(dateStartElem, {...FLATPIKR_SETTINGS, defaultDate: defaultDateStart});
+    this.#datepickrEnd = flatpickr(dateEndElem, {...FLATPIKR_SETTINGS, defaultDate: defaultDateEnd});
   }
 
   #pointSubmitHandler = (evt) => {
@@ -205,6 +227,8 @@ export default class EditPointView extends AbstractStatefulView {
     evt.preventDefault();
 
     const target = evt.target;
+
+    console.log(target);
 
     if(target.id === CSSIDs.DEFAULT_POINT_TYPE.slice(1)) {
       return;
