@@ -59,9 +59,15 @@ function createPhotosTemplate(photos) {
     </div>`;
 }
 
-function createEditPointTemplate({type, destination, dates, offers, cost, destinationsList}) {
+function createEditPointTemplate({
+  type,
+  destination,
+  dates,
+  cost,
+  destinationsList,
+  offersList}) {
   const eventTypeTemplate = createEventTypeTemplate(type);
-  const offersTemplate = createOffersTemplate(offers);
+  const offersTemplate = createOffersTemplate(offersList);
   const destinationInfo = findObjectByID(destination, destinationsList);
   const destinationsTemplate = createDestinationsTemplate(destinationsList);
   const photosTemplate = destinationInfo.pictures ? createPhotosTemplate(destinationInfo.pictures) : '';
@@ -158,12 +164,13 @@ export default class EditPointView extends AbstractStatefulView {
   constructor({
     point = getBlankPoint(),
     destinationsList,
+    offersList,
     onSubmitCallback,
     onFinishEditCallback,
     onTypeChangeCallback}) {
     super();
 
-    this.#templateData = {...point, destinationsList};
+    this.#templateData = {...point, destinationsList, offersList};
     this.#destinationsList = destinationsList;
     this.#onSubmitCallback = onSubmitCallback;
     this.#onFinishEditCallback = onFinishEditCallback;

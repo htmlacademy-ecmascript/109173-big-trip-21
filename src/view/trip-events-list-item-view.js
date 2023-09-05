@@ -23,9 +23,16 @@ function createOffersTemplate(offers) {
   }).join(''); // т.к. на выходе map мы получаем массив, а нам нужна строка - делаем строку
 }
 
-function createTripEventsListTemplate({type, destination, dates, offers, cost, isFavorite, destinationsList}) {
+function createTripEventsListTemplate({
+  type,
+  destination,
+  dates,
+  cost,
+  isFavorite,
+  destinationsList,
+  offersList}) {
   const destinationInfo = findObjectByID(destination, destinationsList);
-  const offersTemplate = createOffersTemplate(offers);
+  const offersTemplate = createOffersTemplate(offersList);
   const dateForPoint = dates.start.format(DateFormats.FOR_POINT);
   const dateStart = dates.start.format(DateFormats.FOR_POINT_PERIODS);
   const dateEnd = dates.end.format(DateFormats.FOR_POINT_PERIODS);
@@ -76,10 +83,15 @@ export default class TripEventsListItemView extends AbstractView {
   #onEditCallback = null;
   #onFavoriteCallback = null;
 
-  constructor({point, destinationsList, onEditCallback, onFavoriteCallback}) {
+  constructor({
+    point,
+    destinationsList,
+    offersList,
+    onEditCallback,
+    onFavoriteCallback}) {
     super();
 
-    this.#templateData = {...point, destinationsList};
+    this.#templateData = {...point, destinationsList, offersList};
     this.#onEditCallback = onEditCallback;
     this.#onFavoriteCallback = onFavoriteCallback;
 

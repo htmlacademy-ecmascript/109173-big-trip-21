@@ -8,6 +8,7 @@ export default class TripPointPresenter {
   #point = null;
   #pointsContainer = null;
   #destinationsList = null;
+  #offersList = null;
 
   #pointComponent = null;
   #editPointComponent = null;
@@ -21,7 +22,6 @@ export default class TripPointPresenter {
   #onTypeChangeCallback = null;
 
   constructor(pointPresenterData) {
-    this.#destinationsList = getDestinations();
     this.#pointsContainer = pointPresenterData.container;
     this.#onChangeCallback = pointPresenterData.onChangeCallback;
     this.#onBeforeEditCallback = pointPresenterData.onBeforeEditCallback;
@@ -29,6 +29,8 @@ export default class TripPointPresenter {
 
   init(point) {
     this.#point = point;
+    this.#destinationsList = getDestinations();
+    this.#offersList = getOffersByType(this.#point.type);
 
     // Компоненты предыдущей точки маршрута
     this.#prevPointComponent = this.#pointComponent;
@@ -38,6 +40,7 @@ export default class TripPointPresenter {
     this.#pointComponent = new TripEventsListItemView({
       point: this.#point,
       destinationsList: this.#destinationsList,
+      offersList: this.#offersList,
       onEditCallback: this.#pointEditHandler,
       onFavoriteCallback: this.#favoriteClickHandler,
     }); // Точка маршрута
@@ -45,6 +48,7 @@ export default class TripPointPresenter {
     this.#editPointComponent = new EditPointView({
       point: this.#point,
       destinationsList: this.#destinationsList,
+      offersList: this.#offersList,
       onFinishEditCallback: this.#pointFinishEditHandler,
       onSubmitCallback: this.#pointSubmitHandler,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
