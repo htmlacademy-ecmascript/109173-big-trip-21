@@ -15,8 +15,8 @@ const Duration = {
 };
 
 const DateFormats = {
-  DATE_TIME: 'YYYY-MM-DD[T]hh:mm', // Для тега datetime
   FLATPICKR: 'd/m/y H:i ', // Для Флэтпикера
+  DATE_TIME: 'YYYY-MM-DD[T]hh:mm', // Для тега datetime
   CHOSED_DATE: 'DD/MM/YY HH:mm', // Дата и время начала события
   FOR_POINT_PERIODS: 'HH:mm', // Для периодов, выбранных для точки маршрута
   FOR_POINT: 'MMM DD', // Дата для каждой конкретной точки маршрута

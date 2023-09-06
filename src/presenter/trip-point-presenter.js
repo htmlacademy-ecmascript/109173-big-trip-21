@@ -144,7 +144,7 @@ export default class TripPointPresenter {
   #pointDatesChangeHandler = (newDates) => {
     this.#point.dates = newDates;
     this.#onChangeCallback(this.#point);
-  }
+  };
 
   #pointSubmitHandler = () => {
     this.#replaceFormToPoint();

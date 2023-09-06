@@ -18,7 +18,8 @@ const CSSClasses = {
 
 const FLATPIKR_SETTINGS = {
   enableTime: true,
-  dateFormat: DateFormats.FLATPICKR,
+  altFormat: DateFormats.FLATPICKR,
+  altInput: true,
 };
 
 function createEventTypeTemplate(currentPointType) {
@@ -208,21 +209,19 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   #initDatepickr() {
-    const defaultDateStart = this.#templateData.dates.start.format(DateFormats.CHOSED_DATE);
-    const defaultDateEnd = this.#templateData.dates.end.format(DateFormats.CHOSED_DATE);
+    const defaultDateStart = this.#templateData.dates.start.toString();
+    const defaultDateEnd = this.#templateData.dates.end.toString();
     const dateStartElem = this.element.querySelector(CSSIDs.DATE_TIME_START);
     const dateEndElem = this.element.querySelector(CSSIDs.DATE_TIME_END);
 
     this.#datepickrStart = flatpickr(dateStartElem, {
       ...FLATPIKR_SETTINGS,
-      defaultDate:
-      defaultDateStart,
+      defaultDate: defaultDateStart,
       onChange: this.#pointDatesChangeHandler
     });
     this.#datepickrEnd = flatpickr(dateEndElem, {
       ...FLATPIKR_SETTINGS,
-      defaultDate:
-      defaultDateEnd,
+      defaultDate: defaultDateEnd,
       onChange: this.#pointDatesChangeHandler
     });
   }
@@ -267,8 +266,6 @@ export default class EditPointView extends AbstractStatefulView {
         break;
       }
     }
-
-    console.log(dates, dateStr);
 
     this.#onDatesChangeCallback?.(dates);
   };
