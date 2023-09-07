@@ -1,6 +1,6 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { POINT_TYPES, BLANK_POINT } from '../mock/way-point.js';
-import { DateFormats, upperCaseFirst, findObjectByID } from '../utils/utils.js';
+import { DateFormats, upperCaseFirst, findObjectByID, updateItem, getIDs } from '../utils/utils.js';
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -13,20 +13,24 @@ dayjs.extend(customParseFormat);
 const FLATPIKR_SETTINGS = {
   enableTime: true,
   dateFormat: DateFormats.FLATPICKR,
+  minuteIncrement: 1,
   'time_24hr': true,
   // 'locale': Russian
 };
 
 const CSSIDs = {
+  DEFAULT_POINT_TYPE: '#event-type-toggle-1',
   DATE_TIME_START: '#event-start-time-1',
   DATE_TIME_END: '#event-end-time-1',
-  DEFAULT_POINT_TYPE: '#event-type-toggle-1'
 };
 
 const CSSClasses = {
   EVENT_EDIT: '.event--edit',
   ROLLUP_BTN: '.event__rollup-btn',
-  POINT_TYPE: '.event__type-list'
+  POINT_TYPE: '.event__type-list',
+  DESTINATION: '.event__field-group--destination',
+  OFFERS: '.event__section--offers',
+  BASE_PRICE: '.event__field-group--price',
 };
 
 function createEventTypeTemplate(currentPointType) {
@@ -44,17 +48,13 @@ function createEventTypeTemplate(currentPointType) {
 }
 
 function createOffersTemplate(offers) {
-  if (!offers) {
-    return;
-  }
-
-  return offers.map(({title, price, checked}) => {
-    const loweredOfferTitle = title.toLowerCase();
+  return offers.map(({id, title, price, checked}) => {
+    const loweredOfferTitle = title.toLowerCase().split(' ').join('-');
     const offerChecked = checked ? 'checked' : '';
 
     return /*html*/`
       <div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${loweredOfferTitle}-1" type="checkbox" name="event-offer-${loweredOfferTitle}" ${offerChecked}>
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${loweredOfferTitle}-1" type="checkbox" name="event-offer-${loweredOfferTitle}" data-id="${id}" ${offerChecked}>
         <label class="event__offer-label" for="event-offer-${loweredOfferTitle}-1">
           <span class="event__offer-title">${title}</span>
           &plus;&euro;&nbsp;
@@ -86,9 +86,12 @@ function createEditPointTemplate({
   dateTo,
   cost,
   destinations,
-  offers}) {
+  offers,
+  isHasOffers,
+  isHasDestination}) {
+
   const eventTypeTemplate = createEventTypeTemplate(type);
-  const offersTemplate = createOffersTemplate(offers);
+  const offersTemplate = isHasOffers ? createOffersTemplate(offers) : '';
   const destinationsTemplate = createDestinationsTemplate(destinations);
   const photosTemplate = destination.pictures ? createPhotosTemplate(destination.pictures) : '';
 
@@ -156,7 +159,7 @@ function createEditPointTemplate({
             </section>` : ''}
 
           <!-- Есть есть пункт назначения - показываем блок -->
-          ${destination ? `
+          ${isHasDestination ? `
             <section class="event__section  event__section--destination">
               <h3 class="event__section-title  event__section-title--destination">Destination</h3>
               <p class="event__destination-description">${destination.description}</p>
@@ -169,13 +172,16 @@ function createEditPointTemplate({
     </li>`;
 }
 export default class EditPointView extends AbstractStatefulView {
+  #point = null;
+  #datepickrFrom = null;
+  #datepickrTo = null;
+
   #onSubmitCallback = null;
   #onFinishEditCallback = null;
   #onTypeChangeCallback = null;
   #onDatesChangeCallback = null;
-
-  #datepickrFrom = null;
-  #datepickrTo = null;
+  #onDestinationChangeCallback = null;
+  // #onPriceChangeCallback = null;
 
   /**
    * Создание/Редкатирование точки маршрута
@@ -188,15 +194,19 @@ export default class EditPointView extends AbstractStatefulView {
     onSubmitCallback,
     onFinishEditCallback,
     onTypeChangeCallback,
+    onDestinationChangeHandler,
     onDatesChangeCallback}) {
+
     super();
 
     this._setState(EditPointView.convertDataToState({...point, destinations, offers}));
-
+    this.#point = point;
     this.#onSubmitCallback = onSubmitCallback;
     this.#onFinishEditCallback = onFinishEditCallback;
     this.#onTypeChangeCallback = onTypeChangeCallback;
     this.#onDatesChangeCallback = onDatesChangeCallback;
+    this.#onDestinationChangeCallback = onDestinationChangeHandler;
+    // this.#onPriceChangeHandler = onPriceChangeHandler;
 
     this.#initDatepickr();
     this._restoreHandlers();
@@ -207,9 +217,27 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   _restoreHandlers() {
-    this.element.querySelector(CSSClasses.EVENT_EDIT).addEventListener('submit', this.#pointSubmitHandler);
-    this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointFinishEditHandler);
-    this.element.querySelector(CSSClasses.POINT_TYPE).addEventListener('change', this.#pointTypeChangeHandler);
+    this.element
+      .querySelector(CSSClasses.EVENT_EDIT)
+      .addEventListener('submit', this.#pointSubmitHandler);
+    this.element
+      .querySelector(CSSClasses.ROLLUP_BTN)
+      .addEventListener('click', this.#pointFinishEditHandler);
+    this.element
+      .querySelector(CSSClasses.POINT_TYPE)
+      .addEventListener('change', this.#pointTypeChangeHandler);
+    this.element
+      .querySelector(CSSClasses.DESTINATION)
+      .addEventListener('change', this.#pointDestinationChangeHandler);
+    this.element
+      .querySelector(CSSClasses.BASE_PRICE)
+      .addEventListener('change', this.#pointPriceChangeCallback);
+
+    if(this._state.isHasOffers) {
+      this.element
+        .querySelector(CSSClasses.OFFERS)
+        .addEventListener('change', this.#pointOffersChangeHandler);
+    }
   }
 
   removeElement() {
@@ -242,14 +270,21 @@ export default class EditPointView extends AbstractStatefulView {
     });
   }
 
+  // TODO: Пока пользователь не отправил форму - нам всего лишь нужно перерисовывать форму
+  // без изменения данных на сервере, для этого можно завести метот updateView, чтобы, в случае
+  // отмены пользоваетелем редактирования, можно было вернуть все, как было
   #pointSubmitHandler = (evt) => {
     evt.preventDefault();
 
-    this.#onSubmitCallback?.();
+    const updatedPoint = EditPointView.convertStateToData(this._state);
+
+    this.#onSubmitCallback?.(updatedPoint);
   };
 
   #pointFinishEditHandler = (evt) => {
     evt.preventDefault();
+
+    this._setState(this.#point);
 
     this.#onFinishEditCallback?.();
   };
@@ -269,42 +304,86 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #dateFromChangeHandler = (_, dateStr) => {
-    const dates = this._state.dates;
-    const newDateFrom = dayjs(dateStr, DateFormats.CHOSED_DATE);
-
-    dates.start = newDateFrom;
-    dates.end = dayjs(this._state.dateTo, DateFormats.CHOSED_DATE);
-    this._state.dateFrom = newDateFrom;
-
-    this.#onDatesChangeCallback?.(dates);
+    this._setState({dateFrom: dateStr});
   };
 
   #dateToChangeHandler = (_, dateStr) => {
-    const dates = this._state.dates;
-    const newDateTo = dayjs(dateStr, DateFormats.CHOSED_DATE);
+    this._setState({dateTo: dateStr});
+  };
 
-    dates.start = dayjs(this._state.dateFrom, DateFormats.CHOSED_DATE);
-    dates.end = newDateTo;
-    this._state.dateTo = newDateTo;
+  // TODO: При изменении пункта назначения, пропадает обработчик на ESC - поправить
+  #pointDestinationChangeHandler = (evt) => {
+    const target = evt.target;
+    const newDestination = this._state.destinations.find((destination) => destination.name === target.value);
 
-    this.#onDatesChangeCallback?.(dates);
+    if(!target.value || !newDestination) {
+      target.value = this._state.destination.name;
+      return;
+    }
+
+
+    this._setState({destination: newDestination.id});
+    this.#onDestinationChangeCallback?.(newDestination.id);
+  };
+
+  #pointOffersChangeHandler = (evt) => {
+    const target = evt.target;
+    const offers = structuredClone(this._state.offers); // т.к. офферы - объекты и изменяются по ссылке, копируем их, чтобы напрямую не менять стейт в обход метода _setState
+    const updatedOffer = offers.find((offer) => offer.id === target.dataset.id);
+    updatedOffer.checked = target.checked;
+
+    const updatedOffers = updateItem(offers, updatedOffer);
+
+
+    this._setState({offers: updatedOffers});
+    console.log('Офферы в стейте: ', this._state.offers);
+  };
+
+  #pointPriceChangeCallback = (evt) => {
+    const target = evt.target;
+    const newPrice = !target.value ? 0 : target.value;
+
+    this._setState({cost: newPrice});
   };
 
   static convertDataToState(data) {
+    console.log('Офферы при конвертации: ', data.offers); // <- почему-то приходят старые, необновленные офферы
     const dateFrom = data.dates.start.format(DateFormats.CHOSED_DATE);
     const dateTo = data.dates.end.format(DateFormats.CHOSED_DATE);
 
     return {
-      ...data,
+      type: data.type,
+      cost: data.cost,
       destination: findObjectByID(data.destination, data.destinations),
       dateFrom: dateFrom,
       dateTo: dateTo,
       offers: data.offers,
       destinations: data.destinations,
+      isHasDestination: Boolean(data.destination),
+      isHasOffers: data.offers.length > 0
     };
   }
 
-  static convertStateToData(data) {
-    return data; // TODO конвертировать стэйт обратно в данные
+  static convertStateToData({
+    type,
+    cost,
+    destination,
+    offers,
+    dateFrom,
+    dateTo}) {
+
+    const checkedOffers = offers.filter((offer) => offer.checked);
+    const checkedOffersIDs = getIDs(checkedOffers);
+
+    return {
+      type,
+      cost,
+      destination: destination.id || '',
+      offers: checkedOffersIDs,
+      dates: {
+        start: dayjs(dateFrom, DateFormats.CHOSED_DATE),
+        end: dayjs(dateTo, DateFormats.CHOSED_DATE)
+      }
+    };
   }
 }

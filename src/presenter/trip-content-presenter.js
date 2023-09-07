@@ -1,6 +1,6 @@
 import { render } from '../framework/render.js';
-import { upperCaseFirst, updateItem } from '../utils/utils.js';
-import { FilterType, filters } from '../utils/filters.js';
+import { updateItem } from '../utils/utils.js';
+import { FilterType } from '../utils/filters.js';
 import { SortType, sorts } from '../utils/sort.js';
 import TripSortView from '../view/trip-sort-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
@@ -89,6 +89,7 @@ export default class TripContentPresenter {
 
   /** Обработчики */
   #pointChangeHandler = (changedPoint) => {
+    console.log(changedPoint);
     this.#points = updateItem(this.#points, changedPoint); // Обновляем информацию о точке в общем списке
     this.#pointPresenters.get(changedPoint.id).init(changedPoint); // Перерисовываем точку
   };

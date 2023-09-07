@@ -1,5 +1,5 @@
 import { render, replace, remove } from '../framework/render.js';
-import { DateFormats, isEscKey } from '../utils/utils.js';
+import { isEscKey } from '../utils/utils.js';
 import { getOffersByType, getDestinations} from '../mock/way-point.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
@@ -18,6 +18,7 @@ export default class TripPointPresenter {
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
   #onTypeChangeCallback = null;
+  #onDestinationChangeHandler = null;
 
   constructor(pointPresenterData) {
     this.#pointsContainer = pointPresenterData.container;
@@ -43,15 +44,16 @@ export default class TripPointPresenter {
       ...pointData,
       onEditCallback: this.#pointEditHandler,
       onFavoriteCallback: this.#favoriteClickHandler,
-    }); // Точка маршрута
+    });
 
     this.#editPointComponent = new EditPointView({
       ...pointData,
       onFinishEditCallback: this.#pointFinishEditHandler,
       onSubmitCallback: this.#pointSubmitHandler,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
+      onDestinationChangeHandler: this.#pointDestinationChangeHandler,
       onDatesChangeCallback: this.#pointDatesChangeHandler,
-    }); // Форма редактирования точки маршрута
+    });
 
     if(this.#prevPointComponent === null && this.#prevEditPointComponent === null) {
       // Отрисовка новой точки маршрута
@@ -139,12 +141,20 @@ export default class TripPointPresenter {
     this.#onChangeCallback(this.#point);
   };
 
+  #pointDestinationChangeHandler = (newDestination) => {
+    this.#point.destination = newDestination;
+    this.#onChangeCallback(this.#point);
+  };
+
   #pointDatesChangeHandler = (newDates) => {
     this.#point.dates = newDates;
     this.#onChangeCallback(this.#point);
   };
 
-  #pointSubmitHandler = () => {
+  #pointSubmitHandler = (updatedPoint) => {
+    this.#point = {...this.#point, ...updatedPoint};
+
+    this.#onChangeCallback(this.#point);
     this.#replaceFormToPoint();
   };
 }
