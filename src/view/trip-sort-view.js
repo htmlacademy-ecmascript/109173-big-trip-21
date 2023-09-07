@@ -1,36 +1,28 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractFiltersView from './abstract-filters-view.js';
+import { createSorts } from '../mock/sort.js';
 
-function createTripSortTemplate() {
-  return /*html*/`
-    <form class="trip-events__trip-sort  trip-sort" action="#" method="get">
-      <div class="trip-sort__item  trip-sort__item--day">
-        <input id="sort-day" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-day" checked>
-        <label class="trip-sort__btn" for="sort-day">Day</label>
-      </div>
+function createTripSortItemsTemplate() {
+  const sorts = createSorts();
+  return sorts.map(({name, checked, disabled}) => {
+    const loweredSortType = name.toLowerCase();
 
-      <div class="trip-sort__item  trip-sort__item--event">
-        <input id="sort-event" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-event" disabled>
-        <label class="trip-sort__btn" for="sort-event">Event</label>
+    return /*html*/`
+      <div class="trip-sort__item  trip-sort__item--${loweredSortType}">
+        <input id="sort-${loweredSortType}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" data-filter-type="${name}" value="sort-${loweredSortType}" ${checked} ${disabled}>
+        <label class="trip-sort__btn" for="sort-${loweredSortType}">${name}</label>
       </div>
-
-      <div class="trip-sort__item  trip-sort__item--time">
-        <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time">
-        <label class="trip-sort__btn" for="sort-time">Time</label>
-      </div>
-
-      <div class="trip-sort__item  trip-sort__item--price">
-        <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price">
-        <label class="trip-sort__btn" for="sort-price">Price</label>
-      </div>
-
-      <div class="trip-sort__item  trip-sort__item--offer">
-        <input id="sort-offer" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-offer" disabled>
-        <label class="trip-sort__btn" for="sort-offer">Offers</label>
-      </div>
-    </form>`;
+    `;
+  }).join('');
 }
 
-export default class TripSortView extends AbstractView {
+function createTripSortTemplate() {
+  const sortItemsTemplate = createTripSortItemsTemplate();
+  return /*html*/`
+    <form class="trip-events__trip-sort  trip-sort" action="#" method="get">
+      ${sortItemsTemplate}
+    </form>`;
+}
+export default class TripSortView extends AbstractFiltersView {
   get template() {
     return createTripSortTemplate();
   }

@@ -1,21 +1,14 @@
-import AbstractView from '../framework/view/abstract-view.js';
-
-const CSSClasses = {
-  FILTER_BTN_CONTAINER: '.trip-filters__filter',
-  FILTER_BTN_INPUT: '.trip-filters__filter-input',
-};
+import AbstractFiltersView from './abstract-filters-view.js';
 
 function createTripFilterListTemplate(filters) {
-  return filters.map(({name, checked, dataLength}) => {
+  return filters.map(({name, checked, disabled}) => {
     const loweredName = name.toLowerCase();
-    const checkedState = checked ? 'checked' : '';
-    const disabledState = dataLength <= 0 ? 'disabled' : '';
-    const pointsCount = dataLength > 0 ? `( ${dataLength} )` : '';
+    // const pointsCount = dataLength > 0 ? `( ${dataLength} )` : '';
 
     return /*html*/`
       <div class="trip-filters__filter">
-        <input id="filter-${loweredName}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${loweredName}" ${checkedState} ${disabledState}>
-        <label class="trip-filters__filter-label" for="filter-${loweredName}">${name} ${pointsCount}</label>
+        <input id="filter-${loweredName}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" data-filter-type="${loweredName}" value="${loweredName}" ${checked} ${disabled}>
+        <label class="trip-filters__filter-label" for="filter-${loweredName}">${name}</label>
       </div>`;
   }).join('');
 }
@@ -30,34 +23,8 @@ function createTripFilterTemplate(filters) {
     </form>`;
 }
 
-export default class TripFilterView extends AbstractView {
-  #templateData = null;
-  #filtersClickCallback = null;
-
-  constructor(templateData) {
-    super();
-
-    this.#templateData = templateData;
-    this.#filtersClickCallback = templateData.filtersClickCallback;
-    this.element.addEventListener('click', this.#clickFilterBtnHandler.bind(this));
-  }
-
+export default class TripFilterView extends AbstractFiltersView {
   get template() {
-    return createTripFilterTemplate(this.#templateData.filters);
-  }
-
-  #clickFilterBtnHandler(evt) {
-    evt.preventDefault();
-
-    const parent = evt.target.closest(CSSClasses.FILTER_BTN_CONTAINER);
-    const filterBtn = parent.querySelector(CSSClasses.FILTER_BTN_INPUT);
-
-    if (!parent || filterBtn.disabled) {
-      return;
-    }
-
-    const filterType = filterBtn.value;
-
-    this.#filtersClickCallback(filterType);
+    return createTripFilterTemplate(this._items);
   }
 }

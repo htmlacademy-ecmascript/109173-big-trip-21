@@ -1,6 +1,7 @@
 import { render } from '../framework/render.js';
 import { upperCaseFirst, updateItem } from '../utils/utils.js';
 import { FilterType, filters } from '../utils/filters.js';
+import { SortType, sorts } from '../utils/sort.js';
 import TripSortView from '../view/trip-sort-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import TripEventsListView from '../view/trip-events-list-view.js';
@@ -17,14 +18,7 @@ export default class TripContentPresenter {
   #points = null;
   #pointPresenters = new Map();
   #previousFilterType = FilterType.EVERYTHING; // Предыдущий выбранный фильтр (по-умолчанию - EVERYTHING);
-
-  /**
-   * @property {Object | null} previousEditingPoint Объект с информацией о предыдущей редактируемой точке
-   * @property {TripEventsListItemView} previousEditingPoint.point View точки маршрута
-   * @property {EditPointView} previousEditingPoint.form View формы редактированияточки маршрута
-   * @property {Function}  previousEditingPoint.handler KeyDownHandler точки маршрута
-   */
-  #previousEditingPoint = null;
+  #previousSortType = SortType.DAY; // Предыдущая сортировка (по-умолчанию - DAY);
 
   constructor() {
     this.#tripEventsContainer = document.querySelector(CSSClasses.TRIP_EVENTS); // Общий контейнер для событий
@@ -34,6 +28,7 @@ export default class TripContentPresenter {
 
   init() {
     this.#points = this.#pointsModel.points.slice(); // Копируем полученный из модели массив с точками маршрута
+    this.#points = sorts[this.#previousSortType](this.#points); // Сортируем (по-умолчанию - по дате)
 
     this.#renderTripBoard();
   }
@@ -42,17 +37,64 @@ export default class TripContentPresenter {
     return this.#points;
   }
 
+  reRenderEventPoints(points) {
+    this.#clearEventPoints();
+    this.#renderEventPoints(points);
+  }
+
+  #renderTripBoard() {
+    this.#renderSort(); // Отрисовываем сортировку точек маршрута
+
+    // Отрисовываем точки маршрута или надпись-предложение, если ни одной точки нет
+    render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
+
+    if (this.#points.length > 0) {
+      this.#renderEventPoints(this.#points);
+    } else {
+      this.#renderNoPoints();
+    }
+  }
+
+  #renderSort() {
+    const sortData = {onChangeCallback: this.#sortChangeHandler};
+
+    render(new TripSortView(sortData), this.#tripEventsContainer);
+  }
+
+  #renderNoPoints() {
+    render(new TripEventsListEmptyView(), this.#tripEventsListContainer.element);
+  }
+
+  #renderEventPoints(points) {
+    for (let i = 0; i < points.length; i++) { //Выводим не с первой точки, а со второй т.к. первая отводится под блок редактирования
+      this.#renderEventPoint(points[i]); // Отрисовываем события; // Отрисовываем события
+    }
+  }
+
+  #renderEventPoint(point) {
+    const pointPresenter = new TripPointPresenter({
+      container: this.#tripEventsListContainer.element,
+      onChangeCallback: this.#pointChangeHandler,
+      onBeforeEditCallback: this.#pointBeforeEditHandler,
+    });
+
+    pointPresenter.init(point);
+    this.#pointPresenters.set(point.id, pointPresenter);
+  }
+
+  #clearEventPoints() {
+    this.#pointPresenters.forEach((pointPresenter) => pointPresenter.destroy());
+    this.#pointPresenters.clear();
+  }
+
+  /** Обработчики */
   #pointChangeHandler = (changedPoint) => {
     this.#points = updateItem(this.#points, changedPoint); // Обновляем информацию о точке в общем списке
     this.#pointPresenters.get(changedPoint.id).init(changedPoint); // Перерисовываем точку
   };
 
   #pointBeforeEditHandler = () => {
-    this.#pointPresenters.forEach((pointPresenter) => {
-      if (pointPresenter.isEditing()) {
-        pointPresenter.reset();
-      }
-    });
+    this.#pointPresenters.forEach((pointPresenter) => pointPresenter.reset());
   };
 
   #filterChangeHandler = (filterType) => {
@@ -69,51 +111,14 @@ export default class TripContentPresenter {
     this.reRenderEventPoints(filteredPoints);
   };
 
-  #renderTripBoard() {
-    this.#renderSort(); // Отрисовываем сортировку точек маршрута
-
-    // Отрисовываем точки маршрута или надпись-предложение, если ни одной точки нет
-    render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
-
-    if (this.#points.length > 0) {
-      this.#renderEventPoints(this.#points);
-    } else {
-      this.#renderNoPoints();
+  #sortChangeHandler = (sortType) => {
+    if(this.#previousSortType === sortType) {
+      return;
     }
-  }
 
-  #renderSort() {
-    render(new TripSortView(), this.#tripEventsContainer);
-  }
+    const sortedPoints = sorts[sortType](this.#points);
 
-  #renderNoPoints() {
-    render(new TripEventsListEmptyView(), this.#tripEventsListContainer.element);
-  }
-
-  #renderEventPoints(points) {
-    for (let i = 0; i < points.length; i++) { //Выводим не с первой точки, а со второй т.к. первая отводится под блок редактирования
-      this.#renderEventPoint(points[i]); // Отрисовываем события; // Отрисовываем события
-    }
-  }
-
-  #renderEventPoint(point) {
-    const pointPresenter = new TripPointPresenter(this.#tripEventsListContainer.element);
-
-    point.pointChangeCallback = this.#pointChangeHandler;
-    point.pointBeforeEditCallback = this.#pointBeforeEditHandler;
-
-    pointPresenter.init(point);
-    this.#pointPresenters.set(point.id, pointPresenter);
-  }
-
-  #clearEventPoints() {
-    this.#pointPresenters.forEach((pointPresenter) => pointPresenter.destroy());
-    this.#pointPresenters.clear();
-  }
-
-  reRenderEventPoints(points) {
-    this.#clearEventPoints();
-    this.#previousEditingPoint = null;
-    this.#renderEventPoints(points);
-  }
+    this.#previousSortType = sortType;
+    this.reRenderEventPoints(sortedPoints);
+  };
 }

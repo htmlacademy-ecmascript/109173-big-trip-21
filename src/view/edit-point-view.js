@@ -142,19 +142,20 @@ function createEditPointTemplate({type, destination, dates, offers, cost}) {
 }
 export default class EditPointView extends AbstractView {
   #templateData = null;
-  #pointSubmitCallback = null;
-  #pointFinishEditCallback = null;
+  #onSubmitCallback = null;
+  #onFinishEditCallback = null;
 
   /**
    * Создание/Редкатирование точки маршрута
    * @param {Object} templateData Объект данных для формирования шаблона
    */
-  constructor(templateData = getBlankPoint()) {
+  constructor({point = getBlankPoint(), onSubmitCallback, onFinishEditCallback}) {
     super();
 
-    this.#templateData = templateData;
-    this.#pointSubmitCallback = templateData.pointSubmitCallback;
-    this.#pointFinishEditCallback = templateData.pointFinishEditCallback;
+    this.#templateData = point;
+    this.#onSubmitCallback = onSubmitCallback;
+    this.#onFinishEditCallback = onFinishEditCallback;
+
     this.element.querySelector(CSSClasses.EVENT_EDIT).addEventListener('submit', this.#pointSubmitHandler);
     this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointFinishEditHandler);
   }
@@ -166,16 +167,12 @@ export default class EditPointView extends AbstractView {
   #pointSubmitHandler = (evt) => {
     evt.preventDefault();
 
-    if (this.#pointSubmitCallback) {
-      this.#pointSubmitCallback();
-    }
+    this.#onSubmitCallback?.();
   };
 
   #pointFinishEditHandler = (evt) => {
     evt.preventDefault();
 
-    if (this.#pointFinishEditCallback) {
-      this.#pointFinishEditCallback();
-    }
+    this.#onFinishEditCallback?.();
   };
 }

@@ -96,12 +96,16 @@ function getMockDate(addOffset = false) {
 
 // v.2 (на нативной функции)
 function getFormattedDateDiff(date1, date2) {
-  const dateDiff = Math.abs(dayjs(date2).diff(date1));
+  const dateDiff = getDateDiff(date1, date2);
   const formattedDate = parseDateFromMillis(dateDiff);
   const formattedNums = [`${formattedDate.days}D`, `${formattedDate.hours}H`, `${formattedDate.minutes}M`];
   const filteredNums = Array.from(formattedNums).filter((datePart) => !/00\w/.test(datePart));
 
   return filteredNums.join(' ');
+}
+
+function getDateDiff(date1, date2) {
+  return Math.abs(dayjs(date2).diff(date1));
 }
 
 // Функция для получения дней, часов и минут в миллисекундах
@@ -172,6 +176,7 @@ export {
   getUniqRandomArrayElements,
   getRandomBoolean,
   getMockDate,
+  getDateDiff,
   getFormattedDateDiff,
   DateFormats,
   isPastDate,
