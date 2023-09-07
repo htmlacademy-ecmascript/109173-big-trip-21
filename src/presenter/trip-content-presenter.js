@@ -29,7 +29,7 @@ export default class TripContentPresenter {
   }
 
   init() {
-    this.#points = this.#pointsModel.points.slice(); // Копируем полученный из модели массив с точками маршрута
+    this.#points = [...this.#pointsModel.points]; // Копируем полученный из модели массив с точками маршрута
     this.#points = sorts[this.#previousSortType](this.#points);
 
     this.#renderTripBoard();
@@ -45,7 +45,7 @@ export default class TripContentPresenter {
   }
 
   #renderTripBoard() {
-    this.#renderSort(); // Отрисовываем сортировку точек маршрута
+    this.#renderSort();
 
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
 
@@ -57,9 +57,9 @@ export default class TripContentPresenter {
   }
 
   #renderSort() {
-    const sortData = {onChangeCallback: this.#sortChangeHandler};
-
-    render(new TripSortView(sortData), this.#tripEventsContainer);
+    render(new TripSortView({
+      onChangeCallback: this.#sortChangeHandler
+    }), this.#tripEventsContainer);
   }
 
   #renderNoPoints() {
@@ -97,19 +97,19 @@ export default class TripContentPresenter {
     this.#pointPresenters.forEach((pointPresenter) => pointPresenter.reset());
   };
 
-  #filterChangeHandler = (filterType) => {
-    const filterName = upperCaseFirst(filterType);
+  // #filterChangeHandler = (filterType) => {
+  //   const filterName = upperCaseFirst(filterType);
 
-    // Исключаем клик по одному и тому же фильтру
-    if (this.#previousFilterType === filterName) {
-      return;
-    }
+  //   // Исключаем клик по одному и тому же фильтру
+  //   if (this.#previousFilterType === filterName) {
+  //     return;
+  //   }
 
-    const filteredPoints = filters[filterName](this.points);
+  //   const filteredPoints = filters[filterName](this.points);
 
-    this.#previousFilterType = filterType;
-    this.reRenderEventPoints(filteredPoints);
-  };
+  //   this.#previousFilterType = filterType;
+  //   this.reRenderEventPoints(filteredPoints);
+  // };
 
   #sortChangeHandler = (sortType) => {
     if(this.#previousSortType === sortType) {

@@ -1,28 +1,32 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { POINT_TYPES, BLANK_POINT } from '../mock/way-point.js';
 import { DateFormats, upperCaseFirst, findObjectByID } from '../utils/utils.js';
-import dayjs from 'dayjs';
+
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
-// import { Russian } from "flatpickr/dist/l10n/ru.js"
+
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
+
+const FLATPIKR_SETTINGS = {
+  enableTime: true,
+  dateFormat: DateFormats.FLATPICKR,
+  'time_24hr': true,
+  // 'locale': Russian
+};
 
 const CSSIDs = {
   DATE_TIME_START: '#event-start-time-1',
   DATE_TIME_END: '#event-end-time-1',
   DEFAULT_POINT_TYPE: '#event-type-toggle-1'
 };
+
 const CSSClasses = {
   EVENT_EDIT: '.event--edit',
   ROLLUP_BTN: '.event__rollup-btn',
   POINT_TYPE: '.event__type-list'
-};
-
-const FLATPIKR_SETTINGS = {
-  enableTime: true,
-  altFormat: DateFormats.FLATPICKR,
-  altInput: true,
-  'time_24hr': true,
-  // 'locale': Russian
 };
 
 function createEventTypeTemplate(currentPointType) {
@@ -81,11 +85,11 @@ function createEditPointTemplate({
   dateFrom,
   dateTo,
   cost,
-  destinationsList,
-  offersList}) {
+  destinations,
+  offers}) {
   const eventTypeTemplate = createEventTypeTemplate(type);
-  const offersTemplate = createOffersTemplate(offersList);
-  const destinationsTemplate = createDestinationsTemplate(destinationsList);
+  const offersTemplate = createOffersTemplate(offers);
+  const destinationsTemplate = createDestinationsTemplate(destinations);
   const photosTemplate = destination.pictures ? createPhotosTemplate(destination.pictures) : '';
 
   return /*html*/`
@@ -120,10 +124,10 @@ function createEditPointTemplate({
 
           <div class="event__field-group  event__field-group--time">
             <label class="visually-hidden" for="event-start-time-1">From</label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom}"> <!-- 18/03/19 12:25-->
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom}">
             &mdash;
             <label class="visually-hidden" for="event-end-time-1">To</label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo}"> <!-- 18/03/19 13:35 -->
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo}">
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -170,8 +174,8 @@ export default class EditPointView extends AbstractStatefulView {
   #onTypeChangeCallback = null;
   #onDatesChangeCallback = null;
 
-  #datepickrStart = null;
-  #datepickrEnd = null;
+  #datepickrFrom = null;
+  #datepickrTo = null;
 
   /**
    * Создание/Редкатирование точки маршрута
@@ -179,15 +183,15 @@ export default class EditPointView extends AbstractStatefulView {
    */
   constructor({
     point = BLANK_POINT,
-    destinationsList,
-    offersList,
+    destinations,
+    offers,
     onSubmitCallback,
     onFinishEditCallback,
     onTypeChangeCallback,
     onDatesChangeCallback}) {
     super();
 
-    this._setState(EditPointView.convertDataToState({...point, destinationsList, offersList}));
+    this._setState(EditPointView.convertDataToState({...point, destinations, offers}));
 
     this.#onSubmitCallback = onSubmitCallback;
     this.#onFinishEditCallback = onFinishEditCallback;
@@ -208,49 +212,33 @@ export default class EditPointView extends AbstractStatefulView {
     this.element.querySelector(CSSClasses.POINT_TYPE).addEventListener('change', this.#pointTypeChangeHandler);
   }
 
-  static convertDataToState(data) {
-    return {
-      ...data,
-      destination: findObjectByID(data.destination, data.destinationsList),
-      dateFrom: data.dates.start.format(DateFormats.CHOSED_DATE),
-      dateTo: data.dates.end.format(DateFormats.CHOSED_DATE),
-      offersList: data.offersList,
-      destinationsList: data.destinationsList,
-    };
-  }
-
-  static convertStateToData(data) {
-    return data; // TODO конвертировать стэйт обратно в данные
-  }
-
   removeElement() {
     super.removeElement();
 
-    this.#datepickrStart?.destroy();
-    this.#datepickrEnd?.destroy();
+    this.#datepickrFrom?.destroy();
+    this.#datepickrTo?.destroy();
 
-    this.#datepickrStart = null;
-    this.#datepickrEnd = null;
+    this.#datepickrFrom = null;
+    this.#datepickrTo = null;
   }
 
   #initDatepickr() {
-    // TODO: не работают даты, т.к. не nstanceof dayjs после копирования. Попробовать исправить.
-    const defaultDateStart = dayjs(this._state.dateFrom).toString();
-    const defaultDateEnd = dayjs(this._state.dateTo).toString();
+    const defaultDateFrom = this._state.dateFrom;
+    const defaultDateTo = this._state.dateTo;
     const dateStartElem = this.element.querySelector(CSSIDs.DATE_TIME_START);
     const dateEndElem = this.element.querySelector(CSSIDs.DATE_TIME_END);
 
-    this.#datepickrStart = flatpickr(dateStartElem, {
+    this.#datepickrFrom = flatpickr(dateStartElem, {
       ...FLATPIKR_SETTINGS,
-      defaultDate: defaultDateStart,
-      onChange: this.#pointDatesChangeHandler
+      defaultDate: defaultDateFrom,
+      onChange: this.#dateFromChangeHandler
     });
 
-    this.#datepickrEnd = flatpickr(dateEndElem, {
+    this.#datepickrTo = flatpickr(dateEndElem, {
       ...FLATPIKR_SETTINGS,
-      defaultDate: defaultDateEnd,
-      minDate: defaultDateStart,
-      onChange: this.#pointDatesChangeHandler
+      defaultDate: defaultDateTo,
+      minDate: defaultDateFrom,
+      onChange: this.#dateToChangeHandler
     });
   }
 
@@ -280,21 +268,43 @@ export default class EditPointView extends AbstractStatefulView {
     this.#onTypeChangeCallback?.(chosedPointType);
   };
 
-  #pointDatesChangeHandler = (_, dateStr, instance) => {
+  #dateFromChangeHandler = (_, dateStr) => {
     const dates = this._state.dates;
-    const target = instance.input;
+    const newDateFrom = dayjs(dateStr, DateFormats.CHOSED_DATE);
 
-    switch(target.id) {
-      case CSSIDs.DATE_TIME_START.slice(1): {
-        dates.start = dayjs(dateStr);
-        break;
-      }
-      case CSSIDs.DATE_TIME_END.slice(1): {
-        dates.end = dayjs(dateStr);
-        break;
-      }
-    }
+    dates.start = newDateFrom;
+    dates.end = dayjs(this._state.dateTo, DateFormats.CHOSED_DATE);
+    this._state.dateFrom = newDateFrom;
 
     this.#onDatesChangeCallback?.(dates);
   };
+
+  #dateToChangeHandler = (_, dateStr) => {
+    const dates = this._state.dates;
+    const newDateTo = dayjs(dateStr, DateFormats.CHOSED_DATE);
+
+    dates.start = dayjs(this._state.dateFrom, DateFormats.CHOSED_DATE);
+    dates.end = newDateTo;
+    this._state.dateTo = newDateTo;
+
+    this.#onDatesChangeCallback?.(dates);
+  };
+
+  static convertDataToState(data) {
+    const dateFrom = data.dates.start.format(DateFormats.CHOSED_DATE);
+    const dateTo = data.dates.end.format(DateFormats.CHOSED_DATE);
+
+    return {
+      ...data,
+      destination: findObjectByID(data.destination, data.destinations),
+      dateFrom: dateFrom,
+      dateTo: dateTo,
+      offers: data.offers,
+      destinations: data.destinations,
+    };
+  }
+
+  static convertStateToData(data) {
+    return data; // TODO конвертировать стэйт обратно в данные
+  }
 }

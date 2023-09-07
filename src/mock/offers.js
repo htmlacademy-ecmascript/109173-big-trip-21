@@ -10,7 +10,7 @@ const offerIDs = [];
 const offers = createOffers();
 
 function createOffers() {
-  return OFFER_NAMES.slice().map((offerName) => {
+  return [...OFFER_NAMES].map((offerName) => {
     const offerID = crypto.randomUUID();
     offerIDs.push(offerID);
 
