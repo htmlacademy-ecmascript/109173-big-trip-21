@@ -1,18 +1,18 @@
 import { getDateDiff } from './utils.js';
 
-const SortType = {
+const SortType = Object.freeze({
   DAY: 'Day',
   EVENT: 'Event',
   TIME: 'Time',
   PRICE: 'Price',
   OFFERS: 'Offers',
-};
+});
 
 const sorts = {
-  [SortType.DAY]: (points) => points?.slice().sort((pointA, pointB) => pointA.dates.start - pointB.dates.start),
+  [SortType.DAY]: (points) => [...points].sort((pointA, pointB) => pointB.dates.start - pointA.dates.start),
   [SortType.EVENT]: (points) => points,
-  [SortType.TIME]: (points) => points?.slice().sort((pointA, pointB) => getDateDiff(pointA.dates.start, pointA.dates.end) - getDateDiff(pointB.dates.start, pointB.dates.end)),
-  [SortType.PRICE]: (points) => points?.slice().sort((pointA, pointB) => pointA.cost - pointB.cost),
+  [SortType.TIME]: (points) => [...points].slice().sort((pointA, pointB) => getDateDiff(pointB.dates.start, pointA.dates.end) - getDateDiff(pointA.dates.start, pointB.dates.end)),
+  [SortType.PRICE]: (points) => [...points].slice().sort((pointA, pointB) => pointB.cost - pointA.cost),
   [SortType.OFFERS]: (points) => points,
 };
 

@@ -17,8 +17,10 @@ export default class TripContentPresenter {
   #pointsModel = null;
   #points = null;
   #pointPresenters = new Map();
+  /** @type {FilterType[keyof FilterType]} */
   #previousFilterType = FilterType.EVERYTHING; // Предыдущий выбранный фильтр (по-умолчанию - EVERYTHING);
-  #previousSortType = SortType.DAY; // Предыдущая сортировка (по-умолчанию - DAY);
+  /** @type {SortType[keyof SortType]} Предыдущая сортировка (по-умолчанию - DAY) */
+  #previousSortType = SortType.DAY;
 
   constructor() {
     this.#tripEventsContainer = document.querySelector(CSSClasses.TRIP_EVENTS); // Общий контейнер для событий
@@ -66,9 +68,7 @@ export default class TripContentPresenter {
 
   // Отрисовываем события;
   #renderEventPoints(points) {
-    for (let i = 0; i < points.length; i++) {
-      this.#renderEventPoint(points[i]);
-    }
+    points.forEach((point) => this.#renderEventPoint(point));
   }
 
   #renderEventPoint(point) {

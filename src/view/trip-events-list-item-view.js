@@ -103,15 +103,13 @@ export default class TripEventsListItemView extends AbstractView {
     return createTripEventsListTemplate(this.#templateData);
   }
 
-  #pointEditBtnHandler = (evt) => {
-    evt.preventDefault();
-
+  #pointEditBtnHandler = () => {
     this.#onEditCallback?.();
   };
 
-  #pointFavoriteClickHandler = (evt) => {
-    evt.preventDefault();
+  #pointFavoriteClickHandler = () => {
+    this.#templateData.isFavorite = !this.#templateData.isFavorite;
 
-    this.#onFavoriteCallback?.();
+    this.#onFavoriteCallback?.(this.#templateData.isFavorite);
   };
 }

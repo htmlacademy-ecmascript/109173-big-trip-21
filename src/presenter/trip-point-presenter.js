@@ -128,8 +128,8 @@ export default class TripPointPresenter {
     this.#replaceFormToPoint();
   };
 
-  #favoriteClickHandler = () => {
-    this.#point.isFavorite = !this.#point.isFavorite;
+  #favoriteClickHandler = (isFavorite) => {
+    this.#point.isFavorite = isFavorite;
     this.#onChangeCallback(this.#point);
   };
 

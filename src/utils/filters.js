@@ -1,11 +1,11 @@
 import { isPastDate, isPresentDate, isFutureDate } from './utils.js';
 
-const FilterType = {
+const FilterType = Object.freeze({
   EVERYTHING: 'Everything',
   PAST: 'Past',
   PRESENT: 'Present',
   FUTURE: 'Future',
-};
+});
 
 const filters = {
   // [FilterType.EVERYTHING]: (points) => points?.filter((point) => !isPastDate(point.dates.end)),

@@ -44,10 +44,6 @@ function createPoint(pointType) {
   };
 }
 
-function getBlankPoint() {
-  return BLANK_POINT;
-}
-
 function getRandomPoint() {
   const pointType = getRandomArrayElement(POINT_TYPES);
 
@@ -68,7 +64,7 @@ function getOffersByType(pointType) {
 
 export {
   POINT_TYPES,
-  getBlankPoint,
+  BLANK_POINT,
   getRandomPoint,
   getOffersByType,
   getOffers,
