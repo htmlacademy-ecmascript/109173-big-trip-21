@@ -199,7 +199,9 @@ export default class EditPointView extends AbstractStatefulView {
 
     super();
 
-    this._setState(EditPointView.convertDataToState({...point, destinations, offers}));
+      console.log('Полученная точка: ', point, offers);
+
+    this._setState(EditPointView.convertDataToState({...point, destinations, offers})); // <- Проблема с офферами тут. offers перезаписывает point.offers !!!!
     this.#point = point;
     this.#onSubmitCallback = onSubmitCallback;
     this.#onFinishEditCallback = onFinishEditCallback;
