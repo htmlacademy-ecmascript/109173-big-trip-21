@@ -31,7 +31,7 @@ function createTripEventsListTemplate({
   typeOffersList}) {
 
   const destinationInfo = findObjectByID(destination, destinationsList);
-  const offersTemplate = offers.size > 0 ? createOffersTemplate(offers, typeOffersList) : ''
+  const offersTemplate = offers.size > 0 ? createOffersTemplate(offers, typeOffersList) : '';
   const dateFrom = dayjs(dates.start);
   const dateTo = dayjs(dates.end);
   const pointDate = dateFrom.format(DateFormats.FOR_POINT);

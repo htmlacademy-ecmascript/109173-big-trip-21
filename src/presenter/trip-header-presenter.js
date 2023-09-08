@@ -5,7 +5,7 @@ import TripInfoCostView from '../view/trip-info-cost-view.js';
 import TripFilterView from '../view/trip-filter-view.js';
 import { createFilters } from '../mock/filter.js';
 import { upperCaseFirst } from '../utils/utils.js';
-import { FilterType, filters } from '../utils/filters.js';
+import { FilterType, filters } from '../utils/filter.js';
 
 const CSSClasses = {
   TRIP_MAIN_CONTAINER: '.trip-main',

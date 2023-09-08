@@ -1,4 +1,4 @@
-import { FilterType, filters } from '../utils/filters.js';
+import { FilterType, filters } from '../utils/filter.js';
 
 const DEFAULT_FILTER = FilterType.EVERYTHING;
 

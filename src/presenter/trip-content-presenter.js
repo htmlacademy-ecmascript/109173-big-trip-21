@@ -1,6 +1,6 @@
 import { render } from '../framework/render.js';
 import { updateItem } from '../utils/utils.js';
-import { FilterType } from '../utils/filters.js';
+import { FilterType } from '../utils/filter.js';
 import { SortType, sorts } from '../utils/sort.js';
 import TripSortView from '../view/trip-sort-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
