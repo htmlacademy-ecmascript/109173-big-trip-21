@@ -1,5 +1,5 @@
 import { render, replace, remove } from '../framework/render.js';
-import { getIDs, getUniqRandomArrayElements, isEscKey } from '../utils/utils.js';
+import { isEscKey } from '../utils/utils.js';
 import { getOffersByType, getDestinations} from '../mock/way-point.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';

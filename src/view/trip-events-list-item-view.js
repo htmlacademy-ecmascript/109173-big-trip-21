@@ -4,13 +4,9 @@ import dayjs from 'dayjs';
 
 const CSSClasses = {ROLLUP_BTN: '.event__rollup-btn', FAVORITE_BTN: '.event__favorite-btn'};
 
-function createOffersTemplate(offers) {
-  if (!offers) {
-    return;
-  }
-
-  return offers.map(({title, price, checked}) => {
-    if (checked) {
+function createOffersTemplate(offers, offersList) {
+  return offersList.map(({id, title, price}) => {
+    if (offers.has(id)) {
       return /* html */`
         <li class="event__offer">
           <span class="event__offer-title">${title}</span>
@@ -27,6 +23,7 @@ function createOffersTemplate(offers) {
 function createTripEventsListTemplate({
   type,
   destination,
+  offers,
   dates,
   cost,
   isFavorite,
@@ -34,7 +31,7 @@ function createTripEventsListTemplate({
   typeOffersList}) {
 
   const destinationInfo = findObjectByID(destination, destinationsList);
-  const offersTemplate = createOffersTemplate(typeOffersList);
+  const offersTemplate = offers.size > 0 ? createOffersTemplate(offers, typeOffersList) : ''
   const dateFrom = dayjs(dates.start);
   const dateTo = dayjs(dates.end);
   const pointDate = dateFrom.format(DateFormats.FOR_POINT);
