@@ -1,25 +1,20 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getOffers} from '../mock/way-point.js';
 import { getFormattedDateDiff, DateFormats, findObjectByID } from '../utils/utils.js';
 
 const CSSClasses = {ROLLUP_BTN: '.event__rollup-btn', FAVORITE_BTN: '.event__favorite-btn'};
 
-function createOffersTemplate(offerIDs) {
-  if (!offerIDs) {
+function createOffersTemplate(offers) {
+  if (!offers) {
     return;
   }
 
-  const offersList = getOffers();
-
-  return offerIDs.map((offerID) => {
-    const {name, cost, checked} = findObjectByID(offerID, offersList);
-
+  return offers.map(({title, price, checked}) => {
     if (checked) {
       return /* html */`
         <li class="event__offer">
-          <span class="event__offer-title">${name}</span>
+          <span class="event__offer-title">${title}</span>
           &plus;&euro;&nbsp;
-          <span class="event__offer-price">${cost}</span>
+          <span class="event__offer-price">${price}</span>
         </li>
       `;
     }
@@ -28,8 +23,16 @@ function createOffersTemplate(offerIDs) {
   }).join(''); // т.к. на выходе map мы получаем массив, а нам нужна строка - делаем строку
 }
 
-function createTripEventsListTemplate({type, destination, dates, offers, cost, isFavorite}) {
-  const offersTemplate = createOffersTemplate(offers);
+function createTripEventsListTemplate({
+  type,
+  destination,
+  dates,
+  cost,
+  isFavorite,
+  destinationsList,
+  offersList}) {
+  const destinationInfo = findObjectByID(destination, destinationsList);
+  const offersTemplate = createOffersTemplate(offersList);
   const dateForPoint = dates.start.format(DateFormats.FOR_POINT);
   const dateStart = dates.start.format(DateFormats.FOR_POINT_PERIODS);
   const dateEnd = dates.end.format(DateFormats.FOR_POINT_PERIODS);
@@ -43,7 +46,7 @@ function createTripEventsListTemplate({type, destination, dates, offers, cost, i
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${type} ${destination ? destination.name : ''}</h3>
+        <h3 class="event__title">${type} ${destinationInfo ? destinationInfo.name : ''}</h3>
         <div class="event__schedule">
           <p class="event__time">
             <time class="event__start-time" datetime="${dateTimeStart}">${dateStart}</time>
@@ -80,10 +83,15 @@ export default class TripEventsListItemView extends AbstractView {
   #onEditCallback = null;
   #onFavoriteCallback = null;
 
-  constructor({point, onEditCallback, onFavoriteCallback}) {
+  constructor({
+    point,
+    destinationsList,
+    offersList,
+    onEditCallback,
+    onFavoriteCallback}) {
     super();
 
-    this.#templateData = point;
+    this.#templateData = {...point, destinationsList, offersList};
     this.#onEditCallback = onEditCallback;
     this.#onFavoriteCallback = onFavoriteCallback;
 

@@ -170,6 +170,10 @@ function upperCaseFirst(str) {
   return `${str.charAt(0).toUpperCase()}${str.slice(1)}`;
 }
 
+function getIDs(itemsObj) {
+  return itemsObj.map((item) => item.id);
+}
+
 export {
   getRandomInt,
   getRandomArrayElement,
@@ -185,5 +189,6 @@ export {
   findObjectByID,
   updateItem,
   upperCaseFirst,
-  isEscKey
+  isEscKey,
+  getIDs
 };

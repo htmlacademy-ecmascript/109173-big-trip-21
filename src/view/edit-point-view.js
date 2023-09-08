@@ -1,12 +1,16 @@
-import AbstractView from '../framework/view/abstract-view.js';
-import { pointTypes, getBlankPoint , getDestinations, getOffers} from '../mock/way-point.js';
-import { DateFormats, findObjectByID } from '../utils/utils.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import { POINT_TYPES, getBlankPoint } from '../mock/way-point.js';
+import { DateFormats, upperCaseFirst, findObjectByID } from '../utils/utils.js';
 
-const offersList = getOffers();
-const CSSClasses = {EVENT_EDIT: '.event--edit', ROLLUP_BTN: '.event__rollup-btn'};
+const CSSIDs = {DEFAULT_POINT_TYPE: '#event-type-toggle-1'};
+const CSSClasses = {
+  EVENT_EDIT: '.event--edit',
+  ROLLUP_BTN: '.event__rollup-btn',
+  POINT_TYPE: '.event__header'
+};
 
 function createEventTypeTemplate(currentPointType) {
-  return pointTypes.map((pointType) => {
+  return POINT_TYPES.map((pointType) => {
     const checkedState = pointType === currentPointType ? 'checked' : '';
     const loweredPointTypeName = pointType.toLowerCase();
 
@@ -19,23 +23,22 @@ function createEventTypeTemplate(currentPointType) {
   }).join('');
 }
 
-function createOffersTemplate(offerIDs) {
-  if (!offerIDs) {
+function createOffersTemplate(offers) {
+  if (!offers) {
     return;
   }
 
-  return offerIDs.map((offerID) => {
-    const {name, cost, checked} = findObjectByID(offerID, offersList);
-    const loweredOfferName = name.toLowerCase();
+  return offers.map(({title, price, checked}) => {
+    const loweredOfferTitle = title.toLowerCase();
     const offerChecked = checked ? 'checked' : '';
 
     return /*html*/`
       <div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${loweredOfferName}-1" type="checkbox" name="event-offer-${loweredOfferName}" ${offerChecked}>
-        <label class="event__offer-label" for="event-offer-${loweredOfferName}-1">
-          <span class="event__offer-title">${name}</span>
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${loweredOfferTitle}-1" type="checkbox" name="event-offer-${loweredOfferTitle}" ${offerChecked}>
+        <label class="event__offer-label" for="event-offer-${loweredOfferTitle}-1">
+          <span class="event__offer-title">${title}</span>
           &plus;&euro;&nbsp;
-          <span class="event__offer-price">${cost}</span>
+          <span class="event__offer-price">${price}</span>
         </label>
       </div>`;
   }).join('');
@@ -45,7 +48,7 @@ function createDestinationsTemplate(destinations) {
   return destinations.map((dest) => `<option value="${dest.name}"></option>`).join('');
 }
 
-function createPhotostemplate(photos) {
+function createPhotosTemplate(photos) {
   const photosArr = photos.slice();
 
   return /*html*/`
@@ -56,11 +59,18 @@ function createPhotostemplate(photos) {
     </div>`;
 }
 
-function createEditPointTemplate({type, destination, dates, offers, cost}) {
+function createEditPointTemplate({
+  type,
+  destination,
+  dates,
+  cost,
+  destinationsList,
+  offersList}) {
   const eventTypeTemplate = createEventTypeTemplate(type);
-  const offersTemplate = createOffersTemplate(offers);
-  const destinationsTemplate = createDestinationsTemplate(getDestinations());
-  const photosTemplate = destination.photos ? createPhotostemplate(destination.photos) : '';
+  const offersTemplate = createOffersTemplate(offersList);
+  const destinationInfo = findObjectByID(destination, destinationsList);
+  const destinationsTemplate = createDestinationsTemplate(destinationsList);
+  const photosTemplate = destinationInfo.pictures ? createPhotosTemplate(destinationInfo.pictures) : '';
   const dateStart = dates.start.format(DateFormats.CHOSED_DATE);
   const dateEnd = dates.end.format(DateFormats.CHOSED_DATE);
 
@@ -88,7 +98,7 @@ function createEditPointTemplate({type, destination, dates, offers, cost}) {
             <label class="event__label  event__type-output" for="event-destination-1">
               ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination ? destination.name : ''}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destinationInfo ? destinationInfo.name : ''}" list="destination-list-1">
             <datalist id="destination-list-1">
               ${destinationsTemplate}
             </datalist>
@@ -128,10 +138,10 @@ function createEditPointTemplate({type, destination, dates, offers, cost}) {
             </section>` : ''}
 
           <!-- Есть есть пункт назначения - показываем блок -->
-          ${destination ? `
+          ${destinationInfo ? `
             <section class="event__section  event__section--destination">
               <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-              <p class="event__destination-description">${destination.description}</p>
+              <p class="event__destination-description">${destinationInfo.description}</p>
 
               <!-- Вывод фотографий точки маршрута -->
               ${photosTemplate}
@@ -140,28 +150,43 @@ function createEditPointTemplate({type, destination, dates, offers, cost}) {
       </form>
     </li>`;
 }
-export default class EditPointView extends AbstractView {
+export default class EditPointView extends AbstractStatefulView {
   #templateData = null;
+  #destinationsList = null;
   #onSubmitCallback = null;
   #onFinishEditCallback = null;
+  #onTypeChangeCallback = null;
 
   /**
    * Создание/Редкатирование точки маршрута
    * @param {Object} templateData Объект данных для формирования шаблона
    */
-  constructor({point = getBlankPoint(), onSubmitCallback, onFinishEditCallback}) {
+  constructor({
+    point = getBlankPoint(),
+    destinationsList,
+    offersList,
+    onSubmitCallback,
+    onFinishEditCallback,
+    onTypeChangeCallback}) {
     super();
 
-    this.#templateData = point;
+    this.#templateData = {...point, destinationsList, offersList};
+    this.#destinationsList = destinationsList;
     this.#onSubmitCallback = onSubmitCallback;
     this.#onFinishEditCallback = onFinishEditCallback;
+    this.#onTypeChangeCallback = onTypeChangeCallback;
 
     this.element.querySelector(CSSClasses.EVENT_EDIT).addEventListener('submit', this.#pointSubmitHandler);
     this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointFinishEditHandler);
+    this.element.querySelector(CSSClasses.POINT_TYPE).addEventListener('change', this.#pointTypeChangeHandler);
   }
 
   get template() {
     return createEditPointTemplate(this.#templateData);
+  }
+
+  _restoreHandlers() {
+    return true;
   }
 
   #pointSubmitHandler = (evt) => {
@@ -174,5 +199,19 @@ export default class EditPointView extends AbstractView {
     evt.preventDefault();
 
     this.#onFinishEditCallback?.();
+  };
+
+  #pointTypeChangeHandler = (evt) => {
+    evt.preventDefault();
+
+    const target = evt.target;
+
+    if(target.id === CSSIDs.DEFAULT_POINT_TYPE.slice(1)) {
+      return;
+    }
+
+    const chosedPointType = upperCaseFirst(evt.target.value);
+
+    this.#onTypeChangeCallback?.(chosedPointType);
   };
 }

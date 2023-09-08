@@ -1,11 +1,14 @@
 import { render, replace, remove } from '../framework/render.js';
+import { isEscKey } from '../utils/utils.js';
+import { getOffersByType, getDestinations} from '../mock/way-point.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
-import { isEscKey } from '../utils/utils.js';
 
 export default class TripPointPresenter {
   #point = null;
   #pointsContainer = null;
+  #destinationsList = null;
+  #offersList = null;
 
   #pointComponent = null;
   #editPointComponent = null;
@@ -16,6 +19,7 @@ export default class TripPointPresenter {
 
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
+  #onTypeChangeCallback = null;
 
   constructor(pointPresenterData) {
     this.#pointsContainer = pointPresenterData.container;
@@ -25,6 +29,8 @@ export default class TripPointPresenter {
 
   init(point) {
     this.#point = point;
+    this.#destinationsList = getDestinations();
+    this.#offersList = getOffersByType(this.#point.type);
 
     // Компоненты предыдущей точки маршрута
     this.#prevPointComponent = this.#pointComponent;
@@ -33,14 +39,19 @@ export default class TripPointPresenter {
     // Компоненты текущей точки маршрута
     this.#pointComponent = new TripEventsListItemView({
       point: this.#point,
+      destinationsList: this.#destinationsList,
+      offersList: this.#offersList,
       onEditCallback: this.#pointEditHandler,
       onFavoriteCallback: this.#favoriteClickHandler,
     }); // Точка маршрута
 
     this.#editPointComponent = new EditPointView({
       point: this.#point,
+      destinationsList: this.#destinationsList,
+      offersList: this.#offersList,
       onFinishEditCallback: this.#pointFinishEditHandler,
       onSubmitCallback: this.#pointSubmitHandler,
+      onTypeChangeCallback: this.#pointTypeChangeHandler,
     }); // Форма редактирования точки маршрута
 
     if(this.#prevPointComponent === null && this.#prevEditPointComponent === null) {
@@ -118,6 +129,14 @@ export default class TripPointPresenter {
 
   #favoriteClickHandler = () => {
     this.#point.isFavorite = !this.#point.isFavorite;
+    this.#onChangeCallback(this.#point);
+  };
+
+  #pointTypeChangeHandler = (pointType) => {
+    const newOffers = getOffersByType(pointType).offers;
+
+    this.#point.type = pointType;
+    this.#point.offers = newOffers;
     this.#onChangeCallback(this.#point);
   };
 
