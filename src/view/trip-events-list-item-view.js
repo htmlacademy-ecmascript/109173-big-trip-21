@@ -30,11 +30,11 @@ function createTripEventsListTemplate({
   dates,
   cost,
   isFavorite,
-  destinations,
-  offers}) {
+  destinationsList,
+  typeOffersList}) {
 
-  const destinationInfo = findObjectByID(destination, destinations);
-  const offersTemplate = createOffersTemplate(offers);
+  const destinationInfo = findObjectByID(destination, destinationsList);
+  const offersTemplate = createOffersTemplate(typeOffersList);
   const dateFrom = dayjs(dates.start);
   const dateTo = dayjs(dates.end);
   const pointDate = dateFrom.format(DateFormats.FOR_POINT);
@@ -89,14 +89,13 @@ export default class TripEventsListItemView extends AbstractView {
 
   constructor({
     point,
-    destinations,
-    offers,
+    destinationsList,
+    typeOffersList,
     onEditCallback,
     onFavoriteCallback}) {
-
     super();
 
-    this.#templateData = {...point, destinations, offers};
+    this.#templateData = {...point, destinationsList, typeOffersList};
     this.#onEditCallback = onEditCallback;
     this.#onFavoriteCallback = onFavoriteCallback;
 

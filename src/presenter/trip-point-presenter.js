@@ -1,5 +1,5 @@
 import { render, replace, remove } from '../framework/render.js';
-import { isEscKey } from '../utils/utils.js';
+import { getIDs, getUniqRandomArrayElements, isEscKey } from '../utils/utils.js';
 import { getOffersByType, getDestinations} from '../mock/way-point.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
@@ -29,10 +29,11 @@ export default class TripPointPresenter {
   init(point) {
     this.#point = point;
 
+
     const pointData = {
       point: this.#point,
-      destinations: getDestinations(),
-      offers: getOffersByType(this.#point.type),
+      destinationsList: getDestinations(),
+      typeOffersList: getOffersByType(this.#point.type),
     };
 
     // Компоненты предыдущей точки маршрута
@@ -134,10 +135,12 @@ export default class TripPointPresenter {
   };
 
   #pointTypeChangeHandler = (pointType) => {
-    const newOffers = getOffersByType(pointType).offers;
+    // const newOffers = getUniqRandomArrayElements(getOffersByType(pointType));
+    // const newOffersIDs = new Set(getIDs(newOffers));
+    const newOffersIDs = new Set([]); // Реализация сброса выбранных офферов, при смене типа поинта
 
     this.#point.type = pointType;
-    this.#point.offers = newOffers;
+    this.#point.offers = newOffersIDs;
     this.#onChangeCallback(this.#point);
   };
 

@@ -89,7 +89,6 @@ export default class TripContentPresenter {
 
   /** Обработчики */
   #pointChangeHandler = (changedPoint) => {
-    console.log(changedPoint);
     this.#points = updateItem(this.#points, changedPoint); // Обновляем информацию о точке в общем списке
     this.#pointPresenters.get(changedPoint.id).init(changedPoint); // Перерисовываем точку
   };
