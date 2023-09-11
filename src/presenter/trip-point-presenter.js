@@ -125,7 +125,8 @@ export default class TripPointPresenter {
     this.#replacePointToForm();
   };
 
-  #pointFinishEditHandler = () => { // Пока Callback такой же, как и для отправки формы, но, наверняка дальше они будут разными
+  #pointFinishEditHandler = (pointBeforeChange) => { // Пока Callback такой же, как и для отправки формы, но, наверняка дальше они будут разными
+    this.#onChangeCallback(pointBeforeChange);
     this.#replaceFormToPoint();
   };
 

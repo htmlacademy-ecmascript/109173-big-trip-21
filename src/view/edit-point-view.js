@@ -289,12 +289,13 @@ export default class EditPointView extends AbstractStatefulView {
     this.#onSubmitCallback?.(updatedPoint);
   };
 
+  // TODO: Не работает восстановление типа точки
   #pointFinishEditHandler = (evt) => {
     evt.preventDefault();
 
     this._setState(this.#point);
 
-    this.#onFinishEditCallback?.();
+    this.#onFinishEditCallback?.(this.#point);
   };
 
   #pointTypeChangeHandler = (evt) => {
