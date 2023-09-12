@@ -149,6 +149,7 @@ export default class TripPointPresenter {
 
   #favoriteClickHandler = (isFavorite) => {
     this.#point.isFavorite = isFavorite;
+    this.#pointDefaultState.isFavorite = isFavorite;
     this.#onChangeCallback(this.#point);
   };
 
