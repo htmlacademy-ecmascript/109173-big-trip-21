@@ -9,17 +9,8 @@ import {
 
 import {createDestinations, getRandomDestination } from '../mock/destinations.js';
 import { createOffersWithType } from '../mock/offers.js';
+import { POINT_TYPES, BLANK_POINT } from '../utils/const.js';
 
-/** Пустая точка (для создания новой точки маршрута) */
-const POINT_TYPES = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
-const BLANK_POINT = {
-  type: POINT_TYPES[5],
-  destination: '',
-  dates: '',
-  offers: '',
-  cost: 0,
-  isFavorite: false,
-};
 const PointPrice = {MIN: 500, MAX: 5000};
 const offersWithType = createOffersWithType(POINT_TYPES);
 const destinations = createDestinations();

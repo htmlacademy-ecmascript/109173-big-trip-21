@@ -1,4 +1,4 @@
-import AbstractFiltersView from './abstract-filters-view.js';
+import AbstractFilterView from './abstract-filter-view.js';
 import { createSorts } from '../mock/sort.js';
 
 function createTripSortItemsTemplate() {
@@ -22,7 +22,7 @@ function createTripSortTemplate() {
       ${sortItemsTemplate}
     </form>`;
 }
-export default class TripSortView extends AbstractFiltersView {
+export default class TripSortView extends AbstractFilterView {
   get template() {
     return createTripSortTemplate();
   }

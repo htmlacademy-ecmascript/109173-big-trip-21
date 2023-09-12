@@ -1,6 +1,6 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { POINT_TYPES, BLANK_POINT } from '../mock/way-point.js';
 import { DateFormats, upperCaseFirst, findObjectByID } from '../utils/utils.js';
+import { POINT_TYPES, BLANK_POINT, FLATPIKR_SETTINGS } from '../utils/const.js';
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -10,13 +10,6 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(customParseFormat);
 
-const FLATPIKR_SETTINGS = {
-  enableTime: true,
-  dateFormat: DateFormats.FLATPICKR,
-  minuteIncrement: 1,
-  'time_24hr': true,
-  // 'locale': Russian
-};
 
 const CSSIDs = {
   DEFAULT_POINT_TYPE: '#event-type-toggle-1',
@@ -196,7 +189,7 @@ export default class EditPointView extends AbstractStatefulView {
     onSubmitCallback,
     onCancelEditCallback,
     onTypeChangeCallback,
-    onDestinationChangeHandler}) {
+    onDestinationChangeCallback}) {
     super();
 
     this._setState(EditPointView.convertDataToState({...point, destinationsList, typeOffersList})); // <- Проблема с офферами тут. offers перезаписывает point.offers !!!!
@@ -205,7 +198,7 @@ export default class EditPointView extends AbstractStatefulView {
     this.#onCancelEditCallback = onCancelEditCallback;
     this.#onTypeChangeCallback = onTypeChangeCallback;
     // this.#onDatesChangeCallback = onDatesChangeCallback;
-    this.#onDestinationChangeCallback = onDestinationChangeHandler;
+    this.#onDestinationChangeCallback = onDestinationChangeCallback;
     // this.#onPriceChangeHandler = onPriceChangeHandler;
 
     this.#initDatepickr();

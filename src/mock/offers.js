@@ -4,7 +4,8 @@ import {
   getUniqRandomArrayElements,
 } from '../utils/utils.js';
 
-const OFFER_NAMES = ['Transfer', 'Meet in Airport', 'Extra Luggage', 'Lunch', 'Switch to comfort'];
+import { OFFER_NAMES } from '../utils/const.js';
+
 const OfferPrice = {MIN: 50, MAX: 500};
 const offerIDs = [];
 const offers = createOffers();

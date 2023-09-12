@@ -1,31 +1,38 @@
 import { render } from '../framework/render.js';
-import { updateItem } from '../utils/utils.js';
-import { FilterType } from '../utils/filter.js';
+import { filters } from '../utils/filter.js';
 import { SortType, sorts } from '../utils/sort.js';
 import TripSortView from '../view/trip-sort-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import TripEventsListView from '../view/trip-events-list-view.js';
-import TripEventsListEmptyView from '../view/trip-events-list-empty-view.js';
-
-// Модели
-import PointsModel from '../model/points-model.js';
+import TripEventsListEmptyView from '../view/trip-events-list-empty-view.js.js';
 
 const CSSClasses = {TRIP_EVENTS: '.trip-events'};
 export default class TripContentPresenter {
   #tripEventsContainer = null;
   #tripEventsListContainer = null;
+
   #pointsModel = null;
-  #points = null;
+  #filterModel = null;
+
   #pointPresenters = new Map();
-  /** @type {FilterType[keyof FilterType]} */
-  #previousFilterType = FilterType.EVERYTHING; // Предыдущий выбранный фильтр (по-умолчанию - EVERYTHING);
+
+  #points = null;
+
   /** @type {SortType[keyof SortType]} Предыдущая сортировка (по-умолчанию - DAY) */
   #previousSortType = SortType.DAY;
 
-  constructor() {
+  constructor({ pointsModel, filterModel }) {
     this.#tripEventsContainer = document.querySelector(CSSClasses.TRIP_EVENTS); // Общий контейнер для событий
     this.#tripEventsListContainer = new TripEventsListView(); // Контейнер для списка точек маршрута
-    this.#pointsModel = new PointsModel(); // Модель для получения данных о точках маршрута
+    this.#pointsModel = pointsModel;
+    this.#filterModel = filterModel;
+  }
+
+  get points() {
+    const filterType = this.#filterModel.filter;
+    const filteredPoints = filters[filterType](this.#points);
+
+    return filteredPoints;
   }
 
   init() {
@@ -33,10 +40,6 @@ export default class TripContentPresenter {
     this.#points = sorts[this.#previousSortType](this.#points);
 
     this.#renderTripBoard();
-  }
-
-  get points() {
-    return this.#points;
   }
 
   reRenderEventPoints(points) {
@@ -89,7 +92,7 @@ export default class TripContentPresenter {
 
   /** Обработчики */
   #pointChangeHandler = (changedPoint) => {
-    this.#points = updateItem(this.#points, changedPoint); // Обновляем информацию о точке в общем списке
+    this.#points = this.#pointsModel.updatePoint(changedPoint); // Обновляем информацию о точке в общем списке
     this.#pointPresenters.get(changedPoint.id).init(changedPoint); // Перерисовываем точку
   };
 

@@ -61,7 +61,7 @@ export default class TripPointPresenter {
       onCancelEditCallback: this.#pointCancelEditHandler,
       onSubmitCallback: this.#pointSubmitHandler,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
-      onDestinationChangeHandler: this.#pointDestinationChangeHandler,
+      onDestinationChangeCallback: this.#pointDestinationChangeHandler,
       onDatesChangeCallback: this.#pointDatesChangeHandler,
     });
 

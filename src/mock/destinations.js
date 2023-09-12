@@ -4,8 +4,8 @@ import {
   getIDs
 } from '../utils/utils.js';
 
-const CITY_NAMES = ['Moskow', 'London', 'Amsterdam', 'New Zealand'];
-const RANDOM_PHOTOS_SERVICE_URL = 'https://loremflickr.com/248/152?random=';
+import { CITY_NAMES, RANDOM_PHOTOS_SERVICE_URL } from '../utils/const.js';
+
 const PhotoCount = {MIN: 0, MAX: 4};
 const PhotoAltLength = {MIN: 30, MAX: 100};
 const destinationDescriptions = [
