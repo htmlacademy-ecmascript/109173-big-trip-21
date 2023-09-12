@@ -1,6 +1,6 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { POINT_TYPES, BLANK_POINT } from '../mock/way-point.js';
-import { DateFormats, upperCaseFirst, findObjectByID, getIDs } from '../utils/utils.js';
+import { DateFormats, upperCaseFirst, findObjectByID } from '../utils/utils.js';
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -178,7 +178,8 @@ export default class EditPointView extends AbstractStatefulView {
   #datepickrTo = null;
 
   #onSubmitCallback = null;
-  #onFinishEditCallback = null;
+  #onStateChangeCallback = null;
+  #onCancelEditCallback = null;
   #onTypeChangeCallback = null;
   #onDestinationChangeCallback = null;
   // #onDatesChangeCallback = null;
@@ -193,7 +194,7 @@ export default class EditPointView extends AbstractStatefulView {
     destinationsList,
     typeOffersList,
     onSubmitCallback,
-    onFinishEditCallback,
+    onCancelEditCallback,
     onTypeChangeCallback,
     onDestinationChangeHandler}) {
     super();
@@ -201,7 +202,7 @@ export default class EditPointView extends AbstractStatefulView {
     this._setState(EditPointView.convertDataToState({...point, destinationsList, typeOffersList})); // <- Проблема с офферами тут. offers перезаписывает point.offers !!!!
     this.#point = point;
     this.#onSubmitCallback = onSubmitCallback;
-    this.#onFinishEditCallback = onFinishEditCallback;
+    this.#onCancelEditCallback = onCancelEditCallback;
     this.#onTypeChangeCallback = onTypeChangeCallback;
     // this.#onDatesChangeCallback = onDatesChangeCallback;
     this.#onDestinationChangeCallback = onDestinationChangeHandler;
@@ -221,7 +222,7 @@ export default class EditPointView extends AbstractStatefulView {
       .addEventListener('submit', this.#pointSubmitHandler);
     this.element
       .querySelector(CSSClasses.ROLLUP_BTN)
-      .addEventListener('click', this.#pointFinishEditHandler);
+      .addEventListener('click', this.#pointCancelEditHandler);
     this.element
       .querySelector(CSSClasses.POINT_TYPE)
       .addEventListener('change', this.#pointTypeChangeHandler);
@@ -269,17 +270,10 @@ export default class EditPointView extends AbstractStatefulView {
     });
   }
 
-  #getCheckedOffersIDs(offers) {
-    const checkedOffers = offers.filter((offer) => offer.checked);
-    return getIDs(checkedOffers);
-  }
-
   /*
     TODO: Пока пользователь не отправил форму - нам всего лишь нужно перерисовывать форму
     без изменения данных на сервере, для этого можно завести метот updateView, чтобы, в случае
     отмены пользоваетелем редактирования, можно было вернуть все, как было
-    - по-прежнему перестает работать обработчик ESC, если при редактировании сменить в точке
-    пункт назначения
   */
   #pointSubmitHandler = (evt) => {
     evt.preventDefault();
@@ -289,13 +283,11 @@ export default class EditPointView extends AbstractStatefulView {
     this.#onSubmitCallback?.(updatedPoint);
   };
 
-  // TODO: Не работает восстановление типа точки
-  #pointFinishEditHandler = (evt) => {
+  #pointCancelEditHandler = (evt) => {
     evt.preventDefault();
 
     this._setState(this.#point);
-
-    this.#onFinishEditCallback?.(this.#point);
+    this.#onCancelEditCallback?.(this.#point);
   };
 
   #pointTypeChangeHandler = (evt) => {
@@ -307,9 +299,9 @@ export default class EditPointView extends AbstractStatefulView {
       return;
     }
 
-    const chosedPointType = upperCaseFirst(evt.target.value);
+    const chosePointType = upperCaseFirst(evt.target.value);
 
-    this.#onTypeChangeCallback?.(chosedPointType);
+    this.#onTypeChangeCallback?.(chosePointType);
   };
 
   #dateFromChangeHandler = (_, dateStr) => {
@@ -320,7 +312,6 @@ export default class EditPointView extends AbstractStatefulView {
     this._setState({dateTo: dateStr});
   };
 
-  // TODO: При изменении пункта назначения, пропадает обработчик на ESC - поправить
   #pointDestinationChangeHandler = (evt) => {
     const target = evt.target;
     const newDestination = this._state.destinationsList.find((destination) => destination.name === target.value);
@@ -365,8 +356,8 @@ export default class EditPointView extends AbstractStatefulView {
       typeOffersList,
       dates
     } = data;
-    const dateFrom = dates.start.format(DateFormats.CHOSED_DATE);
-    const dateTo = dates.end.format(DateFormats.CHOSED_DATE);
+    const dateFrom = dayjs(dates.start, DateFormats.CHOSED_DATE).format(DateFormats.CHOSED_DATE);
+    const dateTo = dayjs(dates.end, DateFormats.CHOSED_DATE).format(DateFormats.CHOSED_DATE);
 
     return {
       type,
@@ -396,8 +387,8 @@ export default class EditPointView extends AbstractStatefulView {
       destination: destination.id || '',
       offers,
       dates: {
-        start: dayjs(dateFrom, DateFormats.CHOSED_DATE),
-        end: dayjs(dateTo, DateFormats.CHOSED_DATE)
+        start: dateFrom,
+        end: dateTo
       }
     };
   }

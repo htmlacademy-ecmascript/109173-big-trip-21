@@ -97,20 +97,6 @@ export default class TripContentPresenter {
     this.#pointPresenters.forEach((pointPresenter) => pointPresenter.reset());
   };
 
-  // #filterChangeHandler = (filterType) => {
-  //   const filterName = upperCaseFirst(filterType);
-
-  //   // Исключаем клик по одному и тому же фильтру
-  //   if (this.#previousFilterType === filterName) {
-  //     return;
-  //   }
-
-  //   const filteredPoints = filters[filterName](this.points);
-
-  //   this.#previousFilterType = filterType;
-  //   this.reRenderEventPoints(filteredPoints);
-  // };
-
   #sortChangeHandler = (sortType) => {
     if(this.#previousSortType === sortType) {
       return;

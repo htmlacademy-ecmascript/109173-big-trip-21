@@ -60,18 +60,6 @@ function getRandomBoolean() {
   return Boolean(getRandomInt(0, 1));
 }
 
-// TODO: Неверно считает - переделать
-// function getFormattedDateDiff(date1, date2) {
-//   const dateDiff = Math.abs(dayjs(date2).diff(date1));
-//   let formattedDate = dayjs.duration(dateDiff).format('DD[D] HH[H] mm[M]');
-//   const filterredNums = formattedDate.filter((datePart) => !/00\w/.test(datePart));
-
-//   // console.log(date1, date2, dateDiff, formattedDate);
-//   // console.log(date1, date2, dateDiff, parseDateFromMillis(dateDiff));
-
-//   return filterredNums.join(' ');
-// }
-
 // Получаем текущую дату с рандомным смещением в днях (в прошлое)
 let baseDate = dayjs().subtract(getRandomInt(0, Duration.DAY), 'days');
 
@@ -92,12 +80,14 @@ function getMockDate(addOffset = false) {
       .add(daysOffset, 'h');
   }
 
-  return baseDate;
+  return baseDate.format(DateFormats.CHOSED_DATE);
 }
 
 // v.2 (на нативной функции)
 function getFormattedDateDiff(date1, date2) {
-  const dateDiff = getDateDiff(date1, date2);
+  const dateFrom = dayjs(date1);
+  const dateTo = dayjs(date2);
+  const dateDiff = getDateDiff(dateFrom, dateTo);
   const formattedDate = parseDateFromMillis(dateDiff);
   const formattedNums = [`${formattedDate.days}D`, `${formattedDate.hours}H`, `${formattedDate.minutes}M`];
   const filteredNums = Array.from(formattedNums).filter((datePart) => !/00\w/.test(datePart));
@@ -105,8 +95,8 @@ function getFormattedDateDiff(date1, date2) {
   return filteredNums.join(' ');
 }
 
-function getDateDiff(date1, date2) {
-  return Math.abs(dayjs(date2).diff(date1));
+function getDateDiff(dateFrom, dateTo) {
+  return Math.abs(dateTo.diff(dateFrom));
 }
 
 // Функция для получения дней, часов и минут в миллисекундах

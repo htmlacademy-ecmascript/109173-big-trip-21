@@ -1,6 +1,10 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { getFormattedDateDiff, DateFormats, findObjectByID } from '../utils/utils.js';
+
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
 
 const CSSClasses = {ROLLUP_BTN: '.event__rollup-btn', FAVORITE_BTN: '.event__favorite-btn'};
 
@@ -32,13 +36,14 @@ function createTripEventsListTemplate({
 
   const destinationInfo = findObjectByID(destination, destinationsList);
   const offersTemplate = offers.size > 0 ? createOffersTemplate(offers, typeOffersList) : '';
-  const dateFrom = dayjs(dates.start);
-  const dateTo = dayjs(dates.end);
+  const dateFrom = dayjs(dates.start, DateFormats.CHOSED_DATE);
+  const dateTo = dayjs(dates.end, DateFormats.CHOSED_DATE);
   const pointDate = dateFrom.format(DateFormats.FOR_POINT);
   const dateStart = dateFrom.format(DateFormats.FOR_POINT_PERIODS);
   const dateEnd = dateTo.format(DateFormats.FOR_POINT_PERIODS);
   const dateTimeStart = dateFrom.format(DateFormats.DATE_TIME);
   const dateTimeEnd = dateTo.format(DateFormats.DATE_TIME);
+  const datesDiff = getFormattedDateDiff(dateFrom, dateTo);
 
   return /*html*/`
     <li class="trip-events__item">
@@ -54,7 +59,7 @@ function createTripEventsListTemplate({
             &mdash;
             <time class="event__end-time" datetime="${dateTimeEnd}">${dateEnd}</time>
           </p>
-          <p class="event__duration">${getFormattedDateDiff(dates.start, dates.end)}</p>
+          <p class="event__duration">${datesDiff}</p>
         </div>
         <p class="event__price">
           &euro;&nbsp;<span class="event__price-value">${cost}</span>
