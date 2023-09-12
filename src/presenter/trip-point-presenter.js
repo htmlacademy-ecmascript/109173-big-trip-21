@@ -6,9 +6,8 @@ import EditPointView from '../view/edit-point-view.js';
 
 export default class TripPointPresenter {
   #point = null;
+  #pointDefaultState = null;
   #pointsContainer = null;
-  #destinationsList = null;
-  #offersList = null;
 
   #pointComponent = null;
   #editPointComponent = null;
@@ -20,6 +19,7 @@ export default class TripPointPresenter {
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
   #onTypeChangeCallback = null;
+  #onDestinationChangeHandler = null;
 
   constructor(pointPresenterData) {
     this.#pointsContainer = pointPresenterData.container;
@@ -28,9 +28,22 @@ export default class TripPointPresenter {
   }
 
   init(point) {
-    this.#point = point;
-    this.#destinationsList = getDestinations();
-    this.#offersList = getOffersByType(this.#point.type);
+    /**
+     * Если не копировать точку, то при изменении типа в pointTypeChangeHandler
+     * this.#point.type на новый, по какой-то причине меняется и копия в
+     * this.#pointDefaultState <-- Выяснить?
+     */
+    this.#point = structuredClone(point);
+
+    if(this.#pointDefaultState === null) { // Сохранение точки для возможности последующего восстановления
+      this.#pointDefaultState = structuredClone(point);
+    }
+
+    const pointData = {
+      point: this.#point,
+      destinationsList: getDestinations(),
+      typeOffersList: getOffersByType(this.#point.type),
+    };
 
     // Компоненты предыдущей точки маршрута
     this.#prevPointComponent = this.#pointComponent;
@@ -38,21 +51,19 @@ export default class TripPointPresenter {
 
     // Компоненты текущей точки маршрута
     this.#pointComponent = new TripEventsListItemView({
-      point: this.#point,
-      destinationsList: this.#destinationsList,
-      offersList: this.#offersList,
+      ...pointData,
       onEditCallback: this.#pointEditHandler,
       onFavoriteCallback: this.#favoriteClickHandler,
-    }); // Точка маршрута
+    });
 
     this.#editPointComponent = new EditPointView({
-      point: this.#point,
-      destinationsList: this.#destinationsList,
-      offersList: this.#offersList,
-      onFinishEditCallback: this.#pointFinishEditHandler,
+      ...pointData,
+      onCancelEditCallback: this.#pointCancelEditHandler,
       onSubmitCallback: this.#pointSubmitHandler,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
-    }); // Форма редактирования точки маршрута
+      onDestinationChangeHandler: this.#pointDestinationChangeHandler,
+      onDatesChangeCallback: this.#pointDatesChangeHandler,
+    });
 
     if(this.#prevPointComponent === null && this.#prevEditPointComponent === null) {
       // Отрисовка новой точки маршрута
@@ -81,16 +92,20 @@ export default class TripPointPresenter {
     return this.#pointIsEditing;
   }
 
+  #updateView = (updatedPoint) => {
+    // Метод для визуального обновления view (без изменения данных)
+    // необходим для возможности вернуть точку к первоначальному состоянию
+    this.init(updatedPoint);
+  };
+
   // Используем функцию, т.к. нужно поднятие
   #replacePointToForm() {
     replace(this.#editPointComponent, this.#pointComponent);
-
     this.#pointIsEditing = true;
   }
 
   #replaceFormToPoint() {
     replace(this.#pointComponent, this.#editPointComponent);
-
     this.#pointIsEditing = false;
   }
 
@@ -106,16 +121,18 @@ export default class TripPointPresenter {
     this.destroy(this.#prevPointComponent, this.#prevEditPointComponent);
   }
 
+  /** Обработчики */
   #documentKeyDownHandler = (evt) => {
-    if (isEscKey(evt) && this.#pointIsEditing) {
-      evt.preventDefault();
-      this.#replaceFormToPoint();
+    if (!isEscKey(evt) || !this.#pointIsEditing) {
+      return;
     }
+
+    evt.preventDefault();
+    this.#pointCancelEditHandler();
 
     document.removeEventListener('keydown', this.#documentKeyDownHandler);
   };
 
-  /** Обработчики */
   #pointEditHandler = () => {
     document.addEventListener('keydown', this.#documentKeyDownHandler);
 
@@ -123,24 +140,47 @@ export default class TripPointPresenter {
     this.#replacePointToForm();
   };
 
-  #pointFinishEditHandler = () => { // Пока Callback такой же, как и для отправки формы, но, наверняка дальше они будут разными
+  #pointCancelEditHandler = () => { // Пока Callback такой же, как и для отправки формы, но, наверняка дальше они будут разными
+    this.#point = this.#pointDefaultState;
+
+    this.#updateView(this.#point);
     this.#replaceFormToPoint();
   };
 
-  #favoriteClickHandler = () => {
-    this.#point.isFavorite = !this.#point.isFavorite;
+  #favoriteClickHandler = (isFavorite) => {
+    this.#point.isFavorite = isFavorite;
+    this.#pointDefaultState.isFavorite = isFavorite;
     this.#onChangeCallback(this.#point);
   };
 
   #pointTypeChangeHandler = (pointType) => {
-    const newOffers = getOffersByType(pointType).offers;
+    // const newOffers = getUniqRandomArrayElements(getOffersByType(pointType));
+    // const newOffersIDs = new Set(getIDs(newOffers));
+    const newOffersIDs = new Set(); // Реализация сброса выбранных офферов, при смене типа поинта
 
     this.#point.type = pointType;
-    this.#point.offers = newOffers;
+    this.#point.offers = newOffersIDs;
+    this.#updateView(this.#point);
+  };
+
+  #pointDestinationChangeHandler = (newDestination) => {
+    document.addEventListener('keydown', this.#documentKeyDownHandler);
+
+    this.#point.destination = newDestination;
+    this.#updateView(this.#point);
+  };
+
+  #pointDatesChangeHandler = (newDates) => {
+    this.#point.dates = newDates;
     this.#onChangeCallback(this.#point);
   };
 
-  #pointSubmitHandler = () => {
+  #pointSubmitHandler = (updatedPoint) => {
+    this.#point = {...this.#point, ...updatedPoint};
+
+    this.#pointDefaultState = null;
+
+    this.#onChangeCallback(this.#point);
     this.#replaceFormToPoint();
   };
 }

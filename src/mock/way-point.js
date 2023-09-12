@@ -3,7 +3,8 @@ import {
   getRandomArrayElement,
   getRandomBoolean,
   getMockDate,
-  getIDs
+  getIDs,
+  getUniqRandomArrayElements
 } from '../utils/utils.js';
 
 import {createDestinations, getRandomDestination } from '../mock/destinations.js';
@@ -26,8 +27,9 @@ const destinations = createDestinations();
 
 // TODO - поменять структуру согласно https://21.objects.pages.academy/spec/big-trip#get-/big-trip/points
 function createPoint(pointType) {
-  const pointOffers = getOffersByType(pointType);
-  const pointOffersIDs = getIDs(pointOffers);
+  const pointTypeOffers = getOffersByType(pointType);
+  const pointOffers = getUniqRandomArrayElements(pointTypeOffers);
+  const pointOffersIDs = new Set(getIDs(pointOffers));
 
   return {
     id: crypto.randomUUID(),
@@ -42,10 +44,6 @@ function createPoint(pointType) {
     cost: getRandomInt(PointPrice.MIN, PointPrice.MAX), // <- заменить на base_price
     isFavorite: getRandomBoolean(),
   };
-}
-
-function getBlankPoint() {
-  return BLANK_POINT;
 }
 
 function getRandomPoint() {
@@ -68,7 +66,7 @@ function getOffersByType(pointType) {
 
 export {
   POINT_TYPES,
-  getBlankPoint,
+  BLANK_POINT,
   getRandomPoint,
   getOffersByType,
   getOffers,

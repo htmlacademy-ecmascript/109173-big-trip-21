@@ -1,15 +1,16 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { getFormattedDateDiff, DateFormats, findObjectByID } from '../utils/utils.js';
 
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
+
 const CSSClasses = {ROLLUP_BTN: '.event__rollup-btn', FAVORITE_BTN: '.event__favorite-btn'};
 
-function createOffersTemplate(offers) {
-  if (!offers) {
-    return;
-  }
-
-  return offers.map(({title, price, checked}) => {
-    if (checked) {
+function createOffersTemplate(offers, offersList) {
+  return offersList.map(({id, title, price}) => {
+    if (offers.has(id)) {
       return /* html */`
         <li class="event__offer">
           <span class="event__offer-title">${title}</span>
@@ -26,23 +27,28 @@ function createOffersTemplate(offers) {
 function createTripEventsListTemplate({
   type,
   destination,
+  offers,
   dates,
   cost,
   isFavorite,
   destinationsList,
-  offersList}) {
+  typeOffersList}) {
+
   const destinationInfo = findObjectByID(destination, destinationsList);
-  const offersTemplate = createOffersTemplate(offersList);
-  const dateForPoint = dates.start.format(DateFormats.FOR_POINT);
-  const dateStart = dates.start.format(DateFormats.FOR_POINT_PERIODS);
-  const dateEnd = dates.end.format(DateFormats.FOR_POINT_PERIODS);
-  const dateTimeStart = dates.start.format(DateFormats.DATE_TIME);
-  const dateTimeEnd = dates.end.format(DateFormats.DATE_TIME);
+  const offersTemplate = offers.size > 0 ? createOffersTemplate(offers, typeOffersList) : '';
+  const dateFrom = dayjs(dates.start, DateFormats.CHOSED_DATE);
+  const dateTo = dayjs(dates.end, DateFormats.CHOSED_DATE);
+  const pointDate = dateFrom.format(DateFormats.FOR_POINT);
+  const dateStart = dateFrom.format(DateFormats.FOR_POINT_PERIODS);
+  const dateEnd = dateTo.format(DateFormats.FOR_POINT_PERIODS);
+  const dateTimeStart = dateFrom.format(DateFormats.DATE_TIME);
+  const dateTimeEnd = dateTo.format(DateFormats.DATE_TIME);
+  const datesDiff = getFormattedDateDiff(dateFrom, dateTo);
 
   return /*html*/`
     <li class="trip-events__item">
       <div class="event">
-        <time class="event__date" datetime="${dates.start}">${dateForPoint}</time>
+        <time class="event__date" datetime="${dateTimeStart}">${pointDate}</time>
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
         </div>
@@ -53,7 +59,7 @@ function createTripEventsListTemplate({
             &mdash;
             <time class="event__end-time" datetime="${dateTimeEnd}">${dateEnd}</time>
           </p>
-          <p class="event__duration">${getFormattedDateDiff(dates.start, dates.end)}</p>
+          <p class="event__duration">${datesDiff}</p>
         </div>
         <p class="event__price">
           &euro;&nbsp;<span class="event__price-value">${cost}</span>
@@ -86,12 +92,12 @@ export default class TripEventsListItemView extends AbstractView {
   constructor({
     point,
     destinationsList,
-    offersList,
+    typeOffersList,
     onEditCallback,
     onFavoriteCallback}) {
     super();
 
-    this.#templateData = {...point, destinationsList, offersList};
+    this.#templateData = {...point, destinationsList, typeOffersList};
     this.#onEditCallback = onEditCallback;
     this.#onFavoriteCallback = onFavoriteCallback;
 
@@ -103,15 +109,13 @@ export default class TripEventsListItemView extends AbstractView {
     return createTripEventsListTemplate(this.#templateData);
   }
 
-  #pointEditBtnHandler = (evt) => {
-    evt.preventDefault();
-
+  #pointEditBtnHandler = () => {
     this.#onEditCallback?.();
   };
 
-  #pointFavoriteClickHandler = (evt) => {
-    evt.preventDefault();
+  #pointFavoriteClickHandler = () => {
+    this.#templateData.isFavorite = !this.#templateData.isFavorite;
 
-    this.#onFavoriteCallback?.();
+    this.#onFavoriteCallback?.(this.#templateData.isFavorite);
   };
 }
