@@ -1,5 +1,6 @@
 import { render, replace, remove } from '../framework/render.js';
 import { isEscKey } from '../utils/utils.js';
+import { ActionType, UpdateType } from '../utils/const.js';
 import { getOffersByType, getDestinations} from '../mock/way-point.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
@@ -61,8 +62,7 @@ export default class TripPointPresenter {
       onCancelEditCallback: this.#pointCancelEditHandler,
       onSubmitCallback: this.#pointSubmitHandler,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
-      onDestinationChangeCallback: this.#pointDestinationChangeHandler,
-      onDatesChangeCallback: this.#pointDatesChangeHandler,
+      onDestinationChangeCallback: this.#pointDestinationChangeHandler
     });
 
     if(this.#prevPointComponent === null && this.#prevEditPointComponent === null) {
@@ -150,12 +150,14 @@ export default class TripPointPresenter {
   #favoriteClickHandler = (isFavorite) => {
     this.#point.isFavorite = isFavorite;
     this.#pointDefaultState.isFavorite = isFavorite;
-    this.#onChangeCallback(this.#point);
+    this.#onChangeCallback(
+      ActionType.UPDATE_POINT,
+      UpdateType.PATCH,
+      this.#point
+    );
   };
 
   #pointTypeChangeHandler = (pointType) => {
-    // const newOffers = getUniqRandomArrayElements(getOffersByType(pointType));
-    // const newOffersIDs = new Set(getIDs(newOffers));
     const newOffersIDs = new Set(); // Реализация сброса выбранных офферов, при смене типа поинта
 
     this.#point.type = pointType;
@@ -170,17 +172,16 @@ export default class TripPointPresenter {
     this.#updateView(this.#point);
   };
 
-  #pointDatesChangeHandler = (newDates) => {
-    this.#point.dates = newDates;
-    this.#onChangeCallback(this.#point);
-  };
-
   #pointSubmitHandler = (updatedPoint) => {
     this.#point = {...this.#point, ...updatedPoint};
 
     this.#pointDefaultState = null;
 
-    this.#onChangeCallback(this.#point);
+    this.#onChangeCallback(
+      ActionType.UPDATE_POINT,
+      UpdateType.PATCH,
+      this.#point,
+    );
     this.#replaceFormToPoint();
   };
 }

@@ -167,16 +167,15 @@ function createEditPointTemplate({
 }
 export default class EditPointView extends AbstractStatefulView {
   #point = null;
+  #destinationsList = null;
+  #typeOffersList = null;
   #datepickrFrom = null;
   #datepickrTo = null;
 
   #onSubmitCallback = null;
-  #onStateChangeCallback = null;
   #onCancelEditCallback = null;
   #onTypeChangeCallback = null;
   #onDestinationChangeCallback = null;
-  // #onDatesChangeCallback = null;
-  // #onPriceChangeCallback = null;
 
   /**
    * Создание/Редкатирование точки маршрута
@@ -192,14 +191,17 @@ export default class EditPointView extends AbstractStatefulView {
     onDestinationChangeCallback}) {
     super();
 
-    this._setState(EditPointView.convertDataToState({...point, destinationsList, typeOffersList})); // <- Проблема с офферами тут. offers перезаписывает point.offers !!!!
+    const convertedData = EditPointView.convertDataToState({...point, destinationsList, typeOffersList});
+
+    this._setState(convertedData);
     this.#point = point;
+    this.#destinationsList = destinationsList;
+    this.#typeOffersList = typeOffersList;
+
     this.#onSubmitCallback = onSubmitCallback;
-    this.#onCancelEditCallback = onCancelEditCallback;
     this.#onTypeChangeCallback = onTypeChangeCallback;
-    // this.#onDatesChangeCallback = onDatesChangeCallback;
     this.#onDestinationChangeCallback = onDestinationChangeCallback;
-    // this.#onPriceChangeHandler = onPriceChangeHandler;
+    this.#onCancelEditCallback = onCancelEditCallback;
 
     this.#initDatepickr();
     this._restoreHandlers();
@@ -263,11 +265,6 @@ export default class EditPointView extends AbstractStatefulView {
     });
   }
 
-  /*
-    TODO: Пока пользователь не отправил форму - нам всего лишь нужно перерисовывать форму
-    без изменения данных на сервере, для этого можно завести метот updateView, чтобы, в случае
-    отмены пользоваетелем редактирования, можно было вернуть все, как было
-  */
   #pointSubmitHandler = (evt) => {
     evt.preventDefault();
 
@@ -279,7 +276,15 @@ export default class EditPointView extends AbstractStatefulView {
   #pointCancelEditHandler = (evt) => {
     evt.preventDefault();
 
-    this._setState(this.#point);
+    const destinationsList = this.#destinationsList;
+    const typeOffersList = this.#typeOffersList;
+    const convertedData = EditPointView.convertDataToState({
+      ...this.#point,
+      destinationsList,
+      typeOffersList
+    });
+
+    this.updateElement(convertedData);
     this.#onCancelEditCallback?.(this.#point);
   };
 

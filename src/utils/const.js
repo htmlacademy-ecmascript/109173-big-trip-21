@@ -24,6 +24,17 @@ const FLATPIKR_SETTINGS = {
   'time_24hr': true,
   // 'locale': Russian
 };
+const ActionType = {
+  CREATE_POINT: 'ADD_POINT',
+  UPDATE_POINT: 'EDIT_POINT',
+  DELETE_POINT: 'DELETE_POINT',
+};
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR'
+};
+
 
 const TRIP_EVENTS_LIST_TEMPLATE = '<ul class="trip-events__list"></ul>';
 const TRIP_INFO_TEMPLATE = '<section class="trip-main__trip-info  trip-info"></section>';
@@ -37,5 +48,7 @@ export {
   POINTS_COUNT,
   FLATPIKR_SETTINGS,
   TRIP_EVENTS_LIST_TEMPLATE,
-  TRIP_INFO_TEMPLATE
+  TRIP_INFO_TEMPLATE,
+  ActionType,
+  UpdateType
 };
