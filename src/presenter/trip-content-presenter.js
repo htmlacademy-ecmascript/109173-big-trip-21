@@ -1,4 +1,4 @@
-import { render } from '../framework/render.js';
+import { render, remove } from '../framework/render.js';
 import { filters } from '../utils/filter.js';
 import { SortType, sorts } from '../utils/sort.js';
 import { ActionType, UpdateType } from '../utils/const.js';
@@ -13,6 +13,9 @@ export default class TripContentPresenter {
   #tripEventsContainer = null;
   #tripEventsListContainer = null;
 
+  #sortComponent = null;
+  #noPointsComponent = null;
+
   #pointsModel = null;
   #filterModel = null;
 
@@ -24,6 +27,7 @@ export default class TripContentPresenter {
   constructor({ pointsModel, filterModel }) {
     this.#tripEventsContainer = document.querySelector(CSSClasses.TRIP_EVENTS); // Общий контейнер для событий
     this.#tripEventsListContainer = new TripEventsListView(); // Контейнер для списка точек маршрута
+
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
 
@@ -76,14 +80,26 @@ export default class TripContentPresenter {
     }
   }
 
+  #reRenderTripBoard() {
+    this.#clearEventPoints();
+
+    remove(this.#sortComponent);
+    remove(this.#noPointsComponent);
+
+    this.init();
+  }
+
   #renderSort() {
-    render(new TripSortView({
+    this.#sortComponent = new TripSortView({
       onChangeCallback: this.#sortChangeHandler
-    }), this.#tripEventsContainer);
+    });
+
+    render(this.#sortComponent, this.#tripEventsContainer);
   }
 
   #renderNoPoints() {
-    render(new TripEventsListEmptyView(), this.#tripEventsListContainer.element);
+    this.#noPointsComponent = new TripEventsListEmptyView();
+    render(this.#noPointsComponent, this.#tripEventsListContainer.element);
   }
 
   #renderEventPoints(points) {
@@ -101,9 +117,10 @@ export default class TripContentPresenter {
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 
-  #reRenderEventPoints(points) {
+  // По-умолчанию - передаем пустой объект, т.к. иначе получим ошибку
+  #reRenderEventPoints() {
     this.#clearEventPoints();
-    this.#renderEventPoints(points);
+    this.#renderEventPoints(this.points);
   }
 
   #clearEventPoints() {
@@ -145,12 +162,13 @@ export default class TripContentPresenter {
 
       case UpdateType.MINOR: {
         // Перерисовываем весь список точек (возможно, после сабмита, т.к. может измениться дата и порядок точки в списке?)
-        this.#reRenderEventPoints(this.points);
+        this.#reRenderEventPoints();
         break;
       }
 
       case UpdateType.MAJOR: {
-        // Перерисовываем всю страницу (пока непонятно, для чего это можно использовать)
+        // Перерисовываем весь список точек + сбрасываем сортировку (перерисовать всю доску)
+        this.#reRenderTripBoard();
         break;
       }
     }
@@ -166,6 +184,6 @@ export default class TripContentPresenter {
     }
 
     this.#currentSortType = sortType;
-    this.#reRenderEventPoints(this.points);
+    this.#reRenderEventPoints();
   };
 }

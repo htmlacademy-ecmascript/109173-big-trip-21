@@ -63,7 +63,7 @@ export default class TripFilterPresenter {
     const capitalizedFilterName = upperCaseFirst(filterType);
 
     this.#filterModel.setFilter(
-      UpdateType.MINOR,
+      UpdateType.MAJOR,
       capitalizedFilterName
     );
   };

@@ -13,7 +13,12 @@ const SortType = Object.freeze({
 });
 
 const sorts = {
-  [SortType.DAY]: (points) => [...points].sort((pointA, pointB) => dayjs(pointB.dates.start, DateFormats.CHOSED_DATE) - dayjs(pointA.dates.start, DateFormats.CHOSED_DATE)),
+  [SortType.DAY]: (points) => [...points].sort((pointA, pointB) => {
+    const pointBDateFrom = dayjs(pointB.dates.start, DateFormats.CHOSED_DATE);
+    const pointADateFrom = dayjs(pointA.dates.start, DateFormats.CHOSED_DATE);
+
+    return pointBDateFrom - pointADateFrom;
+  }),
   [SortType.EVENT]: (points) => points,
   [SortType.TIME]: (points) => [...points].sort((pointA, pointB) => {
     const pointADateFrom = dayjs(pointA.dates.start, DateFormats.CHOSED_DATE);
@@ -21,7 +26,7 @@ const sorts = {
     const pointBDateFrom = dayjs(pointA.dates.start, DateFormats.CHOSED_DATE);
     const pointBDateTo = dayjs(pointB.dates.start, DateFormats.CHOSED_DATE);
 
-    return getDateDiff(pointBDateFrom, pointADateTo) - getDateDiff(pointADateFrom, pointBDateTo);
+    return getDateDiff(pointADateFrom, pointBDateTo) - getDateDiff(pointBDateFrom, pointADateTo);
   }),
   [SortType.PRICE]: (points) => [...points].sort((pointA, pointB) => pointB.cost - pointA.cost),
   [SortType.OFFERS]: (points) => points,
