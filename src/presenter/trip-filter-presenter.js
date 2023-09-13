@@ -1,6 +1,7 @@
 import TripFilterView from '../view/trip-filter-view.js';
 import { render, replace, remove } from '../framework/render.js';
 import { upperCaseFirst } from '../utils/utils.js';
+import { UpdateType } from '../utils/const.js';
 import { FilterType, filters } from '../utils/filter.js';
 
 export default class TripFilterPresenter {
@@ -61,6 +62,9 @@ export default class TripFilterPresenter {
 
     const capitalizedFilterName = upperCaseFirst(filterType);
 
-    this.#filterModel.setFilter(capitalizedFilterName);
+    this.#filterModel.setFilter(
+      UpdateType.MINOR,
+      capitalizedFilterName
+    );
   };
 }

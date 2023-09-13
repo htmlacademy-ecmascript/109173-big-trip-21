@@ -24,6 +24,6 @@ const tripFilterPresenter = new TripFilterPresenter({
 const tripHeaderPresenter = new TripHeaderPresenter({ mainContainer });
 const tripContentPresenter = new TripContentPresenter({ pointsModel, filterModel });
 
-tripHeaderPresenter.init(tripContentPresenter);
+tripHeaderPresenter.init();
 tripFilterPresenter.init();
 tripContentPresenter.init();

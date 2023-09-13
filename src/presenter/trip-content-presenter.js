@@ -18,8 +18,6 @@ export default class TripContentPresenter {
 
   #pointPresenters = new Map();
 
-  #points = null;
-
   /** @type {SortType[keyof SortType]} Предыдущая сортировка (по-умолчанию - DAY) */
   #currentSortType = SortType.DAY;
 
@@ -29,12 +27,13 @@ export default class TripContentPresenter {
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
 
+    this.#filterModel.addObserver(this.#modelChangeHandler);
     this.#pointsModel.addObserver(this.#modelChangeHandler);
   }
 
   get points() {
-    const filterType = this.#filterModel.filter;
-    const filteredPoints = filters[filterType](this.#points);
+    const currentFilter = this.#filterModel.filter;
+    const filteredPoints = filters[currentFilter](this.#pointsModel.points);
 
     switch(this.#currentSortType) {
       case SortType.DAY: {
@@ -62,15 +61,7 @@ export default class TripContentPresenter {
   }
 
   init() {
-    this.#points = [...this.#pointsModel.points]; // Копируем полученный из модели массив с точками маршрута
-    this.#points = sorts[this.#currentSortType](this.#points);
-
     this.#renderTripBoard();
-  }
-
-  reRenderEventPoints(points) {
-    this.#clearEventPoints();
-    this.#renderEventPoints(points);
   }
 
   #renderTripBoard() {
@@ -78,8 +69,8 @@ export default class TripContentPresenter {
 
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
 
-    if (this.#points.length > 0) {
-      this.#renderEventPoints(this.#points);
+    if (this.points.length > 0) {
+      this.#renderEventPoints(this.points);
     } else {
       this.#renderNoPoints();
     }
@@ -95,7 +86,6 @@ export default class TripContentPresenter {
     render(new TripEventsListEmptyView(), this.#tripEventsListContainer.element);
   }
 
-  // Отрисовываем события;
   #renderEventPoints(points) {
     points.forEach((point) => this.#renderEventPoint(point));
   }
@@ -103,13 +93,17 @@ export default class TripContentPresenter {
   #renderEventPoint(point) {
     const pointPresenter = new TripPointPresenter({
       container: this.#tripEventsListContainer.element,
-      // onChangeCallback: this.#pointChangeHandler, // Заменяем наш штатный метод на новый
       onChangeCallback: this.#viewChangeHandler,
       onBeforeEditCallback: this.#pointBeforeEditHandler,
     });
 
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
+  }
+
+  #reRenderEventPoints(points) {
+    this.#clearEventPoints();
+    this.#renderEventPoints(points);
   }
 
   #clearEventPoints() {
@@ -122,13 +116,6 @@ export default class TripContentPresenter {
    * Вью с моделью взаимодействует только через данный метод
    */
   #viewChangeHandler = (actionType, updateType, data) => {
-    // Вызываем методы модели в зависимости от того, какой прилетел ActionType от пользователя (шаблона)
-    // - Добавление новой точки
-    // - Обновление существующей точки
-    // - Удаление существующей точки
-
-    console.log('Шаблон изменился: ', actionType, updateType, data);
-
     switch(actionType) {
       case ActionType.CREATE_POINT: {
         this.#pointsModel.createPoint(updateType, data);
@@ -147,10 +134,8 @@ export default class TripContentPresenter {
     }
   };
 
-  #modelChangeHandler = (updateType, pointData) => { // Отслеживаем изменение данных на сервере
-    console.log('Point updated! Update type: ', updateType, ' Data: ', pointData);
-
-    // Перерисовка точек в зависимости от типа обновления
+  // Отслеживание изменения данных на сервере
+  #modelChangeHandler = (updateType, pointData) => {
     switch(updateType) {
       case UpdateType.PATCH: {
         // Перерисовываем только точку
@@ -159,24 +144,16 @@ export default class TripContentPresenter {
       }
 
       case UpdateType.MINOR: {
-        // Перерисовываем весь список точек
+        // Перерисовываем весь список точек (возможно, после сабмита, т.к. может измениться дата и порядок точки в списке?)
+        this.#reRenderEventPoints(this.points);
         break;
       }
 
       case UpdateType.MAJOR: {
-        // Перерисовываем всю страницу
+        // Перерисовываем всю страницу (пока непонятно, для чего это можно использовать)
         break;
       }
     }
-  };
-
-  #pointChangeHandler = (changedPoint) => {
-    this.#points = this.#pointsModel.updatePoint(
-      UpdateType.PATCH,
-      changedPoint
-    );
-
-    this.#pointPresenters.get(changedPoint.id).init(changedPoint); // Перерисовываем точку
   };
 
   #pointBeforeEditHandler = () => {
@@ -188,9 +165,7 @@ export default class TripContentPresenter {
       return;
     }
 
-    const sortedPoints = sorts[sortType](this.#points);
-
     this.#currentSortType = sortType;
-    this.reRenderEventPoints(sortedPoints);
+    this.#reRenderEventPoints(this.points);
   };
 }

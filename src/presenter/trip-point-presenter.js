@@ -158,10 +158,8 @@ export default class TripPointPresenter {
   };
 
   #pointTypeChangeHandler = (pointType) => {
-    const newOffersIDs = new Set(); // Реализация сброса выбранных офферов, при смене типа поинта
-
     this.#point.type = pointType;
-    this.#point.offers = newOffersIDs;
+    this.#point.offers = new Set(); // Реализация сброса выбранных офферов, при смене типа поинта
     this.#updateView(this.#point);
   };
 
@@ -174,9 +172,7 @@ export default class TripPointPresenter {
 
   #pointSubmitHandler = (updatedPoint) => {
     this.#point = {...this.#point, ...updatedPoint};
-
     this.#pointDefaultState = null;
-
     this.#onChangeCallback(
       ActionType.UPDATE_POINT,
       UpdateType.PATCH,
