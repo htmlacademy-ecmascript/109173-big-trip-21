@@ -62,7 +62,8 @@ export default class TripPointPresenter {
       onCancelEditCallback: this.#pointCancelEditHandler,
       onSubmitCallback: this.#pointSubmitHandler,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
-      onDestinationChangeCallback: this.#pointDestinationChangeHandler
+      onDestinationChangeCallback: this.#pointDestinationChangeHandler,
+      onDeletePointCallback: this.#pointDeleteHandler
     });
 
     if(this.#prevPointComponent === null && this.#prevEditPointComponent === null) {
@@ -147,16 +148,6 @@ export default class TripPointPresenter {
     this.#replaceFormToPoint();
   };
 
-  #favoriteClickHandler = (isFavorite) => {
-    this.#point.isFavorite = isFavorite;
-    this.#pointDefaultState.isFavorite = isFavorite;
-    this.#onChangeCallback(
-      ActionType.UPDATE_POINT,
-      UpdateType.PATCH,
-      this.#point
-    );
-  };
-
   #pointTypeChangeHandler = (pointType) => {
     this.#point.type = pointType;
     this.#point.offers = new Set(); // Реализация сброса выбранных офферов, при смене типа поинта
@@ -170,13 +161,32 @@ export default class TripPointPresenter {
     this.#updateView(this.#point);
   };
 
+  #favoriteClickHandler = (isFavorite) => {
+    this.#point.isFavorite = isFavorite;
+    this.#pointDefaultState.isFavorite = isFavorite;
+    this.#onChangeCallback(
+      ActionType.UPDATE_POINT,
+      UpdateType.PATCH,
+      this.#point
+    );
+  };
+
   #pointSubmitHandler = (updatedPoint) => {
-    this.#point = {...this.#point, ...updatedPoint};
+    // this.#point = {...this.#point, ...updatedPoint};
     this.#pointDefaultState = null;
     this.#onChangeCallback(
       ActionType.UPDATE_POINT,
       UpdateType.PATCH,
-      this.#point,
+      updatedPoint,
+    );
+    this.#replaceFormToPoint();
+  };
+
+  #pointDeleteHandler = (deletedPoint) => {
+    this.#onChangeCallback(
+      ActionType.DELETE_POINT,
+      UpdateType.MAJOR,
+      deletedPoint,
     );
     this.#replaceFormToPoint();
   };

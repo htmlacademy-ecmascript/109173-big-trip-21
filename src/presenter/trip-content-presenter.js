@@ -3,12 +3,11 @@ import { filters } from '../utils/filter.js';
 import { SortType, sorts } from '../utils/sort.js';
 import { ActionType, UpdateType } from '../utils/const.js';
 
-import TripSortView from '../view/trip-sort-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import TripEventsListView from '../view/trip-events-list-view.js';
 import TripEventsListEmptyView from '../view/trip-events-list-empty-view.js.js';
 
-const CSSClasses = {TRIP_EVENTS: '.trip-events'};
+
 export default class TripContentPresenter {
   #tripEventsContainer = null;
   #tripEventsListContainer = null;
@@ -18,20 +17,25 @@ export default class TripContentPresenter {
 
   #pointsModel = null;
   #filterModel = null;
+  #sortModel = null;
 
   #pointPresenters = new Map();
 
-  /** @type {SortType[keyof SortType]} Предыдущая сортировка (по-умолчанию - DAY) */
-  #currentSortType = SortType.DAY;
-
-  constructor({ pointsModel, filterModel }) {
-    this.#tripEventsContainer = document.querySelector(CSSClasses.TRIP_EVENTS); // Общий контейнер для событий
+  constructor({
+    eventsContainer,
+    pointsModel,
+    filterModel,
+    sortModel
+  }) {
+    this.#tripEventsContainer = eventsContainer;
     this.#tripEventsListContainer = new TripEventsListView(); // Контейнер для списка точек маршрута
 
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
+    this.#sortModel = sortModel;
 
     this.#filterModel.addObserver(this.#modelChangeHandler);
+    this.#sortModel.addObserver(this.#modelChangeHandler);
     this.#pointsModel.addObserver(this.#modelChangeHandler);
   }
 
@@ -39,7 +43,7 @@ export default class TripContentPresenter {
     const currentFilter = this.#filterModel.filter;
     const filteredPoints = filters[currentFilter](this.#pointsModel.points);
 
-    switch(this.#currentSortType) {
+    switch(this.#sortModel.sort) {
       case SortType.DAY: {
         return sorts[SortType.DAY](filteredPoints);
       }
@@ -69,8 +73,6 @@ export default class TripContentPresenter {
   }
 
   #renderTripBoard() {
-    this.#renderSort();
-
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
 
     if (this.points.length > 0) {
@@ -87,14 +89,6 @@ export default class TripContentPresenter {
     remove(this.#noPointsComponent);
 
     this.init();
-  }
-
-  #renderSort() {
-    this.#sortComponent = new TripSortView({
-      onChangeCallback: this.#sortChangeHandler
-    });
-
-    render(this.#sortComponent, this.#tripEventsContainer);
   }
 
   #renderNoPoints() {
@@ -176,14 +170,5 @@ export default class TripContentPresenter {
 
   #pointBeforeEditHandler = () => {
     this.#pointPresenters.forEach((pointPresenter) => pointPresenter.reset());
-  };
-
-  #sortChangeHandler = (sortType) => {
-    if(this.#currentSortType === sortType) {
-      return;
-    }
-
-    this.#currentSortType = sortType;
-    this.#reRenderEventPoints();
   };
 }

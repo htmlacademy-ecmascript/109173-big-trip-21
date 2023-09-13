@@ -22,6 +22,8 @@ export default class TripFilterPresenter {
     this.#pointsModel = pointsModel;
     this.#filterContainer = filterContainer;
     this.#currentFilter = this.#filterModel.filter;
+
+    this.#pointsModel.addObserver(this.#modelChangeHandler);
   }
 
   get filters() {
@@ -46,15 +48,27 @@ export default class TripFilterPresenter {
       return;
     }
 
-    this.#rerenderFilter();
+    this.#reRenderFilter();
   }
 
-  #rerenderFilter() {
+  #reRenderFilter() {
     replace(this.#filterComponent, this.#previousFilterComponent);
     remove(this.#previousFilterComponent);
   }
 
   /** Обработчики */
+  // Отслеживание изменения данных на сервере
+  #modelChangeHandler = (updateType, { remainingPointsCount }) => {
+    switch(updateType) {
+      case UpdateType.MAJOR: { // Отключаем фильтры, если не осталось точек
+        if(remainingPointsCount <= 0) {
+          this.init();
+        }
+        break;
+      }
+    }
+  };
+
   #filterChangeHandler = (filterType) => {
     if(this.#filterModel.filter === filterType) {
       return;

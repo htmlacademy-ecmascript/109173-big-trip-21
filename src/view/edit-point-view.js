@@ -20,6 +20,7 @@ const CSSIDs = {
 const CSSClasses = {
   EVENT_EDIT: '.event--edit',
   ROLLUP_BTN: '.event__rollup-btn',
+  DELETE_BTN: '.event__reset-btn',
   POINT_TYPE: '.event__type-list',
   DESTINATION: '.event__field-group--destination',
   OFFERS: '.event__section--offers',
@@ -172,10 +173,11 @@ export default class EditPointView extends AbstractStatefulView {
   #datepickrFrom = null;
   #datepickrTo = null;
 
-  #onSubmitCallback = null;
-  #onCancelEditCallback = null;
   #onTypeChangeCallback = null;
   #onDestinationChangeCallback = null;
+  #onSubmitCallback = null;
+  #onCancelEditCallback = null;
+  #onDeletePointCallback = null;
 
   /**
    * Создание/Редкатирование точки маршрута
@@ -185,10 +187,11 @@ export default class EditPointView extends AbstractStatefulView {
     point = BLANK_POINT,
     destinationsList,
     typeOffersList,
+    onTypeChangeCallback,
+    onDestinationChangeCallback,
     onSubmitCallback,
     onCancelEditCallback,
-    onTypeChangeCallback,
-    onDestinationChangeCallback}) {
+    onDeletePointCallback}) {
     super();
 
     const convertedData = EditPointView.convertDataToState({...point, destinationsList, typeOffersList});
@@ -198,10 +201,11 @@ export default class EditPointView extends AbstractStatefulView {
     this.#destinationsList = destinationsList;
     this.#typeOffersList = typeOffersList;
 
-    this.#onSubmitCallback = onSubmitCallback;
     this.#onTypeChangeCallback = onTypeChangeCallback;
     this.#onDestinationChangeCallback = onDestinationChangeCallback;
+    this.#onSubmitCallback = onSubmitCallback;
     this.#onCancelEditCallback = onCancelEditCallback;
+    this.#onDeletePointCallback = onDeletePointCallback;
 
     this.#initDatepickr();
     this._restoreHandlers();
@@ -218,6 +222,9 @@ export default class EditPointView extends AbstractStatefulView {
     this.element
       .querySelector(CSSClasses.ROLLUP_BTN)
       .addEventListener('click', this.#pointCancelEditHandler);
+    this.element
+      .querySelector(CSSClasses.DELETE_BTN)
+      .addEventListener('click', this.#pointDeleteHanler);
     this.element
       .querySelector(CSSClasses.POINT_TYPE)
       .addEventListener('change', this.#pointTypeChangeHandler);
@@ -264,29 +271,6 @@ export default class EditPointView extends AbstractStatefulView {
       onChange: this.#dateToChangeHandler
     });
   }
-
-  #pointSubmitHandler = (evt) => {
-    evt.preventDefault();
-
-    const updatedPoint = EditPointView.convertStateToData(this._state);
-
-    this.#onSubmitCallback?.(updatedPoint);
-  };
-
-  #pointCancelEditHandler = (evt) => {
-    evt.preventDefault();
-
-    const destinationsList = this.#destinationsList;
-    const typeOffersList = this.#typeOffersList;
-    const convertedData = EditPointView.convertDataToState({
-      ...this.#point,
-      destinationsList,
-      typeOffersList
-    });
-
-    this.updateElement(convertedData);
-    this.#onCancelEditCallback?.(this.#point);
-  };
 
   #pointTypeChangeHandler = (evt) => {
     evt.preventDefault();
@@ -344,6 +328,36 @@ export default class EditPointView extends AbstractStatefulView {
     this._setState({cost: newPrice});
   };
 
+  #pointSubmitHandler = (evt) => {
+    evt.preventDefault();
+
+    const updatedPoint = EditPointView.convertStateToData({
+      id: this.#point.id,
+      ...this._state
+    });
+
+    this.#onSubmitCallback?.(updatedPoint);
+  };
+
+  #pointCancelEditHandler = (evt) => {
+    evt.preventDefault();
+
+    const destinationsList = this.#destinationsList;
+    const typeOffersList = this.#typeOffersList;
+    const convertedData = EditPointView.convertDataToState({
+      ...this.#point,
+      destinationsList,
+      typeOffersList
+    });
+
+    this.updateElement(convertedData);
+    this.#onCancelEditCallback?.(this.#point);
+  };
+
+  #pointDeleteHanler = () => {
+    this.#onDeletePointCallback?.(this.#point);
+  };
+
   static convertDataToState(data) {
     const {
       type,
@@ -372,6 +386,7 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   static convertStateToData({
+    id,
     type,
     cost,
     destination,
@@ -380,6 +395,7 @@ export default class EditPointView extends AbstractStatefulView {
     dateTo}) {
 
     return {
+      id,
       type,
       cost,
       destination: destination.id || '',
