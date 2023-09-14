@@ -7,22 +7,26 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
 
 function createTripInfoMainTemplate({ pointsInfo }) {
-  const startPoint = pointsInfo[0];
-  const endPoint = pointsInfo[pointsInfo.length - 1];
-  let destinationsStr = '...';
-  let datesStr = '...';
+  let destinationsStr = '&mdash; ... &mdash;';
+  let datesStr = '... &mdash; ...';
 
-  if(pointsInfo.length > 3) {
-    destinationsStr = `${startPoint.destination} &mdash; ... &mdash; ${endPoint.destination}`;
-  } else {
-    destinationsStr = Object.values(pointsInfo).map((pointInfo) => pointInfo.destination).join('&mdash;');
+  if(pointsInfo.length > 0) {
+    const startPoint = pointsInfo[0];
+    const endPoint = pointsInfo[pointsInfo.length - 1];
+
+    if(pointsInfo.length > 3) {
+      destinationsStr = `${startPoint.destination} ${destinationsStr} ${endPoint.destination}`;
+    } else {
+      destinationsStr = Object.values(pointsInfo).map((pointInfo) => pointInfo.destination).join('&mdash;');
+    }
+
+    const pathDateFrom = dayjs(startPoint.dateFrom, DateFormats.PATH);
+    const pathDateTo = dayjs(endPoint.dateTo, DateFormats.PATH);
+    const dateToFormat = (pathDateFrom.isSame(pathDateTo, 'year') && pathDateFrom.isSame(pathDateTo, 'month')) ? DateFormats.DAY : DateFormats.FOR_POINT;
+
+    datesStr = `${pathDateFrom.format(DateFormats.FOR_POINT)} &mdash; ${pathDateTo.format(dateToFormat)}`;
   }
 
-  const pathDateFrom = dayjs(startPoint.dateFrom, DateFormats.PATH);
-  const pathDateTo = dayjs(endPoint.dateTo, DateFormats.PATH);
-  const dateToFormat = (pathDateFrom.isSame(pathDateTo, 'year') && pathDateFrom.isSame(pathDateTo, 'month')) ? DateFormats.DAY : DateFormats.FOR_POINT;
-
-  datesStr = `${pathDateFrom.format(DateFormats.FOR_POINT)} &mdash; ${pathDateTo.format(dateToFormat)}`;
 
   return /*html*/`
     <div class="trip-info__main">
