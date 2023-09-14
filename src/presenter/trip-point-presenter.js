@@ -1,7 +1,6 @@
 import { render, replace, remove } from '../framework/render.js';
 import { isEscKey } from '../utils/utils.js';
 import { ActionType, UpdateType } from '../utils/const.js';
-import { getOffersByType, getDestinations} from '../mock/way-point.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
 
@@ -9,6 +8,8 @@ export default class TripPointPresenter {
   #point = null;
   #pointDefaultState = null;
   #pointsContainer = null;
+  #destinationsList = null;
+  #offersList = null;
 
   #pointComponent = null;
   #editPointComponent = null;
@@ -19,13 +20,19 @@ export default class TripPointPresenter {
 
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
-  #onTypeChangeCallback = null;
-  #onDestinationChangeHandler = null;
 
-  constructor(pointPresenterData) {
-    this.#pointsContainer = pointPresenterData.container;
-    this.#onChangeCallback = pointPresenterData.onChangeCallback;
-    this.#onBeforeEditCallback = pointPresenterData.onBeforeEditCallback;
+  constructor({
+    container,
+    destinationsList,
+    offersList,
+    onChangeCallback,
+    onBeforeEditCallback,
+  }) {
+    this.#pointsContainer = container;
+    this.#destinationsList = destinationsList;
+    this.#offersList = offersList;
+    this.#onChangeCallback = onChangeCallback;
+    this.#onBeforeEditCallback = onBeforeEditCallback;
   }
 
   init(point) {
@@ -42,8 +49,8 @@ export default class TripPointPresenter {
 
     const pointData = {
       point: this.#point,
-      destinationsList: getDestinations(),
-      typeOffersList: getOffersByType(this.#point.type),
+      destinationsList: this.#destinationsList,
+      typeOffersList: this.#offersList,
     };
 
     // Компоненты предыдущей точки маршрута

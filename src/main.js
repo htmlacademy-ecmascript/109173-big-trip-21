@@ -3,6 +3,8 @@ import TripFilterPresenter from './presenter/trip-filter-presenter.js';
 import TripSortPresenter from './presenter/trip-sort-presenter.js';
 import TripContentPresenter from './presenter/trip-content-presenter.js';
 import FilterModel from './model/filter-model.js';
+import DestinationsModel from './model/destinations-model.js';
+import OffersModel from './model/offers-model.js';
 import PointsModel from './model/points-model.js';
 import SortModel from './model/sort-model.js';
 
@@ -18,13 +20,12 @@ const eventsContainer = document.querySelector(CSSClasses.TRIP_EVENTS); // Об�
 
 // TODO: Нужна модель на пункты назначения и офферы
 const filterModel = new FilterModel();
-const pointsModel = new PointsModel();
+const destinationsModel = new DestinationsModel();
+const offersModel = new OffersModel();
+const pointsModel = new PointsModel({ destinationsModel, offersModel });
 const sortModel = new SortModel();
 
-const tripHeaderPresenter = new TripHeaderPresenter({
-  mainContainer,
-  pointsModel
-});
+const tripHeaderPresenter = new TripHeaderPresenter({ mainContainer, pointsModel });
 const tripFilterPresenter = new TripFilterPresenter({
   filterContainer,
   filterModel,
@@ -38,6 +39,8 @@ const tripSortPresenter = new TripSortPresenter({
 });
 const tripContentPresenter = new TripContentPresenter({
   eventsContainer,
+  destinationsModel,
+  offersModel,
   pointsModel,
   filterModel,
   sortModel,

@@ -15,6 +15,8 @@ export default class TripContentPresenter {
   #sortComponent = null;
   #noPointsComponent = null;
 
+  #destinationsModel = null;
+  #offersModel = null;
   #pointsModel = null;
   #filterModel = null;
   #sortModel = null;
@@ -23,6 +25,8 @@ export default class TripContentPresenter {
 
   constructor({
     eventsContainer,
+    destinationsModel,
+    offersModel,
     pointsModel,
     filterModel,
     sortModel
@@ -30,6 +34,8 @@ export default class TripContentPresenter {
     this.#tripEventsContainer = eventsContainer;
     this.#tripEventsListContainer = new TripEventsListView(); // Контейнер для списка точек маршрута
 
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
     this.#sortModel = sortModel;
@@ -101,8 +107,12 @@ export default class TripContentPresenter {
   }
 
   #renderEventPoint(point) {
+    const destinationsList = this.#destinationsModel.destinations;
+    const offersList = this.#offersModel.getOffersByPointType(point.type);
     const pointPresenter = new TripPointPresenter({
       container: this.#tripEventsListContainer.element,
+      destinationsList,
+      offersList,
       onChangeCallback: this.#viewChangeHandler,
       onBeforeEditCallback: this.#pointBeforeEditHandler,
     });
@@ -111,7 +121,6 @@ export default class TripContentPresenter {
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 
-  // По-умолчанию - передаем пустой объект, т.к. иначе получим ошибку
   #reRenderEventPoints() {
     this.#clearEventPoints();
     this.#renderEventPoints(this.points);

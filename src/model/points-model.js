@@ -2,7 +2,20 @@ import Observable from '../framework/observable.js';
 import { getRandomPoint } from '../mock/way-point.js';
 import { POINTS_COUNT } from '../utils/const.js';
 export default class PointsModel extends Observable {
-  #points = Array.from({length: POINTS_COUNT}, getRandomPoint);
+  #points = null;
+  #destinationsModel = null;
+  #offersModel = null;
+
+  constructor({ destinationsModel, offersModel }) {
+    super();
+
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
+    this.#points = Array.from({length: POINTS_COUNT}, () => getRandomPoint({
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel,
+    }));
+  }
 
   get points() {
     return this.#points;

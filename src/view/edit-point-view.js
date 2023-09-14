@@ -83,7 +83,8 @@ function createEditPointTemplate({
   destinationsList,
   typeOffersList,
   isTypeHasOffers,
-  isHasDestination}) {
+  isHasDestination
+}) {
 
   const eventTypeTemplate = createEventTypeTemplate(type);
   const offersTemplate = isTypeHasOffers ? createOffersTemplate(offers, typeOffersList) : '';
@@ -191,7 +192,8 @@ export default class EditPointView extends AbstractStatefulView {
     onDestinationChangeCallback,
     onSubmitCallback,
     onCancelEditCallback,
-    onDeletePointCallback}) {
+    onDeletePointCallback
+  }) {
     super();
 
     const convertedData = EditPointView.convertDataToState({...point, destinationsList, typeOffersList});
@@ -392,7 +394,8 @@ export default class EditPointView extends AbstractStatefulView {
     destination,
     offers,
     dateFrom,
-    dateTo}) {
+    dateTo
+  }) {
 
     return {
       id,
