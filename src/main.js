@@ -16,11 +16,15 @@ const mainContainer = document.querySelector(CSSClasses.TRIP_MAIN_CONTAINER); //
 const filterContainer = document.querySelector(CSSClasses.TRIP_FILTER_CONTAINER); // Контейнер для фильтров
 const eventsContainer = document.querySelector(CSSClasses.TRIP_EVENTS); // Общий контейнер для событий
 
+// TODO: Нужна модель на пункты назначения и офферы
 const filterModel = new FilterModel();
 const pointsModel = new PointsModel();
 const sortModel = new SortModel();
 
-const tripHeaderPresenter = new TripHeaderPresenter({ mainContainer });
+const tripHeaderPresenter = new TripHeaderPresenter({
+  mainContainer,
+  pointsModel
+});
 const tripFilterPresenter = new TripFilterPresenter({
   filterContainer,
   filterModel,

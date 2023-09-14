@@ -1,7 +1,7 @@
 import { DateFormats } from './utils.js';
 
 const RANDOM_PHOTOS_SERVICE_URL = 'https://loremflickr.com/248/152?random=';
-const CITY_NAMES = ['Moskow', 'London', 'Amsterdam', 'New Zealand'];
+const CITY_NAMES = ['Moskow', 'London', 'Amsterdam', 'New Zealand', 'Switzerland', 'China', 'Japan'];
 const OFFER_NAMES = ['Transfer', 'Meet in Airport', 'Extra Luggage', 'Lunch', 'Switch to comfort'];
 const POINT_TYPES = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
 const CURRENT_DATE = new Date();
@@ -34,7 +34,6 @@ const UpdateType = {
   MINOR: 'MINOR',
   MAJOR: 'MAJOR'
 };
-
 
 const TRIP_EVENTS_LIST_TEMPLATE = '<ul class="trip-events__list"></ul>';
 const TRIP_INFO_TEMPLATE = '<section class="trip-main__trip-info  trip-info"></section>';
