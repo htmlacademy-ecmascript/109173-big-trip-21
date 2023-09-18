@@ -68,17 +68,19 @@ export default class TripPointPresenter {
     this.#pointComponent = new TripEventsListItemView({
       ...pointData,
       onEditCallback: this.#pointEditHandler,
-      onFavoriteCallback: this.#favoriteClickHandler,
+      onFavoriteToggleCallback: this.#favoriteToggleHandler,
     });
 
     this.#editPointComponent = new EditPointView({
       ...pointData,
       isNewPoint: this.#isNewPoint,
-      onCancelEditCallback: this.#pointCancelEditHandler,
-      onSubmitCallback: this.#pointSubmitHandler,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
       onDestinationChangeCallback: this.#pointDestinationChangeHandler,
-      onDeletePointCallback: this.#pointDeleteHandler
+      onDateChangeCallback: this.#pointDateChangeHandler,
+      onPriceChangeCallback: this.#pointPriceChangeCallback,
+      onSubmitCallback: this.#pointSubmitHandler,
+      onDeletePointCallback: this.#pointDeleteHandler,
+      onCancelEditCallback: this.#pointCancelEditHandler,
     });
 
     if(this.#prevPointComponent === null && this.#prevEditPointComponent === null) {
@@ -200,7 +202,10 @@ export default class TripPointPresenter {
     this.#setKeyDownHandler();
   };
 
-  #favoriteClickHandler = (isFavorite) => {
+  #pointDateChangeHandler = (pointWithNewDates) => this.#updateView(pointWithNewDates);
+  #pointPriceChangeCallback = (pointWithNewPrice) => this.#updateView(pointWithNewPrice);
+
+  #favoriteToggleHandler = (isFavorite) => {
     this.#point.isFavorite = isFavorite;
     this.#pointDefaultState.isFavorite = isFavorite;
     this.#onChangeCallback(

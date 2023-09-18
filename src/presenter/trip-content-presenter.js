@@ -194,7 +194,6 @@ export default class TripContentPresenter {
    * Вью с моделью взаимодействует только через данный метод
    */
   #viewChangeHandler = (actionType, updateType, data) => {
-    console.log(actionType);
     switch(actionType) {
       case ActionType.CREATE_POINT: {
         this.#pointsModel.createPoint(updateType, data);

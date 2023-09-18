@@ -87,22 +87,22 @@ export default class TripEventsListItemView extends AbstractView {
   #templateData = null;
   #pointEditBtn = null;
   #onEditCallback = null;
-  #onFavoriteCallback = null;
+  #onFavoriteToggleCallback = null;
 
   constructor({
     point,
     destinationsList,
     typedOffersList,
     onEditCallback,
-    onFavoriteCallback}) {
+    onFavoriteCallback: onFavoriteToggleCallback}) {
     super();
 
     this.#templateData = {...point, destinationsList, typedOffersList};
     this.#onEditCallback = onEditCallback;
-    this.#onFavoriteCallback = onFavoriteCallback;
+    this.#onFavoriteToggleCallback = onFavoriteToggleCallback;
 
     this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointEditBtnHandler);
-    this.element.querySelector(CSSClasses.FAVORITE_BTN).addEventListener('click', this.#pointFavoriteClickHandler);
+    this.element.querySelector(CSSClasses.FAVORITE_BTN).addEventListener('click', this.#pointFavoriteToggleHandler);
   }
 
   get template() {
@@ -113,9 +113,9 @@ export default class TripEventsListItemView extends AbstractView {
     this.#onEditCallback?.();
   };
 
-  #pointFavoriteClickHandler = () => {
+  #pointFavoriteToggleHandler = () => {
     this.#templateData.isFavorite = !this.#templateData.isFavorite;
 
-    this.#onFavoriteCallback?.(this.#templateData.isFavorite);
+    this.#onFavoriteToggleCallback?.(this.#templateData.isFavorite);
   };
 }
