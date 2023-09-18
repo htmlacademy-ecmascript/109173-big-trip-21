@@ -18,7 +18,8 @@ export default class AddNewPointBtnView extends AbstractView{
     return createNewPointBtnTemplate();
   }
 
-  #addNewPointBtnClickHandler = () => {
+  #addNewPointBtnClickHandler = (evt) => {
+    evt.preventDefault();
     this.#onAddNewPointCallback?.();
   };
 }

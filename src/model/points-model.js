@@ -33,7 +33,6 @@ export default class PointsModel extends Observable {
 
   createPoint(updateType, newPoint) {
     this.#points.push(newPoint);
-
     this._notify(updateType, newPoint);
   }
 

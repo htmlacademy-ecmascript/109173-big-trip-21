@@ -1,8 +1,8 @@
-import { render, replace, remove, RenderPosition } from '../framework/render.js';
+import { render, remove, RenderPosition } from '../framework/render.js';
 import { filters } from '../utils/filter.js';
-import { findObjectByID } from '../utils/utils.js';
+import { findObjectByID, upperCaseFirst } from '../utils/utils.js';
 import { SortType, sorts } from '../utils/sort.js';
-import { ActionType, UpdateType } from '../utils/const.js';
+import { BLANK_POINT, ActionType, UpdateType, TripBoardMode } from '../utils/const.js';
 
 import TripInfoView from '../view/trip-info-view.js';
 import TripInfoMainView from '../view/trip-info-main-view.js';
@@ -13,12 +13,11 @@ import TripPointPresenter from './trip-point-presenter.js';
 import TripEventsListView from '../view/trip-events-list-view.js';
 import TripEventsListEmptyView from '../view/trip-events-list-empty-view.js';
 
-
 export default class TripContentPresenter {
   #mainHeaderContainer = null;
   #tripInfoContainer = null;
   #tripInfoComponent = null;
-  #addNewPointBrnComponent = null;
+  #addNewPointBtnComponent = null;
   #priceComponent = null;
   #tripEventsContainer = null;
   #tripEventsListContainer = null;
@@ -33,6 +32,8 @@ export default class TripContentPresenter {
   #sortModel = null;
 
   #pointPresenters = new Map();
+
+  #currentTripBoardMode = TripBoardMode.DEFAULT;
 
   constructor({
     mainHeaderContainer,
@@ -96,20 +97,18 @@ export default class TripContentPresenter {
   #renderHeader() {
     this.#tripInfoComponent = new TripInfoMainView({ pointsInfo: this.#getPointsInfo() });
     this.#priceComponent = new TripInfoPriceView({ price: this.#getCurrentPrice() });
-    this.#addNewPointBrnComponent = new AddNewPointBtnView({ onAddNewPointCallback: this.#addNewPointBtnClickHandler });
+    this.#addNewPointBtnComponent = new AddNewPointBtnView({ onAddNewPointCallback: this.#addNewPointBtnClickHandler });
 
     render(this.#tripInfoContainer, this.#mainHeaderContainer, RenderPosition.AFTERBEGIN); // Отрисовываем контейнер для общей информации о маршруте
     render(this.#tripInfoComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о маршруте и датах
     render(this.#priceComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о цене
-    render(this.#addNewPointBrnComponent, this.#mainHeaderContainer); // Отрисовываем кнопку добавления новой точки
+    render(this.#addNewPointBtnComponent, this.#mainHeaderContainer); // Отрисовываем кнопку добавления новой точки
   }
 
   #reRenderHeader() {
-    this.#mainHeaderContainer.innerHTML = '';
-
     remove(this.#tripInfoComponent);
     remove(this.#priceComponent);
-    remove(this.#addNewPointBrnComponent);
+    remove(this.#addNewPointBtnComponent);
 
     this.#renderHeader();
   }
@@ -130,7 +129,6 @@ export default class TripContentPresenter {
     remove(this.#sortComponent);
     remove(this.#noPointsComponent);
 
-    // this.init();
     this.#renderTripBoard();
   }
 
@@ -143,15 +141,15 @@ export default class TripContentPresenter {
     points.forEach((point) => this.#renderEventPoint(point));
   }
 
-  #renderEventPoint(point) {
+  #renderEventPoint(point = BLANK_POINT) {
     const destinationsList = this.#destinationsModel.destinations;
-    const offersList = this.#offersModel.getOffersByPointType(point.type);
     const pointPresenter = new TripPointPresenter({
       container: this.#tripEventsListContainer.element,
       destinationsList,
-      offersList,
+      offersModel: this.#offersModel,
       onChangeCallback: this.#viewChangeHandler,
       onBeforeEditCallback: this.#pointBeforeEditHandler,
+      onCancelAddCallback: this.#newPointCancelAddingHandler
     });
 
     pointPresenter.init(point);
@@ -183,11 +181,20 @@ export default class TripContentPresenter {
     });
   }
 
+  #setBoardMode(mode) {
+    if(this.#currentTripBoardMode === mode) {
+      return;
+    }
+
+    this.#currentTripBoardMode = mode;
+  }
+
   /** Обработчики */
   /**
    * Вью с моделью взаимодействует только через данный метод
    */
   #viewChangeHandler = (actionType, updateType, data) => {
+    console.log(actionType);
     switch(actionType) {
       case ActionType.CREATE_POINT: {
         this.#pointsModel.createPoint(updateType, data);
@@ -210,12 +217,13 @@ export default class TripContentPresenter {
   #modelChangeHandler = (updateType, pointData) => {
     switch(updateType) {
       case UpdateType.PATCH: {
-        // Перерисовываем только точку
+        this.#reRenderHeader();
         this.#pointPresenters.get(pointData.id).init(pointData); // Перерисовываем точку
         break;
       }
 
       case UpdateType.MINOR: {
+        this.#reRenderHeader();
         this.#reRenderEventPoints();
         break;
       }
@@ -230,7 +238,18 @@ export default class TripContentPresenter {
   };
 
   #addNewPointBtnClickHandler = () => {
+    if(this.#currentTripBoardMode === TripBoardMode.ADDING_NEW_POINT) {
+      return;
+    }
+
     // Добавление новой точки маршрута
+    this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
+    this.#renderEventPoint();
+    this.#pointBeforeEditHandler();
+  };
+
+  #newPointCancelAddingHandler = () => {
+    this.#setBoardMode(TripBoardMode.DEFAULT);
   };
 
   #pointBeforeEditHandler = () => {
