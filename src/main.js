@@ -25,7 +25,11 @@ const offersModel = new OffersModel();
 const pointsModel = new PointsModel({ destinationsModel, offersModel });
 const sortModel = new SortModel();
 
-const tripHeaderPresenter = new TripHeaderPresenter({ mainContainer, pointsModel });
+const tripHeaderPresenter = new TripHeaderPresenter({
+  mainContainer,
+  destinationsModel,
+  pointsModel
+});
 const tripFilterPresenter = new TripFilterPresenter({
   filterContainer,
   filterModel,

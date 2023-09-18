@@ -2,19 +2,29 @@ import {render, replace, remove, RenderPosition} from '../framework/render.js';
 import TripInfoView from '../view/trip-info-view.js';
 import TripInfoMainView from '../view/trip-info-main-view.js';
 import TripInfoPriceView from '../view/trip-info-price-view.js';
+import { findObjectByID } from '../utils/utils.js';
 
 export default class TripHeaderPresenter {
   #mainContainer = null;
   #tripInfoContainer = null;
   #tripInfoComponent = null;
   #priceComponent = null;
+  #destinations = null;
 
+  #destinationsModel = null;
   #pointsModel = null;
 
-  constructor({ mainContainer, pointsModel }) {
+  constructor({
+    mainContainer,
+    destinationsModel,
+    pointsModel
+  }) {
     this.#mainContainer = mainContainer; // Контейнер для отрисовки общей информации о путешествии
     this.#tripInfoContainer = new TripInfoView(); // Контейнер для отрисовки информации о маршруте, датах и стоимости путешествия
+    this.#destinationsModel = destinationsModel;
     this.#pointsModel = pointsModel;
+
+    this.#destinations = this.#destinationsModel.destinations;
 
     this.#pointsModel.addObserver(this.#modelChangeHandler);
   }
@@ -49,11 +59,14 @@ export default class TripHeaderPresenter {
   #getCurrentPrice = () => [...this.#pointsModel.points].reduce((accumulator, point) => accumulator + Number(point.cost), 0);
 
   #getPointsInfo = () =>
-    [...this.#pointsModel.points].map(({ destination, dates }) => ({
-      destination, // <- перевести id пунктов назначения в названия
-      dateFrom: dates.start,
-      dateTo: dates.end
-    }));
+    [...this.#pointsModel.points].map(({ destination, dates }) => {
+      const destinationInfo = findObjectByID(destination, this.#destinations)?.name;
+      return {
+        destination: destinationInfo, // <- перевести id пунктов назначения в названия
+        dateFrom: dates.start,
+        dateTo: dates.end
+      };
+    });
 
   #modelChangeHandler = () => {
     this.#reRenderPrice({ price: this.#getCurrentPrice() });
