@@ -14,8 +14,11 @@ function createTripInfoMainTemplate({ pointsInfo }) {
     const startPoint = pointsInfo[0];
     const endPoint = pointsInfo[pointsInfo.length - 1];
 
+    // TODO: Можно ли исправить на switch?
     if(pointsInfo.length > 3) {
       destinationsStr = `${startPoint.destination} ${destinationsStr} ${endPoint.destination}`;
+    } else if(pointsInfo.length === 2) {
+      destinationsStr = `${startPoint.destination} &mdash; ${endPoint.destination}`;
     } else {
       destinationsStr = Object.values(pointsInfo).map((pointInfo) => pointInfo.destination).join('&mdash;');
     }
@@ -38,9 +41,9 @@ function createTripInfoMainTemplate({ pointsInfo }) {
 
 export default class TripInfoMainView extends AbstractView {
   #pointsInfo = null;
-
   constructor({ pointsInfo }) {
     super();
+
 
     this.#pointsInfo = pointsInfo;
   }

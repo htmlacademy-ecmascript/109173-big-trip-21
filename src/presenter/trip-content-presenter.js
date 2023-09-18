@@ -1,14 +1,25 @@
-import { render, remove } from '../framework/render.js';
+import { render, replace, remove, RenderPosition } from '../framework/render.js';
 import { filters } from '../utils/filter.js';
+import { findObjectByID } from '../utils/utils.js';
 import { SortType, sorts } from '../utils/sort.js';
 import { ActionType, UpdateType } from '../utils/const.js';
 
+import TripInfoView from '../view/trip-info-view.js';
+import TripInfoMainView from '../view/trip-info-main-view.js';
+import TripInfoPriceView from '../view/trip-info-price-view.js';
+import AddNewPointBtnView from '../view/add-new-point-btn-view.js';
+
 import TripPointPresenter from './trip-point-presenter.js';
 import TripEventsListView from '../view/trip-events-list-view.js';
-import TripEventsListEmptyView from '../view/trip-events-list-empty-view.js.js';
+import TripEventsListEmptyView from '../view/trip-events-list-empty-view.js';
 
 
 export default class TripContentPresenter {
+  #mainHeaderContainer = null;
+  #tripInfoContainer = null;
+  #tripInfoComponent = null;
+  #addNewPointBrnComponent = null;
+  #priceComponent = null;
   #tripEventsContainer = null;
   #tripEventsListContainer = null;
 
@@ -24,21 +35,24 @@ export default class TripContentPresenter {
   #pointPresenters = new Map();
 
   constructor({
+    mainHeaderContainer,
     eventsContainer,
     destinationsModel,
     offersModel,
-    pointsModel,
     filterModel,
-    sortModel
+    sortModel,
+    pointsModel
   }) {
+    this.#mainHeaderContainer = mainHeaderContainer;
+    this.#tripInfoContainer = new TripInfoView(); // Контейнер для отрисовки информации о маршруте, датах и стоимости путешествия
     this.#tripEventsContainer = eventsContainer;
     this.#tripEventsListContainer = new TripEventsListView(); // Контейнер для списка точек маршрута
 
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
-    this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
     this.#sortModel = sortModel;
+    this.#pointsModel = pointsModel;
 
     this.#filterModel.addObserver(this.#modelChangeHandler);
     this.#sortModel.addObserver(this.#modelChangeHandler);
@@ -75,7 +89,29 @@ export default class TripContentPresenter {
   }
 
   init() {
+    this.#renderHeader();
     this.#renderTripBoard();
+  }
+
+  #renderHeader() {
+    this.#tripInfoComponent = new TripInfoMainView({ pointsInfo: this.#getPointsInfo() });
+    this.#priceComponent = new TripInfoPriceView({ price: this.#getCurrentPrice() });
+    this.#addNewPointBrnComponent = new AddNewPointBtnView({ onAddNewPointCallback: this.#addNewPointBtnClickHandler });
+
+    render(this.#tripInfoContainer, this.#mainHeaderContainer, RenderPosition.AFTERBEGIN); // Отрисовываем контейнер для общей информации о маршруте
+    render(this.#tripInfoComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о маршруте и датах
+    render(this.#priceComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о цене
+    render(this.#addNewPointBrnComponent, this.#mainHeaderContainer); // Отрисовываем кнопку добавления новой точки
+  }
+
+  #reRenderHeader() {
+    this.#mainHeaderContainer.innerHTML = '';
+
+    remove(this.#tripInfoComponent);
+    remove(this.#priceComponent);
+    remove(this.#addNewPointBrnComponent);
+
+    this.#renderHeader();
   }
 
   #renderTripBoard() {
@@ -94,7 +130,8 @@ export default class TripContentPresenter {
     remove(this.#sortComponent);
     remove(this.#noPointsComponent);
 
-    this.init();
+    // this.init();
+    this.#renderTripBoard();
   }
 
   #renderNoPoints() {
@@ -131,6 +168,21 @@ export default class TripContentPresenter {
     this.#pointPresenters.clear();
   }
 
+  #getCurrentPrice() {
+    return [...this.#pointsModel.points].reduce((accumulator, point) => accumulator + Number(point.cost), 0);
+  }
+
+  #getPointsInfo() {
+    return [...this.#pointsModel.points].map(({ destination, dates }) => {
+      const destinationInfo = findObjectByID(destination, this.#destinationsModel.destinations)?.name;
+      return {
+        destination: destinationInfo, // <- перевести id пунктов назначения в названия
+        dateFrom: dates.start,
+        dateTo: dates.end
+      };
+    });
+  }
+
   /** Обработчики */
   /**
    * Вью с моделью взаимодействует только через данный метод
@@ -164,17 +216,21 @@ export default class TripContentPresenter {
       }
 
       case UpdateType.MINOR: {
-        // Перерисовываем весь список точек (возможно, после сабмита, т.к. может измениться дата и порядок точки в списке?)
         this.#reRenderEventPoints();
         break;
       }
 
       case UpdateType.MAJOR: {
         // Перерисовываем весь список точек + сбрасываем сортировку (перерисовать всю доску)
+        this.#reRenderHeader();
         this.#reRenderTripBoard();
         break;
       }
     }
+  };
+
+  #addNewPointBtnClickHandler = () => {
+    // Добавление новой точки маршрута
   };
 
   #pointBeforeEditHandler = () => {
