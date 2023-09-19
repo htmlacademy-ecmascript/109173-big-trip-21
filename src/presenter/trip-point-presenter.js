@@ -1,6 +1,6 @@
 import { render, replace, remove, RenderPosition } from '../framework/render.js';
 import { isEscKey } from '../utils/utils.js';
-import { ActionType, BLANK_POINT, UpdateType } from '../utils/const.js';
+import { ActionType, BLANK_POINT, TripBoardMode, UpdateType } from '../utils/const.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
 
@@ -22,7 +22,8 @@ export default class TripPointPresenter {
 
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
-  #onCancelAddCallback = null;
+  #setBoardMode = null;
+  #getBoardMode = null;
 
   constructor({
     container,
@@ -30,14 +31,16 @@ export default class TripPointPresenter {
     offersModel,
     onChangeCallback,
     onBeforeEditCallback,
-    onCancelAddCallback
+    setBoardMode,
+    getBoardMode,
   }) {
     this.#pointsContainer = container;
     this.#destinationsList = destinationsList;
     this.#offersModel = offersModel;
     this.#onChangeCallback = onChangeCallback;
     this.#onBeforeEditCallback = onBeforeEditCallback;
-    this.#onCancelAddCallback = onCancelAddCallback;
+    this.#setBoardMode = setBoardMode;
+    this.#getBoardMode = getBoardMode;
   }
 
   init(point) {
@@ -80,7 +83,7 @@ export default class TripPointPresenter {
       onPriceChangeCallback: this.#pointPriceChangeCallback,
       onSubmitCallback: this.#pointSubmitHandler,
       onDeletePointCallback: this.#pointDeleteHandler,
-      onCancelEditCallback: this.#pointCancelEditHandler,
+      onCancelEditCallback: this.#pointCancelEditHandler
     });
 
     if(this.#prevPointComponent === null && this.#prevEditPointComponent === null) {
@@ -93,8 +96,12 @@ export default class TripPointPresenter {
   }
 
   reset() {
-    if (!this.isEditing() || this.#isNewPoint) {
+    if (!this.isEditing()) {
       return;
+    }
+
+    if(this.#isNewPoint) {
+      this.destroy();
     }
 
     this.#replaceFormToPoint();
@@ -117,7 +124,9 @@ export default class TripPointPresenter {
     render(this.#pointComponent, this.#pointsContainer, renderPosition);
 
     if(this.#isNewPoint) {
+      // Сменить режим доски на "Добавление новой точки"
       this.#replacePointToForm();
+      this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
     }
   }
 
@@ -140,15 +149,18 @@ export default class TripPointPresenter {
   }
 
   #replacePointToForm() {
+    this.#onBeforeEditCallback();
     replace(this.#editPointComponent, this.#pointComponent);
-    this.#pointIsEditing = true;
     this.#setKeyDownHandler();
+    this.#pointIsEditing = true;
+    this.#setBoardMode(TripBoardMode.EDITING);
   }
 
   #replaceFormToPoint() {
     replace(this.#pointComponent, this.#editPointComponent);
-    this.#pointIsEditing = false;
     this.#removeKeyDownHandler();
+    this.#pointIsEditing = false;
+    this.#setBoardMode(TripBoardMode.DEFAULT);
   }
 
   #setKeyDownHandler() {
@@ -171,14 +183,12 @@ export default class TripPointPresenter {
   };
 
   #pointEditHandler = () => {
-    this.#onBeforeEditCallback(); // Вызываем колбэк общего презентера (для закрытия всех форм редактирования перед открытием новой)
     this.#replacePointToForm();
   };
 
   #pointCancelEditHandler = () => {
     if(this.#isNewPoint) {
       this.destroy();
-      this.#onCancelAddCallback?.();
       return;
     }
 

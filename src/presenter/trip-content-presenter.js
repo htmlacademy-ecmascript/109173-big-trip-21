@@ -1,6 +1,6 @@
 import { render, remove, RenderPosition } from '../framework/render.js';
-import { filters } from '../utils/filter.js';
-import { findObjectByID, upperCaseFirst } from '../utils/utils.js';
+import { FilterType, filters } from '../utils/filter.js';
+import { findObjectByID } from '../utils/utils.js';
 import { SortType, sorts } from '../utils/sort.js';
 import { BLANK_POINT, ActionType, UpdateType, TripBoardMode } from '../utils/const.js';
 
@@ -149,7 +149,8 @@ export default class TripContentPresenter {
       offersModel: this.#offersModel,
       onChangeCallback: this.#viewChangeHandler,
       onBeforeEditCallback: this.#pointBeforeEditHandler,
-      onCancelAddCallback: this.#newPointCancelAddingHandler
+      setBoardMode: this.#setBoardMode,
+      getBoardMode: this.#getBoardMode,
     });
 
     pointPresenter.init(point);
@@ -164,6 +165,7 @@ export default class TripContentPresenter {
   #clearEventPoints() {
     this.#pointPresenters.forEach((pointPresenter) => pointPresenter.destroy());
     this.#pointPresenters.clear();
+    this.#setBoardMode(TripBoardMode.DEFAULT);
   }
 
   #getCurrentPrice() {
@@ -181,13 +183,18 @@ export default class TripContentPresenter {
     });
   }
 
-  #setBoardMode(mode) {
-    if(this.#currentTripBoardMode === mode) {
+  // Используем стрелку для привязки контекста
+  #setBoardMode = (mode) => {
+    const modes = Object.values(TripBoardMode);
+
+    if(this.#currentTripBoardMode === mode || !modes.includes(mode)) {
       return;
     }
 
     this.#currentTripBoardMode = mode;
-  }
+  };
+
+  #getBoardMode = () => this.#currentTripBoardMode;
 
   /** Обработчики */
   /**
@@ -207,6 +214,12 @@ export default class TripContentPresenter {
 
       case ActionType.DELETE_POINT: {
         this.#pointsModel.deletePoint(updateType, data);
+        break;
+      }
+
+      case ActionType.RESET_FILTERS: {
+        this.#filterModel.setFilter(updateType, FilterType.EVERYTHING, true);
+        this.#sortModel.setSort(updateType, SortType.DAY);
         break;
       }
     }
@@ -237,18 +250,12 @@ export default class TripContentPresenter {
   };
 
   #addNewPointBtnClickHandler = () => {
-    if(this.#currentTripBoardMode === TripBoardMode.ADDING_NEW_POINT) {
+    if(this.#getBoardMode() === TripBoardMode.ADDING_NEW_POINT) {
       return;
     }
 
-    // Добавление новой точки маршрута
-    this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
+    this.#viewChangeHandler(ActionType.RESET_FILTERS, UpdateType.MAJOR);
     this.#renderEventPoint();
-    this.#pointBeforeEditHandler();
-  };
-
-  #newPointCancelAddingHandler = () => {
-    this.#setBoardMode(TripBoardMode.DEFAULT);
   };
 
   #pointBeforeEditHandler = () => {

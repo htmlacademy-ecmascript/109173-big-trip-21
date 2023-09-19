@@ -28,6 +28,7 @@ const ActionType = {
   CREATE_POINT: 'ADD_POINT',
   UPDATE_POINT: 'EDIT_POINT',
   DELETE_POINT: 'DELETE_POINT',
+  RESET_FILTERS: 'RESET_FILTERS'
 };
 const UpdateType = {
   PATCH: 'PATCH',
