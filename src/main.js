@@ -1,3 +1,12 @@
+/**
+ * TODO:
+ * Если удалить все точки и попытаться создать новуюж - остается надпись с
+ * предложением создать новую точку. Также не открывается форма редактирования точки.
+ *
+ * Не сбрасывается сортировка при смене фильтра
+ * Не сбрасываются фильтры и сортыровка при создании новой точки
+ */
+
 import TripFilterPresenter from './presenter/trip-filter-presenter.js';
 import TripSortPresenter from './presenter/trip-sort-presenter.js';
 import TripContentPresenter from './presenter/trip-content-presenter.js';

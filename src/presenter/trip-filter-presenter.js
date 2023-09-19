@@ -10,7 +10,6 @@ export default class TripFilterPresenter {
   #pointsModel = null;
 
   #filterComponent = null;
-  #currentFilter = null;
   #previousFilterComponent = null;
 
   constructor({
@@ -21,9 +20,8 @@ export default class TripFilterPresenter {
     this.#filterModel = filterModel;
     this.#pointsModel = pointsModel;
     this.#filterContainer = filterContainer;
-    this.#currentFilter = this.#filterModel.filter;
 
-    this.#filterModel.addObserver(this.#filterModelChangeHandler);
+    this.#filterModel.addObserver(this.#modelChangeHandler);
     this.#pointsModel.addObserver(this.#pointsModelChangeHandler);
   }
 
@@ -40,7 +38,7 @@ export default class TripFilterPresenter {
     this.#previousFilterComponent = this.#filterComponent;
     this.#filterComponent = new TripFilterView({
       filters: this.filters,
-      currentFilter: this.#currentFilter,
+      currentFilter: this.#filterModel.filter,
       onFilterChangeCallback: this.#filterChangeHandler
     });
 
@@ -59,25 +57,11 @@ export default class TripFilterPresenter {
 
   /** Обработчики */
   // Отслеживание изменения данных на сервере
-  #pointsModelChangeHandler = (updateType, { remainingPointsCount }) => {
-    switch(updateType) {
-      case UpdateType.MAJOR: { // Отключаем фильтры, если не осталось точек
-        if(remainingPointsCount <= 0) {
-          this.init();
-        }
-        break;
-      }
-    }
-  };
+  #modelChangeHandler = () => this.init();
 
-  #filterModelChangeHandler = (updateType, { rerender }) => {
-    switch(updateType) {
-      case UpdateType.MAJOR: { // Отключаем фильтры, если не осталось точек
-        if(rerender) {
-          this.init();
-        }
-        break;
-      }
+  #pointsModelChangeHandler = (updateType, { remainingPointsCount }) => { // Чтобы не перерисовывать каждый раз фильтры при удалении точек
+    if(remainingPointsCount <= 0) {
+      this.init();
     }
   };
 
@@ -89,7 +73,7 @@ export default class TripFilterPresenter {
     const capitalizedFilterName = upperCaseFirst(filterType);
 
     this.#filterModel.setFilter(
-      UpdateType.MAJOR,
+      UpdateType.MINOR,
       capitalizedFilterName
     );
   };

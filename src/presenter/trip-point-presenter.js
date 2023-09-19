@@ -1,6 +1,6 @@
 import { render, replace, remove, RenderPosition } from '../framework/render.js';
 import { isEscKey } from '../utils/utils.js';
-import { ActionType, BLANK_POINT, TripBoardMode, UpdateType } from '../utils/const.js';
+import { ActionType, TripBoardMode, UpdateType } from '../utils/const.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
 
@@ -33,6 +33,7 @@ export default class TripPointPresenter {
     onBeforeEditCallback,
     setBoardMode,
     getBoardMode,
+    isNewPoint,
   }) {
     this.#pointsContainer = container;
     this.#destinationsList = destinationsList;
@@ -41,11 +42,10 @@ export default class TripPointPresenter {
     this.#onBeforeEditCallback = onBeforeEditCallback;
     this.#setBoardMode = setBoardMode;
     this.#getBoardMode = getBoardMode;
+    this.#isNewPoint = isNewPoint;
   }
 
   init(point) {
-    this.#isNewPoint = (point === BLANK_POINT);
-
     /**
      * Если не копировать точку, то при изменении типа в pointTypeChangeHandler
      * this.#point.type на новый, по какой-то причине меняется и копия в
@@ -124,9 +124,7 @@ export default class TripPointPresenter {
     render(this.#pointComponent, this.#pointsContainer, renderPosition);
 
     if(this.#isNewPoint) {
-      // Сменить режим доски на "Добавление новой точки"
       this.#replacePointToForm();
-      this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
     }
   }
 
@@ -153,7 +151,6 @@ export default class TripPointPresenter {
     replace(this.#editPointComponent, this.#pointComponent);
     this.#setKeyDownHandler();
     this.#pointIsEditing = true;
-    this.#setBoardMode(TripBoardMode.EDITING);
   }
 
   #replaceFormToPoint() {
@@ -189,6 +186,7 @@ export default class TripPointPresenter {
   #pointCancelEditHandler = () => {
     if(this.#isNewPoint) {
       this.destroy();
+      this.#setBoardMode(TripBoardMode.DEFAULT);
       return;
     }
 
@@ -198,17 +196,13 @@ export default class TripPointPresenter {
     this.#replaceFormToPoint();
   };
 
-  #pointTypeChangeHandler = (pointType) => {
-    this.#point.type = pointType;
-    this.#point.offers = new Set(); // Реализация сброса выбранных офферов, при смене типа поинта
-    this.#updateView(this.#point);
+  #pointTypeChangeHandler = (pointWithNewType) => {
+    this.#updateView(pointWithNewType);
     this.#setKeyDownHandler();
   };
 
-  #pointDestinationChangeHandler = (newDestination) => {
-    this.#setKeyDownHandler();
-    this.#point.destination = newDestination;
-    this.#updateView(this.#point);
+  #pointDestinationChangeHandler = (pointWithNewDestination) => {
+    this.#updateView(pointWithNewDestination);
     this.#setKeyDownHandler();
   };
 
@@ -226,11 +220,10 @@ export default class TripPointPresenter {
   };
 
   #pointSubmitHandler = (point) => {
-    const actionType = this.#isNewPoint ? ActionType.CREATE_POINT : ActionType.UPDATE_POINT;
-    const updateType = this.#isNewPoint ? UpdateType.MAJOR : UpdateType.PATCH;
+    const actionType = this.#isNewPoint ? ActionType.ADD_POINT : ActionType.UPDATE_POINT;
 
     this.#pointDefaultState = null;
-    this.#onChangeCallback(actionType, updateType, point);
+    this.#onChangeCallback(actionType, UpdateType.MAJOR, point);
     this.#replaceFormToPoint();
   };
 

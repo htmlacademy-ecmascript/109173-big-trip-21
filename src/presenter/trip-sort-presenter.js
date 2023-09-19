@@ -8,26 +8,25 @@ export default class TripSortPresenter {
   #sortContainer = null;
   #sortModel = null;
   #filterModel = null;
-  #pointsModel = null;
+  // #pointsModel = null;
 
   #sortComponent = null;
-  #currentSort = null;
   #previousSortComponent = null;
 
   constructor({
     sortContainer,
     sortModel,
     filterModel,
-    pointsModel,
+    // pointsModel,
   }) {
     this.#sortModel = sortModel;
     this.#filterModel = filterModel;
-    this.#pointsModel = pointsModel;
+    // this.#pointsModel = pointsModel;
     this.#sortContainer = sortContainer;
-    this.#currentSort = this.#sortModel.sort;
 
+    this.#sortModel.addObserver(this.#modelChangeHandler);
     this.#filterModel.addObserver(this.#modelChangeHandler);
-    this.#pointsModel.addObserver(this.#modelChangeHandler);
+    // this.#pointsModel.addObserver(this.#modelChangeHandler);
   }
 
   get sorts() {
@@ -38,7 +37,7 @@ export default class TripSortPresenter {
     this.#previousSortComponent = this.#sortComponent;
     this.#sortComponent = new TripSortView({
       sorts: this.sorts,
-      currentSort: this.#currentSort,
+      currentSort: this.#sortModel.sort,
       onChangeCallback: this.#sortChangeHandler
     });
 
@@ -57,15 +56,7 @@ export default class TripSortPresenter {
 
   /** Обработчики */
   // Отслеживание изменения данных на сервере
-  #modelChangeHandler = (updateType) => {
-    switch(updateType) {
-      case UpdateType.MAJOR: {
-        // TODO: Как получить количество точек так, после сортировки?
-        this.init();
-        break;
-      }
-    }
-  };
+  #modelChangeHandler = () => this.init();
 
   #sortChangeHandler = (sortType) => {
     if(this.#sortModel.sortType === sortType) {
@@ -75,7 +66,7 @@ export default class TripSortPresenter {
     const capitalizedSortName = upperCaseFirst(sortType);
 
     this.#sortModel.setSort(
-      UpdateType.MAJOR,
+      UpdateType.MINOR,
       capitalizedSortName
     );
   };

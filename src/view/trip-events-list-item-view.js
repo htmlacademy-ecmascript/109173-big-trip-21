@@ -85,7 +85,6 @@ function createTripEventsListTemplate({
 
 export default class TripEventsListItemView extends AbstractView {
   #templateData = null;
-  #pointEditBtn = null;
   #onEditCallback = null;
   #onFavoriteToggleCallback = null;
 
@@ -94,7 +93,8 @@ export default class TripEventsListItemView extends AbstractView {
     destinationsList,
     typedOffersList,
     onEditCallback,
-    onFavoriteCallback: onFavoriteToggleCallback}) {
+    onFavoriteToggleCallback
+  }) {
     super();
 
     this.#templateData = {...point, destinationsList, typedOffersList};

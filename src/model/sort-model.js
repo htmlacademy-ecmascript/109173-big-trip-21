@@ -10,6 +10,6 @@ export default class SortModel extends Observable {
 
   setSort(updateType, sortType) {
     this.#sort = sortType;
-    this._notify(updateType, sortType);
+    this._notify(updateType, { sortType });
   }
 }

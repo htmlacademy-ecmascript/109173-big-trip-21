@@ -55,38 +55,16 @@ export default class TripContentPresenter {
     this.#sortModel = sortModel;
     this.#pointsModel = pointsModel;
 
-    this.#filterModel.addObserver(this.#modelChangeHandler);
-    this.#sortModel.addObserver(this.#modelChangeHandler);
-    this.#pointsModel.addObserver(this.#modelChangeHandler);
+    this.#filterModel.addObserver(this.#filterModelChangeHandler);
+    this.#sortModel.addObserver(this.#sortModelChangeHandler);
+    this.#pointsModel.addObserver(this.#pointsModelChangeHandler);
   }
 
   get points() {
     const currentFilter = this.#filterModel.filter;
     const filteredPoints = filters[currentFilter](this.#pointsModel.points);
 
-    switch(this.#sortModel.sort) {
-      case SortType.DAY: {
-        return sorts[SortType.DAY](filteredPoints);
-      }
-
-      case SortType.EVENT: {
-        return sorts[SortType.EVENT](filteredPoints);
-      }
-
-      case SortType.OFFERS: {
-        return sorts[SortType.OFFERS](filteredPoints);
-      }
-
-      case SortType.PRICE: {
-        return sorts[SortType.PRICE](filteredPoints);
-      }
-
-      case SortType.TIME: {
-        return sorts[SortType.TIME](filteredPoints);
-      }
-    }
-
-    return filteredPoints;
+    return sorts[this.#sortModel.sort](filteredPoints);
   }
 
   init() {
@@ -105,14 +83,6 @@ export default class TripContentPresenter {
     render(this.#addNewPointBtnComponent, this.#mainHeaderContainer); // Отрисовываем кнопку добавления новой точки
   }
 
-  #reRenderHeader() {
-    remove(this.#tripInfoComponent);
-    remove(this.#priceComponent);
-    remove(this.#addNewPointBtnComponent);
-
-    this.#renderHeader();
-  }
-
   #renderTripBoard() {
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
 
@@ -123,12 +93,19 @@ export default class TripContentPresenter {
     }
   }
 
-  #reRenderTripBoard() {
-    this.#clearEventPoints();
+  #reRenderHeader() {
+    remove(this.#tripInfoComponent);
+    remove(this.#priceComponent);
+    remove(this.#addNewPointBtnComponent);
 
+    this.#renderHeader();
+  }
+
+  #reRenderTripBoard() {
     remove(this.#sortComponent);
     remove(this.#noPointsComponent);
 
+    this.#clearEventPoints();
     this.#renderTripBoard();
   }
 
@@ -142,6 +119,7 @@ export default class TripContentPresenter {
   }
 
   #renderEventPoint(point = BLANK_POINT) {
+    const isNewPoint = (point === BLANK_POINT);
     const destinationsList = this.#destinationsModel.destinations;
     const pointPresenter = new TripPointPresenter({
       container: this.#tripEventsListContainer.element,
@@ -151,15 +129,11 @@ export default class TripContentPresenter {
       onBeforeEditCallback: this.#pointBeforeEditHandler,
       setBoardMode: this.#setBoardMode,
       getBoardMode: this.#getBoardMode,
+      isNewPoint,
     });
 
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
-  }
-
-  #reRenderEventPoints() {
-    this.#clearEventPoints();
-    this.#renderEventPoints(this.points);
   }
 
   #clearEventPoints() {
@@ -196,6 +170,16 @@ export default class TripContentPresenter {
 
   #getBoardMode = () => this.#currentTripBoardMode;
 
+  #resetFilters({ updateType, resetFilter, resetSort }) {
+    if(resetFilter && this.#filterModel.filter !== FilterType.EVERYTHING) {
+      this.#filterModel.setFilter(updateType, FilterType.EVERYTHING);
+    }
+
+    if(resetSort && this.#sortModel.sort !== SortType.DAY) {
+      this.#sortModel.setSort(updateType, SortType.DAY);
+    }
+  }
+
   /** Обработчики */
   /**
    * Вью с моделью взаимодействует только через данный метод
@@ -203,7 +187,12 @@ export default class TripContentPresenter {
   #viewChangeHandler = (actionType, updateType, data) => {
     switch(actionType) {
       case ActionType.CREATE_POINT: {
-        this.#pointsModel.createPoint(updateType, data);
+        // Создание точки без добавления в модель (например, при клике на кнопку + New event)
+        this.#resetFilters({ updateType, resetFilter: true, resetSort: true });
+        break;
+      }
+      case ActionType.ADD_POINT: {
+        this.#pointsModel.addPoint(updateType, data);
         break;
       }
 
@@ -216,33 +205,43 @@ export default class TripContentPresenter {
         this.#pointsModel.deletePoint(updateType, data);
         break;
       }
-
-      case ActionType.RESET_FILTERS: {
-        this.#filterModel.setFilter(updateType, FilterType.EVERYTHING, true);
-        this.#sortModel.setSort(updateType, SortType.DAY);
-        break;
-      }
     }
   };
 
   // Отслеживание изменения данных на сервере
-  #modelChangeHandler = (updateType, pointData) => {
+  #pointsModelChangeHandler = (updateType, pointData) => {
     switch(updateType) {
       case UpdateType.PATCH: {
-        this.#reRenderHeader();
         this.#pointPresenters.get(pointData.id).init(pointData); // Перерисовываем точку
         break;
       }
 
       case UpdateType.MINOR: {
-        this.#reRenderHeader();
-        this.#reRenderEventPoints();
+        this.#reRenderTripBoard();
         break;
       }
 
       case UpdateType.MAJOR: {
-        // Перерисовываем весь список точек + сбрасываем сортировку (перерисовать всю доску)
         this.#reRenderHeader();
+        this.#reRenderTripBoard();
+        break;
+      }
+    }
+  };
+
+  #filterModelChangeHandler = (updateType) => {
+    switch(updateType) {
+      case UpdateType.MINOR: {
+        this.#resetFilters({ updateType, resetSort: true });
+        this.#reRenderTripBoard();
+        break;
+      }
+    }
+  };
+
+  #sortModelChangeHandler = (updateType) => {
+    switch(updateType) {
+      case UpdateType.MINOR: {
         this.#reRenderTripBoard();
         break;
       }
@@ -254,7 +253,8 @@ export default class TripContentPresenter {
       return;
     }
 
-    this.#viewChangeHandler(ActionType.RESET_FILTERS, UpdateType.MAJOR);
+    this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
+    this.#viewChangeHandler(ActionType.CREATE_POINT, UpdateType.MINOR);
     this.#renderEventPoint();
   };
 
