@@ -18,6 +18,14 @@ export default class AddNewPointBtnView extends AbstractView{
     return createNewPointBtnTemplate();
   }
 
+  disableBtn = () => {
+    this.element.disabled = 'disabled';
+  };
+
+  enableBtn = () => {
+    this.element.disabled = '';
+  };
+
   #addNewPointBtnClickHandler = (evt) => {
     evt.preventDefault();
     this.#onAddNewPointCallback?.();

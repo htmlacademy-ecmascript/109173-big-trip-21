@@ -1,4 +1,4 @@
-import { DateFormats, getMockDate } from './utils.js';
+import { DateFormats } from './utils.js';
 
 const RANDOM_PHOTOS_SERVICE_URL = 'https://loremflickr.com/248/152?random=';
 const CITY_NAMES = ['Moskow', 'London', 'Amsterdam', 'New Zealand', 'Switzerland', 'China', 'Japan'];
@@ -9,8 +9,8 @@ const BLANK_POINT = {
   type: POINT_TYPES[5],
   destination: '',
   dates: {
-    start: getMockDate(),
-    end: getMockDate(true),
+    start: '',
+    end: '',
   },
   offers: new Set(),
   cost: 0,
@@ -22,7 +22,6 @@ const FLATPIKR_SETTINGS = {
   dateFormat: DateFormats.FLATPICKR,
   minuteIncrement: 1,
   'time_24hr': true,
-  // 'locale': Russian
 };
 const ActionType = {
   CREATE_POINT: 'CREATE_POINT',

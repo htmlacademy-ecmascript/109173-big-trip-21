@@ -203,6 +203,7 @@ export default class TripContentPresenter {
     switch(actionType) {
       case ActionType.CREATE_POINT: {
         // Создание точки без добавления в модель (например, при клике на кнопку + New event)
+        this.#addNewPointBtnComponent.disableBtn();
         this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
         this.#resetFilters({ updateType, resetFilter: true, resetSort: true });
         this.#reRenderTripBoard();
@@ -211,6 +212,7 @@ export default class TripContentPresenter {
       }
 
       case ActionType.CANCEL_CREATING_POINT: {
+        this.#addNewPointBtnComponent.enableBtn();
         this.#reRenderTripBoard();
         break;
       }

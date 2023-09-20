@@ -296,19 +296,16 @@ export default class EditPointView extends AbstractStatefulView {
 
   #initDatepickr() {
     const defaultDateFrom = this._state.dateFrom;
-    const defaultDateTo = this._state.dateTo;
     const dateStartElem = this.element.querySelector(CSSIDs.DATE_TIME_START);
     const dateEndElem = this.element.querySelector(CSSIDs.DATE_TIME_END);
 
     this.#datepickrFrom = flatpickr(dateStartElem, {
       ...FLATPIKR_SETTINGS,
-      defaultDate: defaultDateFrom,
       onChange: this.#dateFromChangeHandler
     });
 
     this.#datepickrTo = flatpickr(dateEndElem, {
       ...FLATPIKR_SETTINGS,
-      defaultDate: defaultDateTo,
       minDate: defaultDateFrom,
       onChange: this.#dateToChangeHandler
     });
@@ -333,16 +330,16 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #dateFromChangeHandler = (_, dateStr) => {
-    this. #updateStateView(
+    this.#updateStateView(
       { dateFrom: dateStr },
-      this.#pointDateChangeHandler
+      this.#onDateChangeCallback
     );
   };
 
   #dateToChangeHandler = (_, dateStr) => {
-    this. #updateStateView(
+    this.#updateStateView(
       { dateTo: dateStr },
-      this.#pointDateChangeHandler
+      this.#onDateChangeCallback
     );
   };
 
@@ -373,10 +370,6 @@ export default class EditPointView extends AbstractStatefulView {
     }
 
     this._setState({ offers: offers });
-  };
-
-  #pointDateChangeHandler = () => {
-    this. #updateStateView({}, this.#onDateChangeCallback);
   };
 
   #pointPriceChangeHandler = (evt) => {
@@ -429,8 +422,8 @@ export default class EditPointView extends AbstractStatefulView {
     isNewPoint,
   }) {
 
-    const dateFrom = dayjs(dates.start, DateFormats.CHOSED_DATE).format(DateFormats.CHOSED_DATE);
-    const dateTo = dayjs(dates.end, DateFormats.CHOSED_DATE).format(DateFormats.CHOSED_DATE);
+    const dateFrom = dates?.start ? dayjs(dates.start, DateFormats.CHOSED_DATE).format(DateFormats.CHOSED_DATE) : '';
+    const dateTo = dates?.end ? dayjs(dates.end, DateFormats.CHOSED_DATE).format(DateFormats.CHOSED_DATE) : '';
 
     return {
       type,

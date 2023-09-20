@@ -38,6 +38,7 @@ function createTripEventsListTemplate({
   const offersTemplate = offers.size > 0 ? createOffersTemplate(offers, typedOffersList) : '';
   const dateFrom = dayjs(dates.start, DateFormats.CHOSED_DATE);
   const dateTo = dayjs(dates.end, DateFormats.CHOSED_DATE);
+
   const pointDate = dateFrom.format(DateFormats.FOR_POINT);
   const dateStart = dateFrom.format(DateFormats.FOR_POINT_PERIODS);
   const dateEnd = dateTo.format(DateFormats.FOR_POINT_PERIODS);
