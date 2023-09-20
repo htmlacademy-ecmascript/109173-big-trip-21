@@ -147,7 +147,18 @@ export default class TripContentPresenter {
   }
 
   #getCurrentPrice() {
-    return [...this.#pointsModel.points].reduce((accumulator, point) => accumulator + Number(point.cost), 0);
+    return [...this.#pointsModel.points].reduce((accumulator, point) => {
+      const pointOffers = this.#offersModel.getOffersByPointType(point.type);
+      const totalPointOffersPrice = pointOffers.reduce((offersPrice, offer) => {
+        if(point.offers.has(offer.id)) {
+          return offersPrice + offer.price;
+        }
+
+        return offersPrice;
+      }, 0);
+
+      return accumulator + Number(point.cost + totalPointOffersPrice);
+    }, 0);
   }
 
   #getPointsInfo() {
