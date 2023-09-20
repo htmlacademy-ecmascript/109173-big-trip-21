@@ -1,5 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { DateFormats, upperCaseFirst, findObjectByID } from '../utils/utils.js';
+import { DateFormats, upperCaseFirst, findObjectByID, removeChars } from '../utils/utils.js';
 import { POINT_TYPES, FLATPIKR_SETTINGS } from '../utils/const.js';
 
 import flatpickr from 'flatpickr';
@@ -172,8 +172,6 @@ function createEditPointTemplate({
     </li>`;
 }
 
-// TODO: При обновлении даты и цены - также обновлять вью, чтобы оно не сбрасывалось
-// при смене типа точки маршрута или конечного пункта назначения
 export default class EditPointView extends AbstractStatefulView {
   #point = null;
   #isNewPoint = null;
@@ -253,6 +251,9 @@ export default class EditPointView extends AbstractStatefulView {
     this.element
       .querySelector(CSSClasses.BASE_PRICE)
       .addEventListener('change', this.#pointPriceChangeHandler);
+    this.element
+      .querySelector(CSSClasses.BASE_PRICE)
+      .addEventListener('input', this.#pointPriceInputHandler);
     this.element
       .querySelector(CSSClasses.DELETE_BTN)
       .addEventListener('click', pointAbortHandler);
@@ -351,7 +352,7 @@ export default class EditPointView extends AbstractStatefulView {
       .find((destination) => destination.name === target.value);
 
     if(!target.value || !newDestination) {
-      target.value = this._state.destination.name;
+      target.value = this._state.destination.name || '';
       return;
     }
 
@@ -380,12 +381,17 @@ export default class EditPointView extends AbstractStatefulView {
 
   #pointPriceChangeHandler = (evt) => {
     const target = evt.target;
-    const newPrice = !target.value ? 0 : Number(target.value);
+    const newPrice = !removeChars(target.value) ? 0 : Number(target.value);
 
     this.#updateStateView(
       { cost: newPrice },
       this.#onPriceChangeCallback
     );
+  };
+
+  #pointPriceInputHandler = (evt) => {
+    const target = evt.target;
+    target.value = removeChars(target.value);
   };
 
   #pointSubmitHandler = (evt) => {

@@ -122,17 +122,17 @@ export default class TripContentPresenter {
     const isNewPoint = (point === BLANK_POINT);
     const destinationsList = this.#destinationsModel.destinations;
     const pointPresenter = new TripPointPresenter({
+      point,
       container: this.#tripEventsListContainer.element,
       destinationsList,
       offersModel: this.#offersModel,
       onChangeCallback: this.#viewChangeHandler,
       onBeforeEditCallback: this.#pointBeforeEditHandler,
       setBoardMode: this.#setBoardMode,
-      getBoardMode: this.#getBoardMode,
       isNewPoint,
     });
 
-    pointPresenter.init(point);
+    pointPresenter.init();
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 

@@ -155,6 +155,10 @@ function updateItem(items, updatedItem) {
   return items.map((item) => (item.id === updatedItem.id) ? updatedItem : item);
 }
 
+function removeChars(str) {
+  return str.replace(/\D*/gui, '');
+}
+
 function isEscKey(evt) {
   return evt.key === 'Escape';
 }
@@ -182,6 +186,7 @@ export {
   findObjectByID,
   updateItem,
   upperCaseFirst,
+  removeChars,
   isEscKey,
   getIDs
 };

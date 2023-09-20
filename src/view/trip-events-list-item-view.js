@@ -101,18 +101,18 @@ export default class TripEventsListItemView extends AbstractView {
     this.#onEditCallback = onEditCallback;
     this.#onFavoriteToggleCallback = onFavoriteToggleCallback;
 
-    this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointEditBtnHandler);
-    this.element.querySelector(CSSClasses.FAVORITE_BTN).addEventListener('click', this.#pointFavoriteToggleHandler);
+    this.element.querySelector(CSSClasses.ROLLUP_BTN)
+      .addEventListener('click', this.#pointEditBtnHandler);
+    this.element.querySelector(CSSClasses.FAVORITE_BTN)
+      .addEventListener('click', this.#pointFavoriteToggleHandler);
   }
 
   get template() {
     return createTripEventsListTemplate(this.#templateData);
   }
 
-  #pointEditBtnHandler = () => {
-    this.#onEditCallback?.();
-  };
-
+  /** Обработчики */
+  #pointEditBtnHandler = () => this.#onEditCallback?.();
   #pointFavoriteToggleHandler = () => {
     this.#templateData.isFavorite = !this.#templateData.isFavorite;
 

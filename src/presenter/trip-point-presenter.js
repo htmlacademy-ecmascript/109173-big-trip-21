@@ -18,49 +18,41 @@ export default class TripPointPresenter {
 
   #prevPointComponent = null;
   #prevEditPointComponent = null;
-  #pointIsEditing = false;
+  #isEditing = false;
 
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
   #setBoardMode = null;
-  #getBoardMode = null;
 
   constructor({
+    point,
     container,
     destinationsList,
     offersModel,
     onChangeCallback,
     onBeforeEditCallback,
     setBoardMode,
-    getBoardMode,
     isNewPoint,
   }) {
+    this.#point = point;
     this.#pointsContainer = container;
     this.#destinationsList = destinationsList;
     this.#offersModel = offersModel;
     this.#onChangeCallback = onChangeCallback;
     this.#onBeforeEditCallback = onBeforeEditCallback;
     this.#setBoardMode = setBoardMode;
-    this.#getBoardMode = getBoardMode;
     this.#isNewPoint = isNewPoint;
   }
 
-  init(point) {
-    /**
-     * Если не копировать точку, то при изменении типа в pointTypeChangeHandler
-     * this.#point.type на новый, по какой-то причине меняется и копия в
-     * this.#pointDefaultState <-- Выяснить?
-     */
-    this.#point = structuredClone(point);
-
+  init(point = this.#point) {
     if(this.#pointDefaultState === null) { // Сохранение точки для возможности последующего восстановления
       this.#pointDefaultState = structuredClone(point);
     }
 
     const pointData = {
-      point: this.#point,
+      point,
       destinationsList: this.#destinationsList,
-      typedOffersList: this.#offersModel.getOffersByPointType(this.#point.type),
+      typedOffersList: this.#offersModel.getOffersByPointType(point.type),
     };
 
     // Компоненты предыдущей точки маршрута
@@ -96,7 +88,7 @@ export default class TripPointPresenter {
   }
 
   reset() {
-    if (!this.isEditing()) {
+    if (!this.#isEditing) {
       return;
     }
 
@@ -112,10 +104,6 @@ export default class TripPointPresenter {
     remove(pointEditComponent);
 
     this.#removeKeyDownHandler();
-  }
-
-  isEditing() {
-    return this.#pointIsEditing;
   }
 
   #renderPoint() {
@@ -150,13 +138,13 @@ export default class TripPointPresenter {
     this.#onBeforeEditCallback();
     replace(this.#editPointComponent, this.#pointComponent);
     this.#setKeyDownHandler();
-    this.#pointIsEditing = true;
+    this.#isEditing = true;
   }
 
   #replaceFormToPoint() {
     replace(this.#pointComponent, this.#editPointComponent);
     this.#removeKeyDownHandler();
-    this.#pointIsEditing = false;
+    this.#isEditing = false;
     this.#setBoardMode(TripBoardMode.DEFAULT);
   }
 
@@ -170,7 +158,7 @@ export default class TripPointPresenter {
 
   /** Обработчики */
   #documentKeyDownHandler = (evt) => {
-    if (!isEscKey(evt) || !this.#pointIsEditing) {
+    if (!isEscKey(evt)) {
       return;
     }
 
@@ -179,9 +167,7 @@ export default class TripPointPresenter {
     this.#removeKeyDownHandler();
   };
 
-  #pointEditHandler = () => {
-    this.#replacePointToForm();
-  };
+  #pointEditHandler = () => this.#replacePointToForm();
 
   #pointCancelEditHandler = () => {
     if(this.#isNewPoint) {
@@ -189,8 +175,6 @@ export default class TripPointPresenter {
       this.#setBoardMode(TripBoardMode.DEFAULT);
       return;
     }
-
-    this.#point = this.#pointDefaultState;
 
     this.#updateView(this.#point);
     this.#replaceFormToPoint();
