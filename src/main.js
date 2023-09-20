@@ -36,7 +36,6 @@ const tripFilterPresenter = new TripFilterPresenter({
 });
 const tripSortPresenter = new TripSortPresenter({
   sortContainer: eventsContainer,
-  filterModel,
   sortModel,
   pointsModel
 });

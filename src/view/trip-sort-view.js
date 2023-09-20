@@ -15,37 +15,44 @@ function createTripSortItemsTemplate({ sorts, currentSort }) {
   }).join('');
 }
 
-function createTripSortTemplate({ sorts, currentSort }) {
+function createTripSortTemplate({ sorts, currentSort, pointsCount }) {
   const sortItemsTemplate = createTripSortItemsTemplate({ sorts, currentSort });
+
   return /*html*/`
     <form class="trip-events__trip-sort  trip-sort" action="#" method="get">
-      ${sortItemsTemplate}
+      ${pointsCount > 0 ? sortItemsTemplate : ''}
     </form>`;
 }
 export default class TripSortView extends AbstractView {
   #sorts = null;
   #currentSort = null;
+  #pointsCount = null;
   #onChangeCallback = null;
 
   get template() {
     return createTripSortTemplate({
       sorts: this.#sorts,
-      currentSort: this.#currentSort
+      currentSort: this.#currentSort,
+      pointsCount: this.#pointsCount
     });
   }
 
   constructor({
     sorts,
     currentSort,
+    pointsCount,
     onChangeCallback
   }) {
     super();
 
     this.#sorts = sorts;
     this.#currentSort = currentSort;
+    this.#pointsCount = pointsCount;
     this.#onChangeCallback = onChangeCallback;
 
-    this.element.addEventListener('change', this.#sortChangeHandler);
+    if(this.#pointsCount > 0) {
+      this.element.addEventListener('change', this.#sortChangeHandler);
+    }
   }
 
   #sortChangeHandler = (evt) => {

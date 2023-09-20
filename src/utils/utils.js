@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import duration from 'dayjs/plugin/duration'; // Расширение для подсчета длительности (https://day.js.org/docs/en/durations/durations)
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'; // (https://day.js.org/docs/en/plugin/is-same-or-before)
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'; // (https://day.js.org/docs/en/plugin/is-same-or-after)
@@ -7,6 +8,7 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'; // (https://day.js.org/d
 dayjs.extend(duration);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
+dayjs.extend(customParseFormat);
 
 const Duration = {
   MINUTE: 1440,
@@ -132,15 +134,21 @@ function parseDateFromMillis(millis) {
 }
 
 function isPastDate(dateTo) {
+  dateTo = dayjs(dateTo, DateFormats.CHOSED_DATE);
+
   return dateTo && dayjs().isAfter(dateTo, 'H');
 }
 
 function isPresentDate(dateFrom, dateTo) {
+  dateFrom = dayjs(dateFrom, DateFormats.CHOSED_DATE);
+  dateTo = dayjs(dateTo, DateFormats.CHOSED_DATE);
+
   return dayjs().isSameOrAfter(dateFrom, 'H') && dayjs().isSameOrBefore(dateTo, 'H');
 }
 
-function isFutureDate(dateTo) {
-  return dateTo && dayjs().isBefore(dateTo, 'H');
+function isFutureDate(dateFrom) {
+  dateFrom = dayjs(dateFrom, DateFormats.CHOSED_DATE);
+  return dateFrom && dayjs().isBefore(dateFrom, 'H');
 }
 
 function getPadded2ZeroNum(num) {

@@ -1,15 +1,16 @@
 import AbstractView from '../framework/view/abstract-view.js';
+import { FilterType } from '../utils/filter.js';
 
 const MessageText = {
-  LOADING: 'Loading...',
-  EVERYTHING: 'Click New Event to create your first point',
-  PAST: 'There are no past events now',
-  PRESENT: 'There are no present events now',
-  FUTURE: 'There are no future events now'
+  [FilterType.LOADING]: 'Loading...',
+  [FilterType.EVERYTHING]: 'Click New Event to create your first point',
+  [FilterType.PAST]: 'There are no past events now',
+  [FilterType.PRESENT]: 'There are no present events now',
+  [FilterType.FUTURE]: 'There are no future events now'
 };
 
-function getTripEventsListEmptyTemplate({filterType = 'EVERYTHING'}) {
-  const eventMessage = MessageText[filterType] || MessageText.EVERYTHING;
+function getTripEventsListEmptyTemplate({ currentFilter }) {
+  const eventMessage = MessageText[currentFilter] || MessageText.EVERYTHING;
 
   return `<p class="trip-events__msg">${eventMessage}</p>`;
 }
@@ -19,15 +20,15 @@ function getTripEventsListEmptyTemplate({filterType = 'EVERYTHING'}) {
  * @param {string} templateData.filterType Название применяемого фильтра
  */
 export default class TripEventsListEmptyView extends AbstractView {
-  #templateData = null;
+  #currentFilter = null;
 
-  constructor(templateData = {}) {
+  constructor({ currentFilter }) {
     super();
 
-    this.#templateData = templateData;
+    this.#currentFilter = currentFilter;
   }
 
   get template() {
-    return getTripEventsListEmptyTemplate(this.#templateData);
+    return getTripEventsListEmptyTemplate({ currentFilter: this.#currentFilter });
   }
 }

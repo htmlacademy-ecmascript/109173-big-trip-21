@@ -84,11 +84,16 @@ export default class TripContentPresenter {
   }
 
   #renderTripBoard() {
+    const points = this.points;
+
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
 
-    if (this.points.length > 0) {
-      this.#renderEventPoints(this.points);
-    } else {
+    if (points.length > 0) {
+      this.#renderEventPoints(points);
+      return;
+    }
+
+    if(this.#getBoardMode() !== TripBoardMode.ADDING_NEW_POINT) {
       this.#renderNoPoints();
     }
   }
@@ -110,7 +115,7 @@ export default class TripContentPresenter {
   }
 
   #renderNoPoints() {
-    this.#noPointsComponent = new TripEventsListEmptyView();
+    this.#noPointsComponent = new TripEventsListEmptyView({ currentFilter: this.#filterModel.filter });
     render(this.#noPointsComponent, this.#tripEventsListContainer.element);
   }
 
@@ -139,7 +144,6 @@ export default class TripContentPresenter {
   #clearEventPoints() {
     this.#pointPresenters.forEach((pointPresenter) => pointPresenter.destroy());
     this.#pointPresenters.clear();
-    this.#setBoardMode(TripBoardMode.DEFAULT);
   }
 
   #getCurrentPrice() {
@@ -188,9 +192,18 @@ export default class TripContentPresenter {
     switch(actionType) {
       case ActionType.CREATE_POINT: {
         // Создание точки без добавления в модель (например, при клике на кнопку + New event)
+        this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
         this.#resetFilters({ updateType, resetFilter: true, resetSort: true });
+        this.#reRenderTripBoard();
+        this.#renderEventPoint();
         break;
       }
+
+      case ActionType.CANCEL_CREATING_POINT: {
+        this.#reRenderTripBoard();
+        break;
+      }
+
       case ActionType.ADD_POINT: {
         this.#pointsModel.addPoint(updateType, data);
         break;
@@ -253,12 +266,8 @@ export default class TripContentPresenter {
       return;
     }
 
-    this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
     this.#viewChangeHandler(ActionType.CREATE_POINT, UpdateType.MINOR);
-    this.#renderEventPoint();
   };
 
-  #pointBeforeEditHandler = () => {
-    this.#pointPresenters.forEach((pointPresenter) => pointPresenter.reset());
-  };
+  #pointBeforeEditHandler = () => this.#pointPresenters.forEach((pointPresenter) => pointPresenter.reset());
 }

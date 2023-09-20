@@ -58,12 +58,7 @@ export default class TripFilterPresenter {
   /** Обработчики */
   // Отслеживание изменения данных на сервере
   #modelChangeHandler = () => this.init();
-
-  #pointsModelChangeHandler = (updateType, { remainingPointsCount }) => { // Чтобы не перерисовывать каждый раз фильтры при удалении точек
-    if(remainingPointsCount <= 0) {
-      this.init();
-    }
-  };
+  #pointsModelChangeHandler = () => this.init();
 
   #filterChangeHandler = (filterType) => {
     if(this.#filterModel.filter === filterType) {

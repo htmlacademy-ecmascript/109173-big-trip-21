@@ -139,6 +139,10 @@ export default class TripPointPresenter {
     replace(this.#editPointComponent, this.#pointComponent);
     this.#setKeyDownHandler();
     this.#isEditing = true;
+
+    if(this.#isNewPoint) {
+      this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
+    }
   }
 
   #replaceFormToPoint() {
@@ -173,6 +177,7 @@ export default class TripPointPresenter {
     if(this.#isNewPoint) {
       this.destroy();
       this.#setBoardMode(TripBoardMode.DEFAULT);
+      this.#onChangeCallback(ActionType.CANCEL_CREATING_POINT, UpdateType.MAJOR);
       return;
     }
 

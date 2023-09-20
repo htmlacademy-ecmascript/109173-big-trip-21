@@ -32,7 +32,7 @@ export default class PointsModel extends Observable {
   }
 
   addPoint(updateType, newPoint) {
-    this.#points.push(newPoint);
+    this.#points.push({ ...newPoint, id: crypto.randomUUID() });
     this._notify(updateType, newPoint);
   }
 
