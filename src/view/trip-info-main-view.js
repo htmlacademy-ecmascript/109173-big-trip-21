@@ -53,9 +53,11 @@ function createTripInfoMainTemplate({ pointsInfo }) {
 
   return /*html*/`
     <div class="trip-info__main">
-      <h1 class="trip-info__title">${destinationsStr}</h1>
+      ${(pointsInfo.length > 0) ? /*html*/`
+        <h1 class="trip-info__title">${destinationsStr}</h1>
 
-      <p class="trip-info__dates">${datesStr}</p>
+        <p class="trip-info__dates">${datesStr}</p>
+      ` : ''}
     </div>`;
 }
 
