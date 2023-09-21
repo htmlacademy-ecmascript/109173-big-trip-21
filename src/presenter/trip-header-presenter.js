@@ -78,10 +78,6 @@ export default class TripHeaderPresenter {
   /**
    * Обрнаботчики
    */
-  #addNewPointBtnClickHandler = () => {
-    console.log('Добавляем новую точку');
-  };
-
   #modelChangeHandler = () => {
     this.#reRenderPrice({ price: this.#getCurrentPrice() });
     this.#reRenderTripInfo({ pointsInfo: this.#getPointsInfo() });
