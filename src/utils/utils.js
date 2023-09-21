@@ -151,6 +151,12 @@ function isFutureDate(dateFrom) {
   return dateFrom && dayjs().isBefore(dateFrom, 'H');
 }
 
+function normalizeDate(date, format, filler = '') {
+  const formattedDate = date.format(format);
+
+  return (formattedDate !== 'Invalid Date') ? formattedDate : filler;
+}
+
 function getPadded2ZeroNum(num) {
   return String(num).padStart(2, 0);
 }
@@ -191,6 +197,7 @@ export {
   isPastDate,
   isPresentDate,
   isFutureDate,
+  normalizeDate,
   findObjectByID,
   updateItem,
   upperCaseFirst,

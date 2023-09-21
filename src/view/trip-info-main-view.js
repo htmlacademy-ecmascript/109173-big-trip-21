@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { DateFormats } from '../utils/utils.js';
+import { DateFormats, normalizeDate } from '../utils/utils.js';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -13,21 +13,41 @@ function createTripInfoMainTemplate({ pointsInfo }) {
   if(pointsInfo.length > 0) {
     const startPoint = pointsInfo[0];
     const endPoint = pointsInfo[pointsInfo.length - 1];
+    const startDestination = startPoint.destination;
+    const endDestination = endPoint.destination;
 
-    // TODO: Можно ли исправить на switch?
-    if(pointsInfo.length > 3) {
-      destinationsStr = `${startPoint.destination} ${destinationsStr} ${endPoint.destination}`;
-    } else if(pointsInfo.length === 2) {
-      destinationsStr = `${startPoint.destination} &mdash; ${endPoint.destination}`;
-    } else {
-      destinationsStr = Object.values(pointsInfo).map((pointInfo) => pointInfo.destination).join('&mdash;');
+    if(pointsInfo[0].destination) {
+      switch(Boolean(pointsInfo.length)) {
+        case (pointsInfo.length > 3): {
+          destinationsStr = `${startDestination} ${destinationsStr} ${endDestination}`;
+          break;
+        }
+
+        case (pointsInfo.length === 2): {
+          destinationsStr = `${startDestination} &mdash; ${endDestination}`;
+          break;
+        }
+
+        case (pointsInfo.length === 1): {
+          destinationsStr = startDestination;
+          break;
+        }
+
+        default: {
+          if(startDestination) {
+            destinationsStr = Object.values(pointsInfo).map((pointInfo) => pointInfo.destination).join(' &mdash; ');
+          }
+        }
+      }
     }
 
     const pathDateFrom = dayjs(startPoint.dateFrom, DateFormats.PATH);
     const pathDateTo = dayjs(endPoint.dateTo, DateFormats.PATH);
-    const dateToFormat = (pathDateFrom.isSame(pathDateTo, 'year') && pathDateFrom.isSame(pathDateTo, 'month')) ? DateFormats.DAY : DateFormats.FOR_POINT;
+    const dateToFormat = (pathDateFrom.isSame(pathDateTo, 'year') && pathDateFrom.isSame(pathDateTo, 'month'))
+      ? DateFormats.DAY
+      : DateFormats.FOR_POINT;
 
-    datesStr = `${pathDateFrom.format(DateFormats.FOR_POINT)} &mdash; ${pathDateTo.format(dateToFormat)}`;
+    datesStr = `${normalizeDate(pathDateFrom, DateFormats.FOR_POINT, '...')} &mdash; ${normalizeDate(pathDateTo, dateToFormat, '...')}`;
   }
 
 

@@ -1,5 +1,10 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getFormattedDateDiff, DateFormats, findObjectByID } from '../utils/utils.js';
+import {
+  getFormattedDateDiff,
+  DateFormats,
+  findObjectByID,
+  normalizeDate
+} from '../utils/utils.js';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -39,11 +44,11 @@ function createTripEventsListTemplate({
   const dateFrom = dayjs(dates.start, DateFormats.CHOSED_DATE);
   const dateTo = dayjs(dates.end, DateFormats.CHOSED_DATE);
 
-  const pointDate = dateFrom.format(DateFormats.FOR_POINT);
-  const dateStart = dateFrom.format(DateFormats.FOR_POINT_PERIODS);
-  const dateEnd = dateTo.format(DateFormats.FOR_POINT_PERIODS);
-  const dateTimeStart = dateFrom.format(DateFormats.DATE_TIME);
-  const dateTimeEnd = dateTo.format(DateFormats.DATE_TIME);
+  const pointDate = normalizeDate(dateFrom, DateFormats.FOR_POINT);
+  const dateStart = normalizeDate(dateFrom, DateFormats.FOR_POINT_PERIODS);
+  const dateEnd = normalizeDate(dateTo, DateFormats.FOR_POINT_PERIODS);
+  const dateTimeStart = normalizeDate(dateFrom, DateFormats.DATE_TIME);
+  const dateTimeEnd = normalizeDate(dateTo, DateFormats.DATE_TIME);
   const datesDiff = getFormattedDateDiff(dateFrom, dateTo);
 
   return /*html*/`
