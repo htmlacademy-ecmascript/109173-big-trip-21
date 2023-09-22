@@ -1,13 +1,13 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-export default class AbstractFiltersView extends AbstractView {
+export default class AbstractFilterView extends AbstractView {
   _items = null;
   _onChangeCallback = null;
 
   constructor({items = null, onChangeCallback}) {
     super();
 
-    if (new.target === AbstractFiltersView) {
+    if (new.target === AbstractFilterView) {
       throw new Error('Can\'t instantiate AbstractFiltersView, only concrete one.');
     }
 

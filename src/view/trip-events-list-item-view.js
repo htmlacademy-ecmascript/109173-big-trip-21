@@ -1,5 +1,10 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getFormattedDateDiff, DateFormats, findObjectByID } from '../utils/utils.js';
+import {
+  getFormattedDateDiff,
+  DateFormats,
+  findObjectByID,
+  normalizeDate
+} from '../utils/utils.js';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -32,17 +37,18 @@ function createTripEventsListTemplate({
   cost,
   isFavorite,
   destinationsList,
-  typeOffersList}) {
+  typedOffersList}) {
 
   const destinationInfo = findObjectByID(destination, destinationsList);
-  const offersTemplate = offers.size > 0 ? createOffersTemplate(offers, typeOffersList) : '';
+  const offersTemplate = offers.size > 0 ? createOffersTemplate(offers, typedOffersList) : '';
   const dateFrom = dayjs(dates.start, DateFormats.CHOSED_DATE);
   const dateTo = dayjs(dates.end, DateFormats.CHOSED_DATE);
-  const pointDate = dateFrom.format(DateFormats.FOR_POINT);
-  const dateStart = dateFrom.format(DateFormats.FOR_POINT_PERIODS);
-  const dateEnd = dateTo.format(DateFormats.FOR_POINT_PERIODS);
-  const dateTimeStart = dateFrom.format(DateFormats.DATE_TIME);
-  const dateTimeEnd = dateTo.format(DateFormats.DATE_TIME);
+
+  const pointDate = normalizeDate(dateFrom, DateFormats.FOR_POINT);
+  const dateStart = normalizeDate(dateFrom, DateFormats.FOR_POINT_PERIODS);
+  const dateEnd = normalizeDate(dateTo, DateFormats.FOR_POINT_PERIODS);
+  const dateTimeStart = normalizeDate(dateFrom, DateFormats.DATE_TIME);
+  const dateTimeEnd = normalizeDate(dateTo, DateFormats.DATE_TIME);
   const datesDiff = getFormattedDateDiff(dateFrom, dateTo);
 
   return /*html*/`
@@ -85,37 +91,37 @@ function createTripEventsListTemplate({
 
 export default class TripEventsListItemView extends AbstractView {
   #templateData = null;
-  #pointEditBtn = null;
   #onEditCallback = null;
-  #onFavoriteCallback = null;
+  #onFavoriteToggleCallback = null;
 
   constructor({
     point,
     destinationsList,
-    typeOffersList,
+    typedOffersList,
     onEditCallback,
-    onFavoriteCallback}) {
+    onFavoriteToggleCallback
+  }) {
     super();
 
-    this.#templateData = {...point, destinationsList, typeOffersList};
+    this.#templateData = {...point, destinationsList, typedOffersList};
     this.#onEditCallback = onEditCallback;
-    this.#onFavoriteCallback = onFavoriteCallback;
+    this.#onFavoriteToggleCallback = onFavoriteToggleCallback;
 
-    this.element.querySelector(CSSClasses.ROLLUP_BTN).addEventListener('click', this.#pointEditBtnHandler);
-    this.element.querySelector(CSSClasses.FAVORITE_BTN).addEventListener('click', this.#pointFavoriteClickHandler);
+    this.element.querySelector(CSSClasses.ROLLUP_BTN)
+      .addEventListener('click', this.#pointEditBtnHandler);
+    this.element.querySelector(CSSClasses.FAVORITE_BTN)
+      .addEventListener('click', this.#pointFavoriteToggleHandler);
   }
 
   get template() {
     return createTripEventsListTemplate(this.#templateData);
   }
 
-  #pointEditBtnHandler = () => {
-    this.#onEditCallback?.();
-  };
-
-  #pointFavoriteClickHandler = () => {
+  /** Обработчики */
+  #pointEditBtnHandler = () => this.#onEditCallback?.();
+  #pointFavoriteToggleHandler = () => {
     this.#templateData.isFavorite = !this.#templateData.isFavorite;
 
-    this.#onFavoriteCallback?.(this.#templateData.isFavorite);
+    this.#onFavoriteToggleCallback?.(this.#templateData.isFavorite);
   };
 }

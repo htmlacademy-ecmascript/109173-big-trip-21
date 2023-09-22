@@ -1,10 +1,48 @@
-import TripHeaderPresenter from './presenter/trip-header-presenter.js';
+import TripFilterPresenter from './presenter/trip-filter-presenter.js';
+import TripSortPresenter from './presenter/trip-sort-presenter.js';
 import TripContentPresenter from './presenter/trip-content-presenter.js';
+import FilterModel from './model/filter-model.js';
+import DestinationsModel from './model/destinations-model.js';
+import OffersModel from './model/offers-model.js';
+import PointsModel from './model/points-model.js';
+import SortModel from './model/sort-model.js';
 
-/** TODO: Объеденить хэдер и контентную часть в один презентер для упрощения работы с фильтрацией? */
+const CSSClasses = {
+  TRIP_MAIN_CONTAINER: '.trip-main',
+  TRIP_FILTER_CONTAINER: '.trip-controls__filters',
+  TRIP_EVENTS: '.trip-events'
+};
 
-const tripHeaderPresenter = new TripHeaderPresenter();
-const tripContentPresenter = new TripContentPresenter();
+const mainHeaderContainer = document.querySelector(CSSClasses.TRIP_MAIN_CONTAINER); // Контейнер для отрисовки общей информации о путешествии
+const filterContainer = document.querySelector(CSSClasses.TRIP_FILTER_CONTAINER); // Контейнер для фильтров
+const eventsContainer = document.querySelector(CSSClasses.TRIP_EVENTS); // Общий контейнер для событий
 
+const filterModel = new FilterModel();
+const destinationsModel = new DestinationsModel();
+const offersModel = new OffersModel();
+const pointsModel = new PointsModel({ destinationsModel, offersModel });
+const sortModel = new SortModel();
+
+const tripFilterPresenter = new TripFilterPresenter({
+  filterContainer,
+  filterModel,
+  pointsModel,
+});
+const tripSortPresenter = new TripSortPresenter({
+  sortContainer: eventsContainer,
+  sortModel,
+  pointsModel
+});
+const tripContentPresenter = new TripContentPresenter({
+  mainHeaderContainer,
+  eventsContainer,
+  destinationsModel,
+  offersModel,
+  filterModel,
+  sortModel,
+  pointsModel
+});
+
+tripFilterPresenter.init();
+tripSortPresenter.init();
 tripContentPresenter.init();
-tripHeaderPresenter.init(tripContentPresenter);

@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import duration from 'dayjs/plugin/duration'; // Расширение для подсчета длительности (https://day.js.org/docs/en/durations/durations)
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'; // (https://day.js.org/docs/en/plugin/is-same-or-before)
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'; // (https://day.js.org/docs/en/plugin/is-same-or-after)
@@ -7,6 +8,7 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'; // (https://day.js.org/d
 dayjs.extend(duration);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
+dayjs.extend(customParseFormat);
 
 const Duration = {
   MINUTE: 1440,
@@ -17,6 +19,8 @@ const Duration = {
 const DateFormats = {
   FLATPICKR: 'd/m/y H:i', // Для Флэтпикера
   DATE_TIME: 'YYYY-MM-DD[T]hh:mm', // Для тега datetime
+  PATH: 'DD/MM/YY',
+  DAY: 'DD',
   CHOSED_DATE: 'DD/MM/YY HH:mm', // Дата и время начала события
   FOR_POINT_PERIODS: 'HH:mm', // Для периодов, выбранных для точки маршрута
   FOR_POINT: 'MMM DD', // Дата для каждой конкретной точки маршрута
@@ -130,15 +134,27 @@ function parseDateFromMillis(millis) {
 }
 
 function isPastDate(dateTo) {
+  dateTo = dayjs(dateTo, DateFormats.CHOSED_DATE);
+
   return dateTo && dayjs().isAfter(dateTo, 'H');
 }
 
 function isPresentDate(dateFrom, dateTo) {
+  dateFrom = dayjs(dateFrom, DateFormats.CHOSED_DATE);
+  dateTo = dayjs(dateTo, DateFormats.CHOSED_DATE);
+
   return dayjs().isSameOrAfter(dateFrom, 'H') && dayjs().isSameOrBefore(dateTo, 'H');
 }
 
-function isFutureDate(dateTo) {
-  return dateTo && dayjs().isBefore(dateTo, 'H');
+function isFutureDate(dateFrom) {
+  dateFrom = dayjs(dateFrom, DateFormats.CHOSED_DATE);
+  return dateFrom && dayjs().isBefore(dateFrom, 'H');
+}
+
+function normalizeDate(date, format, filler = '') {
+  const formattedDate = date.format(format);
+
+  return (formattedDate !== 'Invalid Date') ? formattedDate : filler;
 }
 
 function getPadded2ZeroNum(num) {
@@ -151,6 +167,10 @@ function findObjectByID(id, obj) {
 
 function updateItem(items, updatedItem) {
   return items.map((item) => (item.id === updatedItem.id) ? updatedItem : item);
+}
+
+function removeChars(str) {
+  return str.replace(/\D*/gui, '');
 }
 
 function isEscKey(evt) {
@@ -177,9 +197,11 @@ export {
   isPastDate,
   isPresentDate,
   isFutureDate,
+  normalizeDate,
   findObjectByID,
   updateItem,
   upperCaseFirst,
+  removeChars,
   isEscKey,
   getIDs
 };

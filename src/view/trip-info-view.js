@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
+import { TRIP_INFO_TEMPLATE } from '../utils/const.js';
 
-const TRIP_INFO_TEMPLATE = '<section class="trip-main__trip-info  trip-info"></section>';
 
 export default class TripInfoView extends AbstractView {
   get template() {
