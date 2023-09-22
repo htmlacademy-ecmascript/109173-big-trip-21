@@ -2,7 +2,7 @@ import AbstractView from '../framework/view/abstract-view.js';
 import { FilterType } from '../utils/filter.js';
 
 const MessageText = {
-  [FilterType.LOADING]: 'Loading...',
+  LOADING: 'Loading...',
   [FilterType.EVERYTHING]: 'Click New Event to create your first point',
   [FilterType.PAST]: 'There are no past events now',
   [FilterType.PRESENT]: 'There are no present events now',
@@ -10,7 +10,7 @@ const MessageText = {
 };
 
 function getTripEventsListEmptyTemplate({ currentFilter }) {
-  const eventMessage = MessageText[currentFilter] || MessageText.EVERYTHING;
+  const eventMessage = MessageText[currentFilter] || MessageText.LOADING;
 
   return `<p class="trip-events__msg">${eventMessage}</p>`;
 }
