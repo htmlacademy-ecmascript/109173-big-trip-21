@@ -54,7 +54,7 @@ export default class TripSortPresenter {
   /** Обработчики */
   // Отслеживание изменения данных на сервере
   #modelChangeHandler = () => this.init();
-  #pointsModelChangeHandler = (_, { remainingPointsCount }) => {
+  #pointsModelChangeHandler = (_, { remainingPointsCount } = {}) => {
     if(remainingPointsCount > 0) {
       return;
     }

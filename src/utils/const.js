@@ -1,5 +1,7 @@
 import { DateFormats } from './utils.js';
 
+const END_POINT = 'https://21.objects.pages.academy/big-trip';
+const AUTH_TOKEN = `Basic ${crypto.randomUUID()}`;
 const RANDOM_PHOTOS_SERVICE_URL = 'https://loremflickr.com/248/152?random=';
 const CITY_NAMES = ['Moskow', 'London', 'Amsterdam', 'New Zealand', 'Switzerland', 'China', 'Japan'];
 const OFFER_NAMES = ['Transfer', 'Meet in Airport', 'Extra Luggage', 'Lunch', 'Switch to comfort'];
@@ -32,20 +34,34 @@ const ActionType = {
   RESET_FILTERS: 'RESET_FILTERS'
 };
 const UpdateType = {
+  INIT: 'INIT',
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR'
 };
 const TripBoardMode = {
+  LOADING: 'LOADING',
   DEFAULT: 'DEFAULT',
   EDITING: 'EDITING',
   ADDING_NEW_POINT: 'ADDING_NEW_POINT'
+};
+const API_URL = {
+  POINTS: 'points',
+  DESTINATIONS: 'destinations',
+  OFFERS: 'offers',
+};
+const Method = {
+  GET: 'GET',
+  PUT: 'PUT',
+  POST: 'POST',
 };
 
 const TRIP_EVENTS_LIST_TEMPLATE = '<ul class="trip-events__list"></ul>';
 const TRIP_INFO_TEMPLATE = '<section class="trip-main__trip-info  trip-info"></section>';
 
 export {
+  END_POINT,
+  AUTH_TOKEN,
   CITY_NAMES,
   RANDOM_PHOTOS_SERVICE_URL,
   OFFER_NAMES,
@@ -53,6 +69,8 @@ export {
   BLANK_POINT,
   POINTS_COUNT,
   FLATPIKR_SETTINGS,
+  API_URL,
+  Method,
   TRIP_EVENTS_LIST_TEMPLATE,
   TRIP_INFO_TEMPLATE,
   ActionType,

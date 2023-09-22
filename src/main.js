@@ -46,3 +46,4 @@ const tripContentPresenter = new TripContentPresenter({
 tripFilterPresenter.init();
 tripSortPresenter.init();
 tripContentPresenter.init();
+pointsModel.init();

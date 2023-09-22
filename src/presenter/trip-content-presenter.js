@@ -33,7 +33,7 @@ export default class TripContentPresenter {
 
   #pointPresenters = new Map();
 
-  #currentTripBoardMode = TripBoardMode.DEFAULT;
+  #currentTripBoardMode = TripBoardMode.LOADING;
 
   constructor({
     mainHeaderContainer,
@@ -73,6 +73,10 @@ export default class TripContentPresenter {
   }
 
   #renderHeader() {
+    if(this.#getBoardMode() === TripBoardMode.LOADING) {
+      return;
+    }
+
     this.#tripInfoComponent = new TripInfoMainView({ pointsInfo: this.#getPointsInfo() });
     this.#priceComponent = new TripInfoPriceView({ price: this.#getCurrentPrice() });
     this.#addNewPointBtnComponent = new AddNewPointBtnView({ onAddNewPointCallback: this.#addNewPointBtnClickHandler });
@@ -85,17 +89,20 @@ export default class TripContentPresenter {
 
   #renderTripBoard() {
     const points = this.points;
+    const boardMode = this.#getBoardMode();
 
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
 
-    if (points.length > 0) {
-      this.#renderEventPoints(points);
+    if (
+      points.length <= 0 &&
+      (boardMode !== TripBoardMode.ADDING_NEW_POINT &&
+      boardMode !== TripBoardMode.DEFAULT)
+    ) {
+      this.#renderNoPoints();
       return;
     }
 
-    if(this.#getBoardMode() !== TripBoardMode.ADDING_NEW_POINT) {
-      this.#renderNoPoints();
-    }
+    this.#renderEventPoints(points);
   }
 
   #reRenderHeader() {
@@ -115,7 +122,8 @@ export default class TripContentPresenter {
   }
 
   #renderNoPoints() {
-    this.#noPointsComponent = new TripEventsListEmptyView({ currentFilter: this.#filterModel.filter });
+    const currentFilter = (this.#getBoardMode() !== TripBoardMode.LOADING) ? this.#filterModel.filter : null;
+    this.#noPointsComponent = new TripEventsListEmptyView({ currentFilter });
     render(this.#noPointsComponent, this.#tripEventsListContainer.element);
   }
 
@@ -248,6 +256,13 @@ export default class TripContentPresenter {
       }
 
       case UpdateType.MAJOR: {
+        this.#reRenderHeader();
+        this.#reRenderTripBoard();
+        break;
+      }
+
+      case UpdateType.INIT: {
+        this.#setBoardMode(TripBoardMode.DEFAULT);
         this.#reRenderHeader();
         this.#reRenderTripBoard();
         break;

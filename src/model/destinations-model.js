@@ -1,24 +1,18 @@
-import { createDestinations } from '../mock/destinations.js';
-import {
-  getRandomArrayElement,
-  getIDs
-} from '../utils/utils.js';
-
+import DestinationsApiService from '../destinations-api-service.js';
 export default class DestinationsModel {
   #destinations = null;
-
-  constructor() {
-    this.#destinations = createDestinations();
-  }
 
   get destinations() {
     return this.#destinations;
   }
 
-  getRandomDestination() {
-    const destinationIDs = getIDs(this.#destinations);
-
-    return getRandomArrayElement(destinationIDs);
+  async init() {
+    try {
+      const destinationsApiService = new DestinationsApiService();
+      const destinations = await destinationsApiService.destinations;
+      this.#destinations = destinations;
+    } catch(err) {
+      this.#destinations = '';
+    }
   }
-
 }

@@ -1,8 +1,9 @@
+import PointsApiService from '../points-api-service.js';
+import Adapter from '../adapter.js';
 import Observable from '../framework/observable.js';
-import { getRandomPoint } from '../mock/way-point.js';
-import { POINTS_COUNT } from '../utils/const.js';
+import { UpdateType } from '../utils/const.js';
 export default class PointsModel extends Observable {
-  #points = null;
+  #points = [];
   #destinationsModel = null;
   #offersModel = null;
 
@@ -11,10 +12,6 @@ export default class PointsModel extends Observable {
 
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
-    this.#points = Array.from({length: POINTS_COUNT}, () => getRandomPoint({
-      destinationsModel: this.#destinationsModel,
-      offersModel: this.#offersModel,
-    }));
   }
 
   get points() {
@@ -23,6 +20,24 @@ export default class PointsModel extends Observable {
 
   set points(points) {
     this.#points = points;
+  }
+
+  async init() {
+    try {
+      await this.#destinationsModel.init();
+      await this.#offersModel.init();
+
+      const pointsApiService = new PointsApiService();
+      const points = await pointsApiService.points;
+      this.#points = points.map(Adapter.adaptPointToClient);
+    } catch(err) {
+      this.#points = [];
+    }
+
+    this._notify(UpdateType.INIT);
+    // console.log(this.#points);
+    // console.log(this.#destinationsModel.destinations);
+    // console.log(this.#offersModel.offers);
   }
 
   updatePoint(updateType, updatedPoint) {
