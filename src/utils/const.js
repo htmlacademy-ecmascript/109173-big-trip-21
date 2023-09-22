@@ -1,7 +1,7 @@
 import { DateFormats } from './utils.js';
 
 const END_POINT = 'https://21.objects.pages.academy/big-trip';
-const AUTH_TOKEN = `Basic ${crypto.randomUUID()}`;
+const AUTH_TOKEN = 'Basic 44b7-b4ca-e34f0eb25871';
 const RANDOM_PHOTOS_SERVICE_URL = 'https://loremflickr.com/248/152?random=';
 const CITY_NAMES = ['Moskow', 'London', 'Amsterdam', 'New Zealand', 'Switzerland', 'China', 'Japan'];
 const OFFER_NAMES = ['Transfer', 'Meet in Airport', 'Extra Luggage', 'Lunch', 'Switch to comfort'];
