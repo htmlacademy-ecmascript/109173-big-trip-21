@@ -38,10 +38,10 @@ export default class TripContentPresenter {
   constructor({
     mainHeaderContainer,
     eventsContainer,
-    destinationsModel,
-    offersModel,
     filterModel,
     sortModel,
+    destinationsModel,
+    offersModel,
     pointsModel
   }) {
     this.#mainHeaderContainer = mainHeaderContainer;
@@ -49,10 +49,10 @@ export default class TripContentPresenter {
     this.#tripEventsContainer = eventsContainer;
     this.#tripEventsListContainer = new TripEventsListView(); // Контейнер для списка точек маршрута
 
-    this.#destinationsModel = destinationsModel;
-    this.#offersModel = offersModel;
     this.#filterModel = filterModel;
     this.#sortModel = sortModel;
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
     this.#pointsModel = pointsModel;
 
     this.#filterModel.addObserver(this.#filterModelChangeHandler);
@@ -85,6 +85,14 @@ export default class TripContentPresenter {
     render(this.#tripInfoComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о маршруте и датах
     render(this.#priceComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о цене
     render(this.#addNewPointBtnComponent, this.#mainHeaderContainer); // Отрисовываем кнопку добавления новой точки
+
+    /**
+     * Если не удалось загрузить пункты назначения или офферы
+     * - блокируем кнопку добавления новой точки маршрута
+     */
+    if(!this.#checkOptionsLoading()) {
+      this.#addNewPointBtnComponent.disableBtn();
+    }
   }
 
   #renderTripBoard() {
@@ -139,6 +147,7 @@ export default class TripContentPresenter {
       onBeforeEditCallback: this.#pointBeforeEditHandler,
       setBoardMode: this.#setBoardMode,
       isNewPoint,
+      isOptionsLoaded: this.#checkOptionsLoading(),
     });
 
     pointPresenter.init();
@@ -201,6 +210,11 @@ export default class TripContentPresenter {
     if(resetSort && this.#sortModel.sort !== SortType.DAY) {
       this.#sortModel.setSort(updateType, SortType.DAY);
     }
+  }
+
+  #checkOptionsLoading() {
+    return (this.#destinationsModel.destinations.length > 0 &&
+            this.#offersModel.offers.length > 0)
   }
 
   /** Обработчики */
