@@ -1,6 +1,5 @@
 const END_POINT = 'https://21.objects.pages.academy/big-trip';
 const AUTH_TOKEN = 'Basic 44b7-b4ca-e34f0eb25871';
-const RANDOM_PHOTOS_SERVICE_URL = 'https://loremflickr.com/248/152?random=';
 const POINT_TYPES = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
 const DEFAULT_POINT_TYPE = 'Flight';
 const BLANK_POINT = {
@@ -71,7 +70,6 @@ const TRIP_INFO_TEMPLATE = '<section class="trip-main__trip-info  trip-info"></s
 export {
   END_POINT,
   AUTH_TOKEN,
-  RANDOM_PHOTOS_SERVICE_URL,
   POINT_TYPES,
   BLANK_POINT,
   FLATPIKR_SETTINGS,
