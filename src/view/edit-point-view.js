@@ -251,7 +251,6 @@ export default class EditPointView extends AbstractStatefulView {
     this.#onCancelEditCallback = onCancelEditCallback;
     this.#onDeletePointCallback = onDeletePointCallback;
 
-    this.#initDatepickr();
     this._restoreHandlers();
   }
 
@@ -260,6 +259,8 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   _restoreHandlers() {
+    this.#initDatepickr();
+
     const pointAbortHandler = this.#isNewPoint ? this.#pointCancelAddHandler : this.#pointDeleteHanler;
 
     if(!this.#isNewPoint) {
@@ -356,17 +357,11 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #dateFromChangeHandler = (_, dateStr) => {
-    this.#updateStateView(
-      { dateFrom: dateStr },
-      this.#onDateChangeCallback
-    );
+    this.updateElement({ dateFrom: dateStr });
   };
 
   #dateToChangeHandler = (_, dateStr) => {
-    this.#updateStateView(
-      { dateTo: dateStr },
-      this.#onDateChangeCallback
-    );
+    this.updateElement({ dateTo: dateStr });
   };
 
   #pointDestinationChangeHandler = (evt) => {
@@ -402,10 +397,7 @@ export default class EditPointView extends AbstractStatefulView {
     const target = evt.target;
     const newPrice = !removeChars(target.value) ? 0 : Number(target.value);
 
-    this.#updateStateView(
-      { cost: newPrice },
-      this.#onPriceChangeCallback
-    );
+    this.updateElement({ cost: newPrice });
   };
 
   #pointPriceInputHandler = (evt) => {
@@ -424,13 +416,13 @@ export default class EditPointView extends AbstractStatefulView {
     const destinationsList = this.#destinationsList;
     const typedOffersList = this.#typedOffersList;
 
-    this.#updateStateView({
+    this.updateElement({
       ...this.#point,
       isNewPoint: this.#isNewPoint,
       destinationsList,
       typedOffersList
-    },
-    this.#onCancelEditCallback);
+    });
+    this.#onCancelEditCallback?.();
   };
 
   #pointDeleteHanler = () => {

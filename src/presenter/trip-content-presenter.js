@@ -85,14 +85,6 @@ export default class TripContentPresenter {
     render(this.#tripInfoComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о маршруте и датах
     render(this.#priceComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о цене
     render(this.#addNewPointBtnComponent, this.#mainHeaderContainer); // Отрисовываем кнопку добавления новой точки
-
-    /**
-     * Если не удалось загрузить пункты назначения или офферы
-     * - блокируем кнопку добавления новой точки маршрута
-     */
-    if(!this.#checkOptionsLoading()) {
-      this.#addNewPointBtnComponent.disableBtn();
-    }
   }
 
   #renderTripBoard() {
@@ -214,7 +206,7 @@ export default class TripContentPresenter {
 
   #checkOptionsLoading() {
     return (this.#destinationsModel.destinations.length > 0 &&
-            this.#offersModel.offers.length > 0)
+            this.#offersModel.offers.length > 0);
   }
 
   /** Обработчики */
