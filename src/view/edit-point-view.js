@@ -356,13 +356,8 @@ export default class EditPointView extends AbstractStatefulView {
     );
   };
 
-  #dateFromChangeHandler = (_, dateStr) => {
-    this.updateElement({ dateFrom: dateStr });
-  };
-
-  #dateToChangeHandler = (_, dateStr) => {
-    this.updateElement({ dateTo: dateStr });
-  };
+  #dateFromChangeHandler = (_, dateStr) => this._setState({ dateFrom: dateStr });
+  #dateToChangeHandler = (_, dateStr) => this._setState({ dateTo: dateStr });
 
   #pointDestinationChangeHandler = (evt) => {
     const target = evt.target;
