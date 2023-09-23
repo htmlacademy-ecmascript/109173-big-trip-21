@@ -95,14 +95,18 @@ function createEditPointTemplate({
   isHasDestination,
   isNewPoint,
   isOptionsLoaded,
+  isSaving,
+  isDeleting,
+  isDisabled,
 }) {
   const eventTypeTemplate = createEventTypeTemplate(type);
   const offersTemplate = isTypeHasOffers ? createOffersTemplate(offers, typedOffersList) : '';
   const destinationsTemplate = createDestinationsTemplate(destinationsList);
   const photosTemplate = destination?.pictures ? createPhotosTemplate(destination.pictures) : '';
-  const saveBtnText = BtnText.SAVE;
-  const abortBtnText = isNewPoint ? BtnText.CANCEL : BtnText.DELETE;
-  const disabledState = !isOptionsLoaded ? 'disabled' : '';
+  const disabledState = (!isOptionsLoaded || isDisabled) ? 'disabled' : '';
+  const saveBtnText = (isSaving) ? BtnText.SAVING : BtnText.SAVE;
+  const abortBtnDefaultText = (isNewPoint) ? BtnText.CANCEL : BtnText.DELETE;
+  const abortBtnText = (isDeleting) ? BtnText.DELETING : abortBtnDefaultText;
 
   return /*html*/`
     <li class="trip-events__item">
@@ -209,8 +213,6 @@ export default class EditPointView extends AbstractStatefulView {
 
   #onTypeChangeCallback = null;
   #onDestinationChangeCallback = null;
-  #onDateChangeCallback = null;
-  #onPriceChangeCallback = null;
   #onSubmitCallback = null;
   #onCancelEditCallback = null;
   #onDeletePointCallback = null;
@@ -223,12 +225,14 @@ export default class EditPointView extends AbstractStatefulView {
     point,
     isNewPoint,
     isOptionsLoaded,
+    isSaving,
+    isDeleting,
+    isDisabled,
     destinationsList,
     typedOffersList,
+
     onTypeChangeCallback,
     onDestinationChangeCallback,
-    onDateChangeCallback,
-    onPriceChangeCallback,
     onSubmitCallback,
     onCancelEditCallback,
     onDeletePointCallback
@@ -239,6 +243,9 @@ export default class EditPointView extends AbstractStatefulView {
       ...point,
       isNewPoint,
       isOptionsLoaded,
+      isDisabled,
+      isSaving,
+      isDeleting,
       destinationsList,
       typedOffersList
     });
@@ -252,8 +259,6 @@ export default class EditPointView extends AbstractStatefulView {
 
     this.#onTypeChangeCallback = onTypeChangeCallback;
     this.#onDestinationChangeCallback = onDestinationChangeCallback;
-    this.#onDateChangeCallback = onDateChangeCallback;
-    this.#onPriceChangeCallback = onPriceChangeCallback;
     this.#onSubmitCallback = onSubmitCallback;
     this.#onCancelEditCallback = onCancelEditCallback;
     this.#onDeletePointCallback = onDeletePointCallback;
@@ -456,6 +461,7 @@ export default class EditPointView extends AbstractStatefulView {
 
   #pointCancelAddHandler = () => this.#onCancelEditCallback?.(this.#point);
 
+  // TODO: Попробовать отрефакторить эти методы более презентабельно
   static convertDataToState({
     type,
     cost,
@@ -467,6 +473,9 @@ export default class EditPointView extends AbstractStatefulView {
     isFavorite,
     isNewPoint,
     isOptionsLoaded,
+    isSaving,
+    isDeleting,
+    isDisabled,
   }) {
 
     const dateFrom = dates?.start ? dayjs(dates.start, DateFormats.CHOSED_DATE).format(DateFormats.CHOSED_DATE) : '';
@@ -486,6 +495,9 @@ export default class EditPointView extends AbstractStatefulView {
       isFavorite,
       isNewPoint,
       isOptionsLoaded,
+      isSaving,
+      isDeleting,
+      isDisabled,
     };
   }
 

@@ -76,8 +76,6 @@ export default class TripPointPresenter {
       isOptionsLoaded: this.#isOptionsLoaded ,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
       onDestinationChangeCallback: this.#pointDestinationChangeHandler,
-      onDateChangeCallback: this.#pointDateChangeHandler,
-      onPriceChangeCallback: this.#pointPriceChangeCallback,
       onSubmitCallback: this.#pointSubmitHandler,
       onDeletePointCallback: this.#pointDeleteHandler,
       onCancelEditCallback: this.#pointCancelEditHandler
@@ -109,6 +107,35 @@ export default class TripPointPresenter {
     remove(pointEditComponent);
 
     this.#removeKeyDownHandler();
+  }
+
+  setSavingState() {
+    this.#editPointComponent
+      .updateElement({
+        isSaving: true,
+        isDisabled: true,
+      });
+  }
+
+  setDeletingState() {
+    this.#editPointComponent
+      .updateElement({
+        isDeleting: true,
+        isDisabled: true,
+      });
+  }
+
+  setErrorState() {
+    const onErrorStateCallback = () => {
+      this.#editPointComponent
+        .updateElement({
+          isSaving: false,
+          isDeleting: false,
+          isDisabled: false,
+        });
+    };
+
+    this.#editPointComponent.shake(onErrorStateCallback);
   }
 
   #renderPoint() {
@@ -200,12 +227,6 @@ export default class TripPointPresenter {
     this.#setKeyDownHandler();
   };
 
-  #pointDateChangeHandler = (pointWithNewDates) => this.#updateView(pointWithNewDates);
-  #pointPriceChangeCallback = (pointWithNewPrice) => {
-    this.#updateView(pointWithNewPrice);
-    this.#setKeyDownHandler();
-  };
-
   #favoriteToggleHandler = (isFavorite) => {
     this.#point.isFavorite = isFavorite;
     this.#pointDefaultState.isFavorite = isFavorite;
@@ -218,6 +239,8 @@ export default class TripPointPresenter {
 
   #pointSubmitHandler = (point) => {
     const actionType = this.#isNewPoint ? ActionType.ADD_POINT : ActionType.UPDATE_POINT;
+
+    point.cost = (point.cost <= 0) ? 1 : point.cost; // <- Временный костыль для невозможности задать цену меньше 1
 
     this.#pointDefaultState = null;
     this.#onChangeCallback(actionType, UpdateType.MAJOR, point);

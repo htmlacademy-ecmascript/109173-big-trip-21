@@ -1,3 +1,12 @@
+/**
+ * TODO:
+ * Запретить добавлять пустую точку, т.к. это вызывает
+ * ошибку на сервере
+ *
+ * Отрефакторить парсинг данных в стейт и обратно
+ * в компоненте edit-point-view.js
+ */
+
 import TripFilterPresenter from './presenter/trip-filter-presenter.js';
 import TripSortPresenter from './presenter/trip-sort-presenter.js';
 import TripContentPresenter from './presenter/trip-content-presenter.js';

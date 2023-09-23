@@ -215,7 +215,7 @@ export default class TripContentPresenter {
   /**
    * Вью с моделью взаимодействует только через данный метод
    */
-  #viewChangeHandler = (actionType, updateType, data) => {
+  #viewChangeHandler = async (actionType, updateType, data) => {
     switch(actionType) {
       case ActionType.CREATE_POINT: {
         // Создание точки без добавления в модель (например, при клике на кнопку + New event)
@@ -234,17 +234,32 @@ export default class TripContentPresenter {
       }
 
       case ActionType.ADD_POINT: {
-        this.#pointsModel.addPoint(updateType, data);
+        this.#pointPresenters.get(data.id).setSavingState();
+        try {
+          await this.#pointsModel.addPoint(updateType, data);
+        } catch(err) {
+          this.#pointPresenters.get(data.id).setErrorState();
+        }
         break;
       }
 
       case ActionType.UPDATE_POINT: {
-        this.#pointsModel.updatePoint(updateType, data);
+        this.#pointPresenters.get(data.id).setSavingState();
+        try {
+          await this.#pointsModel.updatePoint(updateType, data);
+        } catch(err) {
+          this.#pointPresenters.get(data.id).setErrorState();
+        }
         break;
       }
 
       case ActionType.DELETE_POINT: {
-        this.#pointsModel.deletePoint(updateType, data);
+        this.#pointPresenters.get(data.id).setDeletingState();
+        try {
+          await this.#pointsModel.deletePoint(updateType, data);
+        } catch(err) {
+          this.#pointPresenters.get(data.id).setErrorState();
+        }
         break;
       }
     }
@@ -259,11 +274,13 @@ export default class TripContentPresenter {
       }
 
       case UpdateType.MINOR: {
+        this.#setBoardMode(TripBoardMode.DEFAULT);
         this.#reRenderTripBoard();
         break;
       }
 
       case UpdateType.MAJOR: {
+        this.#setBoardMode(TripBoardMode.DEFAULT);
         this.#reRenderHeader();
         this.#reRenderTripBoard();
         break;
