@@ -16,12 +16,12 @@ import TripEventsListEmptyView from '../view/trip-events-list-empty-view.js';
 export default class TripContentPresenter {
   #mainHeaderContainer = null;
   #tripInfoContainer = null;
-  #tripInfoComponent = null;
-  #addNewPointBtnComponent = null;
-  #priceComponent = null;
   #tripEventsContainer = null;
   #tripEventsListContainer = null;
 
+  #tripInfoComponent = null;
+  #addNewPointBtnComponent = null;
+  #priceComponent = null;
   #sortComponent = null;
   #noPointsComponent = null;
 
@@ -118,7 +118,9 @@ export default class TripContentPresenter {
   }
 
   #renderNoPoints() {
-    const currentFilter = (this.#getBoardMode() !== TripBoardMode.LOADING) ? this.#filterModel.filter : null;
+    const currentFilter = (this.#getBoardMode() !== TripBoardMode.LOADING)
+      ? this.#filterModel.filter
+      : null;
     this.#noPointsComponent = new TripEventsListEmptyView({ currentFilter });
     render(this.#noPointsComponent, this.#tripEventsListContainer.element);
   }
@@ -153,11 +155,11 @@ export default class TripContentPresenter {
 
   #getCurrentPrice() {
     return [...this.#pointsModel.points].reduce((accumulator, point) => {
-      let totalPointOffersPrice = 0;
-      const pointOffers = this.#offersModel.getOffersByPointType(point.type);
+      let offersTotalPrice = 0;
+      const pointOffers = this.#offersModel.getByPointType(point.type);
 
       if(pointOffers.length) {
-        totalPointOffersPrice = pointOffers.reduce((offersPrice, offer) => {
+        offersTotalPrice = pointOffers.reduce((offersPrice, offer) => {
           if(point.offers.has(offer.id)) {
             return offersPrice + offer.price;
           }
@@ -166,7 +168,7 @@ export default class TripContentPresenter {
         }, 0);
       }
 
-      return accumulator + Number(point.cost + totalPointOffersPrice);
+      return accumulator + Number(point.cost + offersTotalPrice);
     }, 0);
   }
 

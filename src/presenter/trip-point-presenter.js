@@ -56,7 +56,7 @@ export default class TripPointPresenter {
     const pointData = {
       point,
       destinationsList: this.#destinationsList,
-      typedOffersList: this.#offersModel.getOffersByPointType(point.type),
+      typedOffersList: this.#offersModel.getByPointType(point.type),
     };
 
     // Компоненты предыдущей точки маршрута
