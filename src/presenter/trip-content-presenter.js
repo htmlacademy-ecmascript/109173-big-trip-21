@@ -1,4 +1,6 @@
 import { render, remove, RenderPosition } from '../framework/render.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+import { TimeLimit } from '../utils/const.js';
 import { FilterType, filters } from '../utils/filter.js';
 import { findObjectByID } from '../utils/utils.js';
 import { SortType, sorts } from '../utils/sort.js';
@@ -34,6 +36,10 @@ export default class TripContentPresenter {
   #pointPresenters = new Map();
 
   #currentTripBoardMode = TripBoardMode.LOADING;
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER,
+    upperLimit: TimeLimit.UPPER,
+  });
 
   constructor({
     mainHeaderContainer,
@@ -216,6 +222,8 @@ export default class TripContentPresenter {
    * Вью с моделью взаимодействует только через данный метод
    */
   #viewChangeHandler = async (actionType, updateType, data) => {
+    this.#uiBlocker.block();
+
     switch(actionType) {
       case ActionType.CREATE_POINT: {
         // Создание точки без добавления в модель (например, при клике на кнопку + New event)
@@ -263,6 +271,8 @@ export default class TripContentPresenter {
         break;
       }
     }
+
+    this.#uiBlocker.unblock();
   };
 
   // Отслеживание изменения данных на сервере

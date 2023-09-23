@@ -345,11 +345,15 @@ export default class EditPointView extends AbstractStatefulView {
     });
   }
 
-  #reInitDatepickrTo() {
+  #reInitDatepickrTo(initialDate) {
     this.#resetDatepickrTo();
-
-    const defaultDateFrom = this._state.dateFrom;
     const dateEndElem = this.element.querySelector(CSSIDs.DATE_TIME_END);
+
+    const parsedDateTo = dayjs(this._state.dateTo, DateFormats.CHOSED_DATE);
+    const parsetInitialDate = dayjs(initialDate, DateFormats.CHOSED_DATE);
+    const isSameOrAfter = parsetInitialDate.isSameOrAfter(parsedDateTo);
+
+    const defaultDateFrom = (isSameOrAfter) ? this._state.dateFrom : this._state.dateTo;
 
     this.#datepickrTo = flatpickr(dateEndElem, {
       ...FLATPIKR_SETTINGS,
@@ -389,7 +393,7 @@ export default class EditPointView extends AbstractStatefulView {
 
   #dateFromChangeHandler = (_, dateStr) => {
     this._setState({ dateFrom: dateStr });
-    this.#reInitDatepickrTo();
+    this.#reInitDatepickrTo(this._state.dateFrom);
   };
 
   #dateToChangeHandler = (_, dateStr) => this._setState({ dateTo: dateStr });

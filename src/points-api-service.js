@@ -1,6 +1,6 @@
 import Adapter from './adapter.js';
 import ApiService from './framework/api-service.js';
-import { API_URL, AUTH_TOKEN, END_POINT, Method } from './utils/const.js';
+import { ApiUrl, AUTH_TOKEN, END_POINT, Method } from './utils/const.js';
 
 
 export default class PointsApiService extends ApiService {
@@ -9,7 +9,7 @@ export default class PointsApiService extends ApiService {
   }
 
   get points() {
-    return this._load({ url: API_URL.POINTS })
+    return this._load({ url: ApiUrl.POINTS })
       .then(ApiService.parseResponse);
   }
 
@@ -39,12 +39,12 @@ export default class PointsApiService extends ApiService {
     let data = null;
 
     if(method === Method.DELETE) {
-      data = { url: `${API_URL.POINTS}/${point.id}`, method };
+      data = { url: `${ApiUrl.POINTS}/${point.id}`, method };
     } else {
       const sendingPoint = Adapter.adaptPointToServer(point);
 
       data = {
-        url: `${API_URL.POINTS}/${uri}`,
+        url: `${ApiUrl.POINTS}/${uri}`,
         method,
         body: JSON.stringify(sendingPoint),
         headers: new Headers({'Content-type': 'application/json'})

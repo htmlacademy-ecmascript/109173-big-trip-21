@@ -3,7 +3,6 @@ import { isEscKey } from '../utils/utils.js';
 import { ActionType, TripBoardMode, UpdateType } from '../utils/const.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
-
 export default class TripPointPresenter {
   #point = null;
   #pointDefaultState = null;
