@@ -12,7 +12,7 @@ export default class OffersModel {
       const offers = await offersApiService.offers;
       this.#offers = offers;
     } catch(err) {
-      this.#offers = new Set();
+      this.#offers = [];
     }
   }
 
