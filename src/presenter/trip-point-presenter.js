@@ -196,7 +196,10 @@ export default class TripPointPresenter {
   };
 
   #pointDateChangeHandler = (pointWithNewDates) => this.#updateView(pointWithNewDates);
-  #pointPriceChangeCallback = (pointWithNewPrice) => this.#updateView(pointWithNewPrice);
+  #pointPriceChangeCallback = (pointWithNewPrice) => {
+    this.#updateView(pointWithNewPrice);
+    this.#setKeyDownHandler();
+  };
 
   #favoriteToggleHandler = (isFavorite) => {
     this.#point.isFavorite = isFavorite;

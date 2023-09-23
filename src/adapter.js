@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { DateFormats } from './utils/utils';
+import { DateFormats } from './utils/const.js';
 
 dayjs.extend(customParseFormat);
 export default class Adapter {

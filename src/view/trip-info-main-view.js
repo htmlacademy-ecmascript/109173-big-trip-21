@@ -1,5 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { DateFormats, normalizeDate } from '../utils/utils.js';
+import { normalizeDate } from '../utils/utils.js';
+import { DateFormats } from '../utils/const.js';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';

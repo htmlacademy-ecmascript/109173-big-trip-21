@@ -3,6 +3,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import duration from 'dayjs/plugin/duration'; // Расширение для подсчета длительности (https://day.js.org/docs/en/durations/durations)
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'; // (https://day.js.org/docs/en/plugin/is-same-or-before)
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'; // (https://day.js.org/docs/en/plugin/is-same-or-after)
+import { DateFormats } from './const';
 
 // Добавляем расширение в библиотеку
 dayjs.extend(duration);
@@ -10,82 +11,11 @@ dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(customParseFormat);
 
-const Duration = {
-  MINUTE: 1440,
-  HOUR: 24,
-  DAY: 30
-};
-
-const DateFormats = {
-  FLATPICKR: 'd/m/y H:i', // Для Флэтпикера
-  DATE_TIME: 'YYYY-MM-DD[T]hh:mm', // Для тега datetime
-  PATH: 'DD/MM/YY',
-  DAY: 'DD',
-  CHOSED_DATE: 'DD/MM/YY HH:mm', // Дата и время начала события
-  FOR_POINT_PERIODS: 'HH:mm', // Для периодов, выбранных для точки маршрута
-  FOR_POINT: 'MMM DD', // Дата для каждой конкретной точки маршрута
-  // Форматирование продолжительности нахождения в точке маршрута
-  LESS_THAN_HOUR: 'mm', // Менее часа
-  LESS_THAN_DAY: 'HH mm', // Менее суток
-  MORE_THAN_DAY: 'DD HH mm' // Более суток
-};
-
 const TimeInMillis = {
   MINUTE: 60 * 1000, // 60000
   HOUR: 3600 * 1000, // 3600000
   DAY: 24 * 3600 * 1000, // 86400000
 };
-
-function getRandomInt(min = 0, max = Infinity) {
-  return Math.floor(min + Math.random() * (max + 1 - min));
-}
-
-function getRandomArrayElement(arr) {
-  const randomIndex = getRandomInt(0, arr.length - 1);
-  return arr[randomIndex];
-}
-
-function getUniqRandomArrayElements(arr) {
-  const elements = [];
-  const elementsCount = getRandomInt(0, arr.length);
-
-  for(let i = 0; i < elementsCount; i++) {
-    const currentElem = getRandomArrayElement(arr);
-
-    if (!elements.includes(currentElem)) {
-      elements.push(currentElem);
-    }
-  }
-
-  return elements;
-}
-
-function getRandomBoolean() {
-  return Boolean(getRandomInt(0, 1));
-}
-
-// Получаем текущую дату с рандомным смещением в днях (в прошлое)
-let baseDate = dayjs().subtract(getRandomInt(0, Duration.DAY), 'days');
-
-/**
- *
- * @param {Boolean} addOffset Если true - добавляет рандомное смещение в минутах, часах и днях
- * @returns {String} baseDate Строка со сгенерированной датой
- */
-function getMockDate(addOffset = false) {
-  if (addOffset) {
-    const minutesOffset = getRandomInt(0, Duration.MINUTE);
-    const hoursOffset = getRandomInt(0, Duration.HOUR);
-    const daysOffset = getRandomInt(0, Duration.DAY);
-
-    baseDate = dayjs(baseDate)
-      .add(minutesOffset, 'm')
-      .add(hoursOffset, 'd')
-      .add(daysOffset, 'h');
-  }
-
-  return baseDate.format(DateFormats.CHOSED_DATE);
-}
 
 // v.2 (на нативной функции)
 function getFormattedDateDiff(date1, date2) {
@@ -162,11 +92,11 @@ function getPadded2ZeroNum(num) {
 }
 
 function findObjectByID(id, obj) {
-  return obj.find((item) => item.id === id);
-}
+  if(typeof obj !== 'object') {
+    return;
+  }
 
-function updateItem(items, updatedItem) {
-  return items.map((item) => (item.id === updatedItem.id) ? updatedItem : item);
+  return obj.find((item) => item.id === id);
 }
 
 function removeChars(str) {
@@ -186,11 +116,6 @@ function getIDs(itemsObj) {
 }
 
 export {
-  getRandomInt,
-  getRandomArrayElement,
-  getUniqRandomArrayElements,
-  getRandomBoolean,
-  getMockDate,
   getDateDiff,
   getFormattedDateDiff,
   DateFormats,
@@ -199,7 +124,6 @@ export {
   isFutureDate,
   normalizeDate,
   findObjectByID,
-  updateItem,
   upperCaseFirst,
   removeChars,
   isEscKey,

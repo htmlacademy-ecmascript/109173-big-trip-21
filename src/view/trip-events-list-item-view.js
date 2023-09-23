@@ -1,10 +1,10 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {
   getFormattedDateDiff,
-  DateFormats,
   findObjectByID,
-  normalizeDate
+  normalizeDate,
 } from '../utils/utils.js';
+import { DateFormats } from '../utils/const.js';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';

@@ -17,8 +17,12 @@ export default class OffersModel {
   }
 
   getOffersByPointType(type) {
-    const typedOffers = this.#offers.find((offer) => offer.type === type);
+    let typedOffers = null;
 
-    return typedOffers?.offers || new Set();
+    if(this.#offers.length) {
+      typedOffers = this.#offers.find((offer) => offer.type === type);
+    }
+
+    return typedOffers?.offers || [];
   }
 }

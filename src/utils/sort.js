@@ -1,4 +1,5 @@
-import { DateFormats, getDateDiff } from './utils.js';
+import { getDateDiff } from './utils.js';
+import { DateFormats } from './const.js';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
