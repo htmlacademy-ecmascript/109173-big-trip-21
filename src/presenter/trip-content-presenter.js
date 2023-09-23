@@ -93,11 +93,7 @@ export default class TripContentPresenter {
 
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
 
-    if (
-      points.length <= 0 &&
-      (boardMode !== TripBoardMode.ADDING_NEW_POINT &&
-      boardMode !== TripBoardMode.DEFAULT)
-    ) {
+    if (points.length <= 0 && boardMode !== TripBoardMode.ADDING_NEW_POINT) {
       this.#renderNoPoints();
       return;
     }
@@ -156,14 +152,18 @@ export default class TripContentPresenter {
 
   #getCurrentPrice() {
     return [...this.#pointsModel.points].reduce((accumulator, point) => {
+      let totalPointOffersPrice = 0;
       const pointOffers = this.#offersModel.getOffersByPointType(point.type);
-      const totalPointOffersPrice = pointOffers.reduce((offersPrice, offer) => {
-        if(point.offers.has(offer.id)) {
-          return offersPrice + offer.price;
-        }
 
-        return offersPrice;
-      }, 0);
+      if(pointOffers.length) {
+        totalPointOffersPrice = pointOffers.reduce((offersPrice, offer) => {
+          if(point.offers.has(offer.id)) {
+            return offersPrice + offer.price;
+          }
+
+          return offersPrice;
+        }, 0);
+      }
 
       return accumulator + Number(point.cost + totalPointOffersPrice);
     }, 0);
@@ -173,7 +173,7 @@ export default class TripContentPresenter {
     return [...this.#pointsModel.points].map(({ destination, dates }) => {
       const destinationInfo = findObjectByID(destination, this.#destinationsModel.destinations)?.name;
       return {
-        destination: destinationInfo, // <- перевести id пунктов назначения в названия
+        destination: destinationInfo,
         dateFrom: dates.start,
         dateTo: dates.end
       };

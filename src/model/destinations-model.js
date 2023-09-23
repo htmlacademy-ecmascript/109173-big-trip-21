@@ -12,7 +12,7 @@ export default class DestinationsModel {
       const destinations = await destinationsApiService.destinations;
       this.#destinations = destinations;
     } catch(err) {
-      this.#destinations = '';
+      this.#destinations = [];
     }
   }
 }

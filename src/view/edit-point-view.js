@@ -1,6 +1,6 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { DateFormats, upperCaseFirst, findObjectByID, removeChars } from '../utils/utils.js';
-import { POINT_TYPES, FLATPIKR_SETTINGS } from '../utils/const.js';
+import { findObjectByID, removeChars } from '../utils/utils.js';
+import { POINT_TYPES, FLATPIKR_SETTINGS, DateFormats } from '../utils/const.js';
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -321,7 +321,7 @@ export default class EditPointView extends AbstractStatefulView {
       return;
     }
 
-    const chosePointType = upperCaseFirst(evt.target.value);
+    const chosePointType = evt.target.value;
 
     this. #updateStateView(
       { type: chosePointType, offers: new Set() },
