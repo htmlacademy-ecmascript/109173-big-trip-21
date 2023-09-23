@@ -308,11 +308,8 @@ export default class EditPointView extends AbstractStatefulView {
   removeElement() {
     super.removeElement();
 
-    this.#datepickrFrom?.destroy();
-    this.#datepickrTo?.destroy();
-
-    this.#datepickrFrom = null;
-    this.#datepickrTo = null;
+    this. #resetDatepickrFrom();
+    this. #resetDatepickrTo();
   }
 
   #updateStateView(data, callback) {
@@ -329,20 +326,42 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   #initDatepickr() {
-    const defaultDateFrom = this._state.dateFrom;
+    this.#reInitDatepickrFrom();
+    this.#reInitDatepickrTo();
+  }
+
+  #reInitDatepickrFrom() {
+    this.#resetDatepickrFrom();
     const dateStartElem = this.element.querySelector(CSSIDs.DATE_TIME_START);
-    const dateEndElem = this.element.querySelector(CSSIDs.DATE_TIME_END);
 
     this.#datepickrFrom = flatpickr(dateStartElem, {
       ...FLATPIKR_SETTINGS,
       onChange: this.#dateFromChangeHandler
     });
+  }
+
+  #reInitDatepickrTo() {
+    this.#resetDatepickrTo();
+
+    const defaultDateFrom = this._state.dateFrom;
+    const dateEndElem = this.element.querySelector(CSSIDs.DATE_TIME_END);
 
     this.#datepickrTo = flatpickr(dateEndElem, {
       ...FLATPIKR_SETTINGS,
+      defaultDate: defaultDateFrom,
       minDate: defaultDateFrom,
       onChange: this.#dateToChangeHandler
     });
+  }
+
+  #resetDatepickrFrom() {
+    this.#datepickrFrom?.destroy();
+    this.#datepickrFrom = null;
+  }
+
+  #resetDatepickrTo() {
+    this.#datepickrTo?.destroy();
+    this.#datepickrTo = null;
   }
 
   /** Обработчики */
@@ -363,7 +382,11 @@ export default class EditPointView extends AbstractStatefulView {
     );
   };
 
-  #dateFromChangeHandler = (_, dateStr) => this._setState({ dateFrom: dateStr });
+  #dateFromChangeHandler = (_, dateStr) => {
+    this._setState({ dateFrom: dateStr });
+    this.#reInitDatepickrTo();
+  };
+
   #dateToChangeHandler = (_, dateStr) => this._setState({ dateTo: dateStr });
 
   #pointDestinationChangeHandler = (evt) => {
