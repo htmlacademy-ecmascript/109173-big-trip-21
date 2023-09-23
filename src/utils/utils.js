@@ -92,7 +92,7 @@ function getPadded2ZeroNum(num) {
 }
 
 function findObjectByID(id, objectsList) {
-  if(typeof obj !== 'object') {
+  if(typeof objectsList !== 'object') {
     return;
   }
 

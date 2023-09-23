@@ -67,7 +67,6 @@ export default class TripInfoMainView extends AbstractView {
   constructor({ pointsInfo }) {
     super();
 
-
     this.#pointsInfo = pointsInfo;
   }
 

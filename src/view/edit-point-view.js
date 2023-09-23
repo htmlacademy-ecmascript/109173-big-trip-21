@@ -12,7 +12,13 @@ dayjs.extend(customParseFormat);
 
 const OPTIONS_LOADING_FAILED_MESSAGE = 'Sorry... Destinations/Offers wasn`t loaded fully.<br> Please, reload this page or try again later.';
 
-const AbortBtnText = {CANCEL: 'Cancel', DELETE: 'Delete'};
+const BtnText = {
+  CANCEL: 'Cancel',
+  SAVE: 'Save',
+  SAVING: 'Saving...',
+  DELETE: 'Delete',
+  DELETING: 'Deleting...'
+};
 
 const CSSIDs = {
   DEFAULT_POINT_TYPE: '#event-type-toggle-1',
@@ -94,7 +100,8 @@ function createEditPointTemplate({
   const offersTemplate = isTypeHasOffers ? createOffersTemplate(offers, typedOffersList) : '';
   const destinationsTemplate = createDestinationsTemplate(destinationsList);
   const photosTemplate = destination?.pictures ? createPhotosTemplate(destination.pictures) : '';
-  const abortBtnText = isNewPoint ? AbortBtnText.CANCEL : AbortBtnText.DELETE;
+  const saveBtnText = BtnText.SAVE;
+  const abortBtnText = isNewPoint ? BtnText.CANCEL : BtnText.DELETE;
   const disabledState = !isOptionsLoaded ? 'disabled' : '';
 
   return /*html*/`
@@ -151,7 +158,7 @@ function createEditPointTemplate({
             <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${cost}" ${disabledState}>
           </div>
 
-          <button class="event__save-btn  btn  btn--blue" type="submit" ${disabledState}>Save</button>
+          <button class="event__save-btn  btn  btn--blue" type="submit" ${disabledState}>${saveBtnText}</button>
           <button class="event__reset-btn" type="reset" ${(!isNewPoint) ? disabledState : ''}>${abortBtnText}</button>
           ${!isNewPoint ? /*html*/`
             <button class="event__rollup-btn" type="button">

@@ -3,7 +3,6 @@ const AUTH_TOKEN = 'Basic 44b7-b4ca-e34f0eb25871';
 const POINT_TYPES = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
 const DEFAULT_POINT_TYPE = 'Flight';
 const BLANK_POINT = {
-  id: crypto.randomUUID(),
   type: DEFAULT_POINT_TYPE,
   destination: '',
   dates: {
@@ -62,6 +61,7 @@ const Method = {
   GET: 'GET',
   PUT: 'PUT',
   POST: 'POST',
+  DELETE: 'DELETE',
 };
 
 const TRIP_EVENTS_LIST_TEMPLATE = '<ul class="trip-events__list"></ul>';
