@@ -221,7 +221,14 @@ export default class TripPointPresenter {
 
     this.#pointDefaultState = null;
     this.#onChangeCallback(actionType, UpdateType.MAJOR, point);
-    this.#replaceFormToPoint();
+    /**
+     *  т.к. при обновлении точки список перерисовывается,
+     * нет смысла скрывать форму редактирования вручную + так
+     * мы можем в дальнейшем заблокировать эту форму на время отправки
+     * данных на сервер, тем самым показывая пользователю, что данные
+     * действительно отправляются на сервер
+     */
+    // this.#replaceFormToPoint();
   };
 
   #pointDeleteHandler = (deletedPoint) => {
