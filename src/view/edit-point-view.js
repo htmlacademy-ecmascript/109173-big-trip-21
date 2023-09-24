@@ -25,7 +25,6 @@ const BtnText = {
 };
 
 const CSSIDs = {
-  DEFAULT_POINT_TYPE: '#event-type-toggle-1',
   DATE_TIME_START: '#event-start-time-1',
   DATE_TIME_END: '#event-end-time-1',
 };
@@ -57,11 +56,18 @@ function createEventTypeTemplate(currentPointType) {
 function createOffersTemplate(offers, typedOffersList) {
   return typedOffersList.map(({id, title, price}) => {
     const loweredOfferTitle = title.toLowerCase().split(' ').join('-');
-    const checkedState = offers?.has(id) ? 'checked' : '';
+    const checkedState = offers.has(id) ? 'checked' : '';
 
     return /*html*/`
       <div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${loweredOfferTitle}-1" type="checkbox" name="event-offer-${loweredOfferTitle}" data-id="${id}" ${checkedState}>
+        <input
+          class="event__offer-checkbox  visually-hidden"
+          id="event-offer-${loweredOfferTitle}-1"
+          type="checkbox"
+          name="event-offer-${loweredOfferTitle}"
+          data-id="${id}"
+          ${checkedState}
+        >
         <label class="event__offer-label" for="event-offer-${loweredOfferTitle}-1">
           <span class="event__offer-title">${title}</span>
           &plus;&euro;&nbsp;
@@ -77,10 +83,6 @@ function createDestinationsTemplate(destinations) {
 
 function createPhotosTemplate(photos) {
   const photosArr = photos.slice();
-
-  if(photosArr.length <= 0) {
-    return '';
-  }
 
   return /*html*/`
     <div class="event__photos-container">
@@ -99,8 +101,6 @@ function createEditPointTemplate({
   dateTo,
   destinationsList,
   typedOffersList,
-  isTypeHasOffers,
-  isHasDestination,
   isNewPoint,
   isOptionsLoaded,
   isSaving,
@@ -108,9 +108,9 @@ function createEditPointTemplate({
   isDisabled,
 }) {
   const eventTypeTemplate = createEventTypeTemplate(type);
-  const offersTemplate = isTypeHasOffers ? createOffersTemplate(offers, typedOffersList) : '';
+  const offersTemplate = (typedOffersList.length) ? createOffersTemplate(offers, typedOffersList) : '';
   const destinationsTemplate = createDestinationsTemplate(destinationsList);
-  const photosTemplate = destination?.pictures ? createPhotosTemplate(destination.pictures) : '';
+  const photosTemplate = (destination?.pictures?.length) ? createPhotosTemplate(destination.pictures) : '';
   const disabledState = (!isOptionsLoaded || isDisabled) ? 'disabled' : '';
   const saveBtnText = (isSaving) ? BtnText.SAVING : BtnText.SAVE;
   const abortBtnDefaultText = (isNewPoint) ? BtnText.CANCEL : BtnText.DELETE;
@@ -195,7 +195,7 @@ function createEditPointTemplate({
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit" ${disabledState}>${saveBtnText}</button>
-          <button class="event__reset-btn" type="reset" ${(!isNewPoint) ? disabledState : ''}>${abortBtnText}</button>
+          <button class="event__reset-btn" type="reset" ${disabledState}>${abortBtnText}</button>
           ${!isNewPoint ? /*html*/`
             <button class="event__rollup-btn" type="button">
               <span class="visually-hidden">Open event</span>
@@ -219,7 +219,7 @@ function createEditPointTemplate({
               </section>
             ` : ''}
 
-            ${(isHasDestination && destination.description) ? `
+            ${(Boolean(destination) && destination.description) ? `
               <section class="event__section  event__section--destination">
                 <h3 class="event__section-title  event__section-title--destination">Destination</h3>
                 <p class="event__destination-description">${destination.description}</p>
@@ -243,7 +243,6 @@ export default class EditPointView extends AbstractStatefulView {
   #datepickrFrom = null;
   #datepickrTo = null;
 
-  #validator = null;
   #onTypeChangeCallback = null;
   #onDestinationChangeCallback = null;
   #onSubmitCallback = null;
@@ -317,6 +316,7 @@ export default class EditPointView extends AbstractStatefulView {
     if(!this.#isOptionsLoaded) {
       return;
     }
+
     this.element
       .querySelector(CSSClasses.EVENT_EDIT)
       .addEventListener('submit', this.#pointSubmitHandler);
@@ -336,7 +336,7 @@ export default class EditPointView extends AbstractStatefulView {
       .querySelector(CSSClasses.DELETE_BTN)
       .addEventListener('click', pointAbortHandler);
 
-    if(this._state.isTypeHasOffers) {
+    if(this.#typedOffersList.length > 0) {
       this.element
         .querySelector(CSSClasses.OFFERS)
         .addEventListener('change', this.#pointOffersChangeHandler);
@@ -412,7 +412,7 @@ export default class EditPointView extends AbstractStatefulView {
 
     const target = evt.target;
 
-    if(target.id === CSSIDs.DEFAULT_POINT_TYPE.slice(1)) {
+    if(target.value === this._state.type) {
       return;
     }
 
@@ -451,13 +451,13 @@ export default class EditPointView extends AbstractStatefulView {
     const target = evt.target;
     const offers = structuredClone(this._state.offers); // т.к. офферы - объекты и изменяются по ссылке, копируем их, чтобы напрямую не менять стейт в обход метода _setState
 
-    if(!target.checked && offers.has(target.dataset.id)) {
-      offers.delete(target.dataset.id);
-    } else {
+    if(!offers.has(target.dataset.id)) {
       offers.add(target.dataset.id);
+    } else {
+      offers.delete(target.dataset.id);
     }
 
-    this._setState({ offers: offers });
+    this.updateElement({ offers });
   };
 
   #pointPriceChangeHandler = (evt) => {
@@ -527,8 +527,6 @@ export default class EditPointView extends AbstractStatefulView {
       typedOffersList,
       destinationsList,
       destination: findObjectByID(destination, destinationsList) || '',
-      isHasDestination: Boolean(destination),
-      isTypeHasOffers: typedOffersList.length > 0,
       isFavorite,
       isNewPoint,
       isOptionsLoaded,

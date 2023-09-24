@@ -52,8 +52,8 @@ export default class TripPointPresenter {
   init(point = this.#point) {
     const pointData = {
       point,
-      destinationsList: this.#destinationsList,
-      typedOffersList: this.#offersModel.getByPointType(point.type),
+      destinationsList: [...this.#destinationsList],
+      typedOffersList: [...this.#offersModel.getByPointType(point.type)],
     };
 
     // Компоненты предыдущей точки маршрута
@@ -211,7 +211,10 @@ export default class TripPointPresenter {
     this.#removeKeyDownHandler();
   };
 
-  #pointEditHandler = () => this.#replacePointToForm();
+  #pointEditHandler = () => {
+    this.#setBoardMode(TripBoardMode.EDITING);
+    this.#replacePointToForm();
+  };
 
   #pointCancelEditHandler = () => {
     if(this.#isNewPoint) {
