@@ -463,7 +463,7 @@ export default class EditPointView extends AbstractStatefulView {
   #pointPriceChangeHandler = (evt) => {
     const target = evt.target;
     const normillizedPrice = removeChars(target.value);
-    const newPrice = (!normillizedPrice || normillizedPrice <= 0) ? 1 : Number(target.value);
+    const newPrice = (!normillizedPrice) ? 0 : Number(target.value);
 
     this.updateElement({ cost: newPrice });
   };
@@ -475,7 +475,10 @@ export default class EditPointView extends AbstractStatefulView {
 
   #pointSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#updateStateView({}, this.#onSubmitCallback);
+
+    const cost = (this._state.cost <= 0) ? 1 : this._state.cost;
+
+    this.#updateStateView({ cost }, this.#onSubmitCallback);
   };
 
   #pointCancelEditHandler = (evt) => {

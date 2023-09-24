@@ -18,9 +18,7 @@ const TimeInMillis = {
 };
 
 // v.2 (на нативной функции)
-function getFormattedDateDiff(date1, date2) {
-  const dateFrom = dayjs(date1);
-  const dateTo = dayjs(date2);
+function getFormattedDateDiff(dateFrom, dateTo) {
   const dateDiff = getDateDiff(dateFrom, dateTo);
   const formattedDate = parseDateFromMillis(dateDiff);
   const formattedNums = [`${formattedDate.days}D`, `${formattedDate.hours}H`, `${formattedDate.minutes}M`];

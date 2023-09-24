@@ -109,6 +109,10 @@ export default class TripContentPresenter {
           break;
         }
 
+        case TripBoardMode.ADDING_NEW_POINT: {
+          break;
+        }
+
         default: {
           this.#renderNoPoints();
           break;

@@ -12,7 +12,7 @@ const BLANK_POINT = {
     end: '',
   },
   offers: new Set(),
-  cost: 1,
+  cost: 0,
   isFavorite: false,
 };
 const DateFormats = {
