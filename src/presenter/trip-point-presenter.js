@@ -3,7 +3,6 @@ import { isEscKey } from '../utils/utils.js';
 import { ActionType, TripBoardMode, UpdateType } from '../utils/const.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
-import Validator from '../validator.js';
 export default class TripPointPresenter {
   #point = null;
   #pointDefaultState = null;
@@ -159,7 +158,6 @@ export default class TripPointPresenter {
     }
 
     this.destroy(this.#prevPointComponent, this.#prevEditPointComponent);
-    this.#setValidator(this.#editPointComponent.element);
   }
 
   #updateView(updatedPoint) {
@@ -175,26 +173,10 @@ export default class TripPointPresenter {
 
     this.#setKeyDownHandler();
     this.#isEditing = true;
-    this.#setValidator(this.#editPointComponent.element);
 
     if(this.#isNewPoint) {
       this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
     }
-  }
-
-  #setValidator(validatingElement) {
-    this.#validator = new Validator(validatingElement);
-    this.#validator.init();
-  }
-
-  #resetValidator() {
-    if(!this.#validator) {
-      return;
-    }
-
-    this.#validator.reset();
-    this.#validator.destroy();
-    this.#validator = null;
   }
 
   #replaceFormToPoint() {
@@ -202,7 +184,6 @@ export default class TripPointPresenter {
     this.#removeKeyDownHandler();
     this.#isEditing = false;
     this.#setBoardMode(TripBoardMode.DEFAULT);
-    this.#resetValidator();
   }
 
   #setKeyDownHandler() {
@@ -263,12 +244,8 @@ export default class TripPointPresenter {
 
     point.cost = (point.cost <= 0) ? 1 : point.cost;
 
-    const isValidForm = this.#validator?.validate();
-
-    if(isValidForm) {
-      this.#pointDefaultState = null;
-      this.#onChangeCallback(actionType, UpdateType.MAJOR, point);
-    }
+    this.#pointDefaultState = null;
+    this.#onChangeCallback(actionType, UpdateType.MAJOR, point);
   };
 
   #pointDeleteHandler = (deletedPoint) => {
