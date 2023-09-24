@@ -23,6 +23,7 @@ const DateFormats = {
   CHOSED_DATE: 'DD/MM/YY HH:mm', // Дата и время начала события
   FOR_POINT_PERIODS: 'HH:mm', // Для периодов, выбранных для точки маршрута
   FOR_POINT: 'MMM DD', // Дата для каждой конкретной точки маршрута
+  FOR_HEAD_DATES: 'DD MMM',
   // Форматирование продолжительности нахождения в точке маршрута
   LESS_THAN_HOUR: 'mm', // Менее часа
   LESS_THAN_DAY: 'HH mm', // Менее суток
@@ -44,12 +45,15 @@ const ActionType = {
 };
 const UpdateType = {
   INIT: 'INIT',
+  INIT_SUCCESS: 'INIT_SUCCESS',
+  INIT_FAILED: 'INIT_FAILED',
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR'
 };
 const TripBoardMode = {
   LOADING: 'LOADING',
+  LOADING_FAILED: 'LOADING_FAILED',
   DEFAULT: 'DEFAULT',
   EDITING: 'EDITING',
   ADDING_NEW_POINT: 'ADDING_NEW_POINT'

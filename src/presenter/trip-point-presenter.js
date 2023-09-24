@@ -23,6 +23,7 @@ export default class TripPointPresenter {
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
   #setBoardMode = null;
+  #getBoardMode = null;
 
   constructor({
     point,
@@ -32,10 +33,10 @@ export default class TripPointPresenter {
     onChangeCallback,
     onBeforeEditCallback,
     setBoardMode,
+    getBoardMode,
     isNewPoint,
     isOptionsLoaded,
   }) {
-    console.log('ENTERED ', point.isFavorite);
     this.#point = point;
     this.#pointsContainer = container;
     this.#destinationsList = destinationsList;
@@ -43,6 +44,7 @@ export default class TripPointPresenter {
     this.#onChangeCallback = onChangeCallback;
     this.#onBeforeEditCallback = onBeforeEditCallback;
     this.#setBoardMode = setBoardMode;
+    this.#getBoardMode = getBoardMode;
     this.#isNewPoint = isNewPoint;
     this.#isOptionsLoaded = isOptionsLoaded;
   }
@@ -121,8 +123,8 @@ export default class TripPointPresenter {
       });
   }
 
-  setErrorState({ boardMode }) {
-    switch(boardMode) {
+  setErrorState() {
+    switch(this.#getBoardMode()) {
       case TripBoardMode.DEFAULT: {
         this.#pointComponent.shake();
         break;

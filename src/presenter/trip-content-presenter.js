@@ -75,7 +75,7 @@ export default class TripContentPresenter {
 
   init() {
     this.#renderHeader();
-    this.#renderTripBoard();
+    // this.#renderTripBoard();
   }
 
   #renderHeader() {
@@ -98,17 +98,27 @@ export default class TripContentPresenter {
   }
 
   #renderTripBoard() {
-    const points = this.points;
-    const boardMode = this.#getBoardMode();
-
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
 
-    if (points.length <= 0 && boardMode !== TripBoardMode.ADDING_NEW_POINT) {
-      this.#renderNoPoints();
+    if(this.points.length <= 0) {
+      switch(this.#getBoardMode()) {
+        case TripBoardMode.LOADING_FAILED: {
+          this.#renderNoPoints({
+            isDataLoadingFailed: true
+          });
+          break;
+        }
+
+        default: {
+          this.#renderNoPoints();
+          break;
+        }
+      }
+
       return;
     }
 
-    this.#renderEventPoints(points);
+    this.#renderEventPoints(this.points);
   }
 
   #reRenderHeader() {
@@ -127,11 +137,11 @@ export default class TripContentPresenter {
     this.#renderTripBoard();
   }
 
-  #renderNoPoints() {
+  #renderNoPoints(isDataLoadingFailed = false) {
     const currentFilter = (this.#getBoardMode() !== TripBoardMode.LOADING)
       ? this.#filterModel.filter
       : null;
-    this.#noPointsComponent = new TripEventsListEmptyView({ currentFilter });
+    this.#noPointsComponent = new TripEventsListEmptyView({ currentFilter, isDataLoadingFailed });
     render(this.#noPointsComponent, this.#tripEventsListContainer.element);
   }
 
@@ -150,6 +160,7 @@ export default class TripContentPresenter {
       onChangeCallback: this.#viewChangeHandler,
       onBeforeEditCallback: this.#pointBeforeEditHandler,
       setBoardMode: this.#setBoardMode,
+      getBoardMode: this.#getBoardMode,
       isNewPoint,
       isOptionsLoaded: this.#checkOptionsLoading(),
     });
@@ -263,7 +274,7 @@ export default class TripContentPresenter {
         try {
           await this.#pointsModel.updatePoint(updateType, data);
         } catch(err) {
-          this.#pointPresenters.get(data.id).setErrorState({ boardMode: this.#getBoardMode() });
+          this.#pointPresenters.get(data.id).setErrorState();
         }
         break;
       }
@@ -286,7 +297,6 @@ export default class TripContentPresenter {
   #pointsModelChangeHandler = (updateType, pointData) => {
     switch(updateType) {
       case UpdateType.PATCH: {
-        console.log('Point data: ', pointData);
         this.#pointPresenters.get(pointData.id).init(pointData); // Перерисовываем точку
         break;
       }
@@ -305,6 +315,20 @@ export default class TripContentPresenter {
       }
 
       case UpdateType.INIT: {
+        this.#setBoardMode(TripBoardMode.LOADING);
+        this.#reRenderTripBoard();
+        break;
+      }
+
+      case UpdateType.INIT_FAILED: {
+        this.#setBoardMode(TripBoardMode.LOADING_FAILED);
+        this.#reRenderHeader();
+        this.#addNewPointBtnComponent.disableBtn();
+        this.#reRenderTripBoard();
+        break;
+      }
+
+      case UpdateType.INIT_SUCCESS: {
         this.#setBoardMode(TripBoardMode.DEFAULT);
         this.#reRenderHeader();
         this.#reRenderTripBoard();
