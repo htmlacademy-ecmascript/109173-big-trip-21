@@ -99,6 +99,7 @@ export default class TripPointPresenter {
       this.destroy();
     }
 
+    this.#updateView(this.#point);
     this.#replaceFormToPoint();
   }
 

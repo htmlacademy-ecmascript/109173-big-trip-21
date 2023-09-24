@@ -78,6 +78,10 @@ function createDestinationsTemplate(destinations) {
 function createPhotosTemplate(photos) {
   const photosArr = photos.slice();
 
+  if(photosArr.length <= 0) {
+    return '';
+  }
+
   return /*html*/`
     <div class="event__photos-container">
       <div class="event__photos-tape">
@@ -143,6 +147,7 @@ function createEditPointTemplate({
               list="destination-list-1"
               placeholder="${PlaceholderText.DESTINATION}"
               required
+              autocomplete="off"
               ${disabledState}
             >
             <datalist id="destination-list-1">${destinationsTemplate}</datalist>
@@ -432,7 +437,7 @@ export default class EditPointView extends AbstractStatefulView {
       .find((destination) => destination.name === target.value);
 
     if(!target.value || !newDestination) {
-      target.value = this._state.destination.name || '';
+      target.value = '';
       return;
     }
 
@@ -494,7 +499,6 @@ export default class EditPointView extends AbstractStatefulView {
 
   #pointCancelAddHandler = () => this.#onCancelEditCallback?.(this.#point);
 
-  // TODO: Попробовать отрефакторить эти методы более презентабельно
   static convertDataToState({
     type,
     cost,
@@ -535,6 +539,7 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   static convertStateToData({
+    id,
     type,
     cost,
     destination,
@@ -545,6 +550,7 @@ export default class EditPointView extends AbstractStatefulView {
   }) {
 
     return {
+      id,
       type,
       cost,
       destination: destination?.id || '',

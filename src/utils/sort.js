@@ -18,7 +18,8 @@ const sorts = {
     const pointBDateFrom = dayjs(pointB.dates.start, DateFormats.CHOSED_DATE);
     const pointADateFrom = dayjs(pointA.dates.start, DateFormats.CHOSED_DATE);
 
-    return pointBDateFrom - pointADateFrom;
+    // return pointBDateFrom - pointADateFrom; // По убыванию (вверху - самая поздняя точка маршрута)
+    return pointADateFrom - pointBDateFrom; // По возрастанию (вверху - самая ближайшая точка маршрута)
   }),
   [SortType.EVENT]: null,
   [SortType.TIME]: (points) => [...points].sort((pointA, pointB) => {
@@ -27,9 +28,10 @@ const sorts = {
     const pointBDateFrom = dayjs(pointA.dates.start, DateFormats.CHOSED_DATE);
     const pointBDateTo = dayjs(pointB.dates.start, DateFormats.CHOSED_DATE);
 
-    return getDateDiff(pointADateFrom, pointBDateTo) - getDateDiff(pointBDateFrom, pointADateTo);
+    // return getDateDiff(pointADateFrom, pointBDateTo) - getDateDiff(pointBDateFrom, pointADateTo);
+    return getDateDiff(pointBDateFrom, pointADateTo) - getDateDiff(pointADateFrom, pointBDateTo);
   }),
-  [SortType.PRICE]: (points) => [...points].sort((pointA, pointB) => pointB.cost - pointA.cost),
+  [SortType.PRICE]: (points) => [...points].sort((pointA, pointB) => pointA.cost - pointB.cost),
   [SortType.OFFERS]: null,
 };
 

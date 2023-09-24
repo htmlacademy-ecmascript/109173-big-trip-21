@@ -1,3 +1,5 @@
+// т.к. задание module8-task3 было выполнено ранее. Данный комит просто для сохранение последовательности ДЗ
+// TODO: Нужно ли запрещать отправку формы с пустыми датами? (может блокировать кнопку?)
 import TripFilterPresenter from './presenter/trip-filter-presenter.js';
 import TripSortPresenter from './presenter/trip-sort-presenter.js';
 import TripContentPresenter from './presenter/trip-content-presenter.js';

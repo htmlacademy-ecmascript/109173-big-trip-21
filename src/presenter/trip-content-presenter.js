@@ -83,14 +83,18 @@ export default class TripContentPresenter {
       return;
     }
 
-    this.#tripInfoComponent = new TripInfoMainView({ pointsInfo: this.#getPointsInfo() });
-    this.#priceComponent = new TripInfoPriceView({ price: this.#getCurrentPrice() });
     this.#addNewPointBtnComponent = new AddNewPointBtnView({ onAddNewPointCallback: this.#addNewPointBtnClickHandler });
 
-    render(this.#tripInfoContainer, this.#mainHeaderContainer, RenderPosition.AFTERBEGIN); // Отрисовываем контейнер для общей информации о маршруте
-    render(this.#tripInfoComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о маршруте и датах
-    render(this.#priceComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о цене
     render(this.#addNewPointBtnComponent, this.#mainHeaderContainer); // Отрисовываем кнопку добавления новой точки
+
+    if(this.points.length > 0) {
+      this.#tripInfoComponent = new TripInfoMainView({ pointsInfo: this.#getPointsInfo() });
+      this.#priceComponent = new TripInfoPriceView({ price: this.#getCurrentPrice() });
+
+      render(this.#tripInfoContainer, this.#mainHeaderContainer, RenderPosition.AFTERBEGIN); // Отрисовываем контейнер для общей информации о маршруте
+      render(this.#tripInfoComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о маршруте и датах
+      render(this.#priceComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о цене
+    }
   }
 
   #renderTripBoard() {
@@ -335,5 +339,11 @@ export default class TripContentPresenter {
     this.#viewChangeHandler(ActionType.CREATE_POINT, UpdateType.MINOR);
   };
 
-  #pointBeforeEditHandler = () => this.#pointPresenters.forEach((pointPresenter) => pointPresenter.reset());
+  #pointBeforeEditHandler = () => {
+    this.#pointPresenters.forEach((pointPresenter) => pointPresenter.reset());
+
+    if(this.#getBoardMode() === TripBoardMode.DEFAULT) {
+      this.#addNewPointBtnComponent.enableBtn();
+    }
+  };
 }
