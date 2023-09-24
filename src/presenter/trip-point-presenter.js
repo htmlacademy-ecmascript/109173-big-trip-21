@@ -5,7 +5,6 @@ import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
 export default class TripPointPresenter {
   #point = null;
-  #pointDefaultState = null;
   #pointsContainer = null;
   #destinationsList = null;
 
@@ -24,7 +23,6 @@ export default class TripPointPresenter {
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
   #setBoardMode = null;
-  #validator = null;
 
   constructor({
     point,
@@ -37,6 +35,7 @@ export default class TripPointPresenter {
     isNewPoint,
     isOptionsLoaded,
   }) {
+    console.log('ENTERED ', point.isFavorite);
     this.#point = point;
     this.#pointsContainer = container;
     this.#destinationsList = destinationsList;
@@ -49,10 +48,6 @@ export default class TripPointPresenter {
   }
 
   init(point = this.#point) {
-    if(this.#pointDefaultState === null) { // Сохранение точки для возможности последующего восстановления
-      this.#pointDefaultState = structuredClone(point);
-    }
-
     const pointData = {
       point,
       destinationsList: this.#destinationsList,
@@ -126,17 +121,25 @@ export default class TripPointPresenter {
       });
   }
 
-  setErrorState() {
-    const onErrorStateCallback = () => {
-      this.#editPointComponent
-        .updateElement({
-          isSaving: false,
-          isDeleting: false,
-          isDisabled: false,
-        });
-    };
+  setErrorState({ boardMode }) {
+    switch(boardMode) {
+      case TripBoardMode.DEFAULT: {
+        this.#pointComponent.shake();
+        break;
+      }
 
-    this.#editPointComponent.shake(onErrorStateCallback);
+      default: {
+        const onErrorStateCallback = () => {
+          this.#editPointComponent
+            .updateElement({
+              isSaving: false,
+              isDeleting: false,
+              isDisabled: false,
+            });
+        };
+        this.#editPointComponent.shake(onErrorStateCallback);
+      }
+    }
   }
 
   #renderPoint() {
@@ -231,12 +234,10 @@ export default class TripPointPresenter {
   };
 
   #favoriteToggleHandler = (isFavorite) => {
-    this.#point.isFavorite = isFavorite;
-    this.#pointDefaultState.isFavorite = isFavorite;
     this.#onChangeCallback(
       ActionType.UPDATE_POINT,
       UpdateType.PATCH,
-      this.#point
+      {...this.#point, isFavorite}
     );
   };
 
@@ -245,7 +246,6 @@ export default class TripPointPresenter {
 
     point.cost = (point.cost <= 0) ? 1 : point.cost;
 
-    this.#pointDefaultState = null;
     this.#onChangeCallback(actionType, UpdateType.MAJOR, point);
   };
 

@@ -11,7 +11,11 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(customParseFormat);
 
-const CSSClasses = {ROLLUP_BTN: '.event__rollup-btn', FAVORITE_BTN: '.event__favorite-btn'};
+const CSSClasses = {
+  ROLLUP_BTN: '.event__rollup-btn',
+  FAVORITE_BTN: '.event__favorite-btn',
+  FAVORITE_BTN_ACTIVE: '.event__favorite-btn--active'
+};
 
 function createOffersTemplate(offers, offersList) {
   return offersList.map(({id, title, price}) => {
@@ -37,12 +41,14 @@ function createTripEventsListTemplate({
   cost,
   isFavorite,
   destinationsList,
-  typedOffersList}) {
+  typedOffersList
+}) {
 
   const destinationInfo = findObjectByID(destination, destinationsList);
   const offersTemplate = offers.size > 0 ? createOffersTemplate(offers, typedOffersList) : '';
   const dateFrom = dayjs(dates.start, DateFormats.CHOSED_DATE);
   const dateTo = dayjs(dates.end, DateFormats.CHOSED_DATE);
+  const favoriteBtnActiveClass = (isFavorite) ? CSSClasses.FAVORITE_BTN_ACTIVE.slice(1) : '';
 
   const pointDate = normalizeDate(dateFrom, DateFormats.FOR_POINT);
   const dateStart = normalizeDate(dateFrom, DateFormats.FOR_POINT_PERIODS);
@@ -76,7 +82,7 @@ function createTripEventsListTemplate({
           <ul class="event__selected-offers">
             ${offersTemplate}
           </ul>` : ''}
-        <button class="event__favorite-btn ${isFavorite ? 'event__favorite-btn--active' : ''}" type="button">
+        <button class="event__favorite-btn ${favoriteBtnActiveClass}" type="button">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
             <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
@@ -90,7 +96,9 @@ function createTripEventsListTemplate({
 }
 
 export default class TripEventsListItemView extends AbstractView {
-  #templateData = null;
+  #point = null;
+  #destinationsList = null;
+  #typedOffersList = null;
   #onEditCallback = null;
   #onFavoriteToggleCallback = null;
 
@@ -102,8 +110,9 @@ export default class TripEventsListItemView extends AbstractView {
     onFavoriteToggleCallback
   }) {
     super();
-
-    this.#templateData = {...point, destinationsList, typedOffersList};
+    this.#point = point;
+    this.#destinationsList = destinationsList;
+    this.#typedOffersList = typedOffersList;
     this.#onEditCallback = onEditCallback;
     this.#onFavoriteToggleCallback = onFavoriteToggleCallback;
 
@@ -114,14 +123,20 @@ export default class TripEventsListItemView extends AbstractView {
   }
 
   get template() {
-    return createTripEventsListTemplate(this.#templateData);
+    return createTripEventsListTemplate({
+      ...this.#point,
+      destinationsList: this.#destinationsList,
+      typedOffersList: this.#typedOffersList,
+    });
   }
 
   /** Обработчики */
   #pointEditBtnHandler = () => this.#onEditCallback?.();
-  #pointFavoriteToggleHandler = () => {
-    this.#templateData.isFavorite = !this.#templateData.isFavorite;
+  #pointFavoriteToggleHandler = (evt) => {
+    evt.preventDefault();
 
-    this.#onFavoriteToggleCallback?.(this.#templateData.isFavorite);
+    const isFavorite = !this.#point.isFavorite;
+
+    this.#onFavoriteToggleCallback?.(isFavorite);
   };
 }

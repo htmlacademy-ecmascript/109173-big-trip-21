@@ -263,7 +263,7 @@ export default class TripContentPresenter {
         try {
           await this.#pointsModel.updatePoint(updateType, data);
         } catch(err) {
-          this.#pointPresenters.get(data.id).setErrorState();
+          this.#pointPresenters.get(data.id).setErrorState({ boardMode: this.#getBoardMode() });
         }
         break;
       }
@@ -286,6 +286,7 @@ export default class TripContentPresenter {
   #pointsModelChangeHandler = (updateType, pointData) => {
     switch(updateType) {
       case UpdateType.PATCH: {
+        console.log('Point data: ', pointData);
         this.#pointPresenters.get(pointData.id).init(pointData); // Перерисовываем точку
         break;
       }
