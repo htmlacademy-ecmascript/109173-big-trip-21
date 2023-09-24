@@ -4,7 +4,7 @@ import { DateFormats } from './utils/const.js';
 
 dayjs.extend(customParseFormat);
 export default class Adapter {
-  static adaptPointToServer(point) {
+  static pointToServer(point) {
     const adaptedPoint = {
       ...point,
       date_from: dayjs(point.dates.start, DateFormats.CHOSED_DATE).toISOString(),
@@ -21,7 +21,7 @@ export default class Adapter {
     return adaptedPoint;
   }
 
-  static adaptPointToClient(point) {
+  static pointToClient(point) {
     const adaptedPoint = {
       ...point,
       dates: {

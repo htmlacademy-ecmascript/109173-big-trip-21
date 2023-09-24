@@ -41,7 +41,7 @@ export default class PointsApiService extends ApiService {
     if(method === Method.DELETE) {
       data = { url: `${ApiUrl.POINTS}/${point.id}`, method };
     } else {
-      const sendingPoint = Adapter.adaptPointToServer(point);
+      const sendingPoint = Adapter.pointToServer(point);
 
       data = {
         url: `${ApiUrl.POINTS}/${uri}`,

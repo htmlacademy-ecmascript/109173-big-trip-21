@@ -239,7 +239,7 @@ export default class TripPointPresenter {
   #pointSubmitHandler = (point) => {
     const actionType = this.#isNewPoint ? ActionType.ADD_POINT : ActionType.UPDATE_POINT;
 
-    point.cost = (point.cost <= 0) ? 1 : point.cost; // <- Временный костыль для невозможности задать цену меньше 1
+    point.cost = (point.cost <= 0) ? 1 : point.cost;
 
     this.#pointDefaultState = null;
     this.#onChangeCallback(actionType, UpdateType.MAJOR, point);

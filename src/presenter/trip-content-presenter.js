@@ -160,6 +160,9 @@ export default class TripContentPresenter {
   }
 
   #getCurrentPrice() {
+    /* Берем точки напрямую из модели, чтобы немного оптимизаровать производительность
+    и не сортировать их лишний раз т.к. нам для подсчета цены, по сути, без разницы,
+    отсортированы точки или нет */
     return [...this.#pointsModel.points].reduce((accumulator, point) => {
       let offersTotalPrice = 0;
       const pointOffers = this.#offersModel.getByPointType(point.type);
@@ -179,7 +182,7 @@ export default class TripContentPresenter {
   }
 
   #getPointsInfo() {
-    return [...this.#pointsModel.points].map(({ destination, dates }) => {
+    return [...this.points].map(({ destination, dates }) => {
       const destinationInfo = findObjectByID(destination, this.#destinationsModel.destinations)?.name;
       return {
         destination: destinationInfo,

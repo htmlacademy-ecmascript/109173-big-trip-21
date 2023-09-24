@@ -11,7 +11,12 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
 
 const OPTIONS_LOADING_FAILED_MESSAGE = 'Sorry... Destinations/Offers wasn`t loaded fully.<br> Please, reload this page or try again later.';
-
+const PlaceholderText = {
+  DESTINATION: 'Destination name',
+  PRICE: 'Price',
+  DATE_FROM: 'Date from',
+  DATE_TO: 'Date to'
+};
 const BtnText = {
   CANCEL: 'Cancel',
   SAVE: 'Save',
@@ -140,6 +145,7 @@ function createEditPointTemplate({
               value="${destination ? destination.name : ''}"
               list="destination-list-1"
               ${disabledState}
+              placeholder="${PlaceholderText.DESTINATION}"
             >
             <datalist id="destination-list-1">
               ${destinationsTemplate}
@@ -148,10 +154,10 @@ function createEditPointTemplate({
 
           <div class="event__field-group  event__field-group--time">
             <label class="visually-hidden" for="event-start-time-1">From</label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom}" ${disabledState}>
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom}" ${disabledState} placeholder="${PlaceholderText.DATE_FROM}">
             &mdash;
             <label class="visually-hidden" for="event-end-time-1">To</label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo}" ${disabledState}>
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo}" ${disabledState} placeholder="${PlaceholderText.DATE_TO}">
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -159,7 +165,7 @@ function createEditPointTemplate({
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${cost}" ${disabledState}>
+            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${cost}" ${disabledState} placeholder="${PlaceholderText.PRICE}">
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit" ${disabledState}>${saveBtnText}</button>
@@ -429,7 +435,8 @@ export default class EditPointView extends AbstractStatefulView {
 
   #pointPriceChangeHandler = (evt) => {
     const target = evt.target;
-    const newPrice = !removeChars(target.value) ? 0 : Number(target.value);
+    const normillizedPrice = removeChars(target.value);
+    const newPrice = (!normillizedPrice || normillizedPrice <= 0) ? 1 : Number(target.value);
 
     this.updateElement({ cost: newPrice });
   };
