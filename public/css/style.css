@@ -634,6 +634,7 @@ main {
           transform: translate(-50%, -50%) rotate(225deg); }
 
 .event__field-group {
+  position: relative;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-align: center;
@@ -838,3 +839,11 @@ main {
     padding-right: 20px; }
   .event__photo:not(:last-child) {
     margin-right: 5px; }
+
+.event__input-error {
+  position: absolute;
+  top: 100%;
+  left: calc(50% / 2);
+  color: red;
+  font-size: 10px;
+}
