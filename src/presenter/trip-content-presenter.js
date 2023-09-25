@@ -156,8 +156,8 @@ export default class TripContentPresenter {
       getOffersByType: this.#offersModel.getByPointType.bind(this.#offersModel),
       onChangeCallback: this.#viewChangeHandler,
       onBeforeEditCallback: this.#pointBeforeEditHandler,
-      setBoardMode: this.#setBoardMode,
-      getBoardMode: this.#getBoardMode,
+      setBoardMode: this.#setBoardMode.bind(this),
+      getBoardMode: this.#getBoardMode.bind(this),
       isNewPoint,
     });
 
@@ -204,7 +204,7 @@ export default class TripContentPresenter {
   }
 
   // Используем стрелку для привязки контекста
-  #setBoardMode = (mode) => {
+  #setBoardMode(mode) {
     const modes = Object.values(TripBoardMode);
 
     if(this.#currentTripBoardMode === mode || !modes.includes(mode)) {
@@ -212,9 +212,11 @@ export default class TripContentPresenter {
     }
 
     this.#currentTripBoardMode = mode;
-  };
+  }
 
-  #getBoardMode = () => this.#currentTripBoardMode;
+  #getBoardMode() {
+    return this.#currentTripBoardMode;
+  }
 
   #resetFilters({ updateType, resetFilter, resetSort }) {
     if(resetFilter && this.#filterModel.filter !== FilterType.EVERYTHING) {
@@ -231,14 +233,12 @@ export default class TripContentPresenter {
    * Вью с моделью взаимодействует только через данный метод
    */
   #viewChangeHandler = async (actionType, updateType, data) => {
-    this.#uiBlocker.block();
-
     switch(actionType) {
       case ActionType.CREATE_POINT: {
         // Создание точки без добавления в модель (например, при клике на кнопку + New event)
         this.#addNewPointBtnComponent.disableBtn();
-        this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
         this.#resetFilters({ updateType, resetFilter: true, resetSort: true });
+        this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
         this.#reRenderTripBoard();
         this.#renderEventPoint();
         break;
@@ -251,6 +251,7 @@ export default class TripContentPresenter {
       }
 
       case ActionType.ADD_POINT: {
+        this.#uiBlocker.block();
         this.#pointPresenters.get(data.id).setSavingState();
         try {
           await this.#pointsModel.addPoint(updateType, data);
@@ -261,6 +262,7 @@ export default class TripContentPresenter {
       }
 
       case ActionType.UPDATE_POINT: {
+        this.#uiBlocker.block();
         this.#pointPresenters.get(data.id).setSavingState();
         try {
           await this.#pointsModel.updatePoint(updateType, data);
@@ -271,6 +273,7 @@ export default class TripContentPresenter {
       }
 
       case ActionType.DELETE_POINT: {
+        this.#uiBlocker.block();
         this.#pointPresenters.get(data.id).setDeletingState();
         try {
           await this.#pointsModel.deletePoint(updateType, data);
@@ -336,6 +339,11 @@ export default class TripContentPresenter {
         break;
       }
     }
+
+    if(this.#getBoardMode() === TripBoardMode.ADDING_NEW_POINT) {
+      this.#setBoardMode(TripBoardMode.DEFAULT);
+      this.#addNewPointBtnComponent.enableBtn();
+    }
   };
 
   #sortModelChangeHandler = (updateType) => {
@@ -344,6 +352,11 @@ export default class TripContentPresenter {
         this.#reRenderTripBoard();
         break;
       }
+    }
+
+    if(this.#getBoardMode() === TripBoardMode.ADDING_NEW_POINT) {
+      this.#setBoardMode(TripBoardMode.DEFAULT);
+      this.#addNewPointBtnComponent.enableBtn();
     }
   };
 
