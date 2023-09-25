@@ -2,7 +2,7 @@ const END_POINT = 'https://21.objects.pages.academy/big-trip';
 const AUTH_TOKEN = 'Basic 44b7-b4ca-e34f0eb25871';
 const POINT_TYPES = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
 const BLANK_POINT = {
-  type: POINT_TYPES[0].toLowerCase(),
+  type: POINT_TYPES[5].toLowerCase(),
   destination: '',
   dates: {
     start: '',

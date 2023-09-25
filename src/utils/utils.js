@@ -13,7 +13,7 @@ dayjs.extend(customParseFormat);
 
 const TimeInMillis = {
   MINUTE: 60 * 1000, // 60000
-  HOUR: 3600 * 1000, // 3600000
+  HOUR: 60 * 60000, // 3 600 000
   DAY: 24 * 3600000, // 86 400 000
   YEAR: 365 * 86400000, // 31 536 000 000
 };
@@ -21,11 +21,31 @@ const TimeInMillis = {
 // v.2 (на нативной функции)
 function getFormattedDateDiff(dateFrom, dateTo) {
   const dateDiff = getDateDiff(dateFrom, dateTo);
-  const formattedDate = parseDateFromMillis(dateDiff);
-  const formattedNums = [`${formattedDate.days}D`, `${formattedDate.hours}H`, `${formattedDate.minutes}M`];
-  const filteredNums = Array.from(formattedNums).filter((datePart) => !/00\w/.test(datePart));
+  const parsedDate = parseDateFromMillis(dateDiff);
+  const daysStr = `${getPadded2ZeroNum(parsedDate.days)}D`;
+  const hoursStr = `${getPadded2ZeroNum(parsedDate.hours)}H`;
+  const minutesStr = `${getPadded2ZeroNum(parsedDate.minutes)}M`;
 
-  return filteredNums.join(' ');
+  let datesDeltaStr = '';
+
+  switch(true) {
+    case (parsedDate.days > 0): {
+      datesDeltaStr = `${daysStr} ${hoursStr} ${minutesStr}`;
+      break;
+    }
+
+    case (parsedDate.hours > 0): {
+      datesDeltaStr = `${hoursStr} ${minutesStr}`;
+      break;
+    }
+
+    case (parsedDate.minutes > 0): {
+      datesDeltaStr = `${minutesStr}`;
+      break;
+    }
+  }
+
+  return datesDeltaStr;
 }
 
 function getDateDiff(dateFrom, dateTo) {
@@ -40,34 +60,27 @@ function parseDateFromMillis(millis) {
   let hours = 0;
   let minutes = 0;
 
-
   if(milliseconds >= TimeInMillis.YEAR) {
-    years = Math.round(milliseconds / TimeInMillis.YEAR);
+    years = Math.trunc(milliseconds / TimeInMillis.YEAR);
     milliseconds -= years * TimeInMillis.YEAR;
   }
 
   if (milliseconds >= TimeInMillis.DAY) {
-    days = Math.round(milliseconds / TimeInMillis.DAY);
+    days = Math.trunc(milliseconds / TimeInMillis.DAY);
     milliseconds -= days * TimeInMillis.DAY;
   }
 
   if (milliseconds >= TimeInMillis.HOUR) {
-    hours = Math.round(milliseconds / TimeInMillis.HOUR);
+    hours = Math.trunc(milliseconds / TimeInMillis.HOUR);
     milliseconds -= hours * TimeInMillis.DAY;
   }
 
   if (milliseconds > TimeInMillis.MINUTE) {
-    minutes = Math.round(milliseconds / TimeInMillis.MINUTE);
-    milliseconds -= hours * TimeInMillis.MINUTE;
+    minutes = Math.trunc(milliseconds / TimeInMillis.MINUTE);
+    milliseconds -= minutes * TimeInMillis.MINUTE;
   }
 
-  // Дополняем строку до двух символов 00D 00H 00M
-  years = getPadded2ZeroNum(years);
-  days = getPadded2ZeroNum(days);
-  hours = getPadded2ZeroNum(hours);
-  minutes = getPadded2ZeroNum(minutes);
-
-  return {years, days, hours, minutes};
+  return { days, hours, minutes };
 }
 
 function isPastDate(dateTo) {
