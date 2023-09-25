@@ -1,20 +1,28 @@
-import { POINT_TYPES } from '../utils/const.js';
-import { createOffersWithType } from '../mock/offers';
-
+import OffersApiService from '../offers-api-service.js';
 export default class OffersModel {
   #offers = null;
-
-  constructor() {
-    this.#offers = createOffersWithType(POINT_TYPES);
-  }
 
   get offers() {
     return this.#offers;
   }
 
-  getOffersByPointType(type) {
-    const typedOffers = this.#offers.find((offer) => offer.type === type);
+  async init() {
+    try {
+      const offersApiService = new OffersApiService();
+      const offers = await offersApiService.offers;
+      this.#offers = offers;
+    } catch(err) {
+      this.#offers = [];
+    }
+  }
 
-    return typedOffers?.offers || new Set();
+  getOffersByPointType(type) {
+    let typedOffers = null;
+
+    if(this.#offers.length) {
+      typedOffers = this.#offers.find((offer) => offer.type === type);
+    }
+
+    return typedOffers?.offers || [];
   }
 }

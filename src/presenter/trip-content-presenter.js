@@ -33,15 +33,15 @@ export default class TripContentPresenter {
 
   #pointPresenters = new Map();
 
-  #currentTripBoardMode = TripBoardMode.DEFAULT;
+  #currentTripBoardMode = TripBoardMode.LOADING;
 
   constructor({
     mainHeaderContainer,
     eventsContainer,
-    destinationsModel,
-    offersModel,
     filterModel,
     sortModel,
+    destinationsModel,
+    offersModel,
     pointsModel
   }) {
     this.#mainHeaderContainer = mainHeaderContainer;
@@ -49,10 +49,10 @@ export default class TripContentPresenter {
     this.#tripEventsContainer = eventsContainer;
     this.#tripEventsListContainer = new TripEventsListView(); // Контейнер для списка точек маршрута
 
-    this.#destinationsModel = destinationsModel;
-    this.#offersModel = offersModel;
     this.#filterModel = filterModel;
     this.#sortModel = sortModel;
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
     this.#pointsModel = pointsModel;
 
     this.#filterModel.addObserver(this.#filterModelChangeHandler);
@@ -73,6 +73,10 @@ export default class TripContentPresenter {
   }
 
   #renderHeader() {
+    if(this.#getBoardMode() === TripBoardMode.LOADING) {
+      return;
+    }
+
     this.#tripInfoComponent = new TripInfoMainView({ pointsInfo: this.#getPointsInfo() });
     this.#priceComponent = new TripInfoPriceView({ price: this.#getCurrentPrice() });
     this.#addNewPointBtnComponent = new AddNewPointBtnView({ onAddNewPointCallback: this.#addNewPointBtnClickHandler });
@@ -85,17 +89,16 @@ export default class TripContentPresenter {
 
   #renderTripBoard() {
     const points = this.points;
+    const boardMode = this.#getBoardMode();
 
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
 
-    if (points.length > 0) {
-      this.#renderEventPoints(points);
+    if (points.length <= 0 && boardMode !== TripBoardMode.ADDING_NEW_POINT) {
+      this.#renderNoPoints();
       return;
     }
 
-    if(this.#getBoardMode() !== TripBoardMode.ADDING_NEW_POINT) {
-      this.#renderNoPoints();
-    }
+    this.#renderEventPoints(points);
   }
 
   #reRenderHeader() {
@@ -115,7 +118,8 @@ export default class TripContentPresenter {
   }
 
   #renderNoPoints() {
-    this.#noPointsComponent = new TripEventsListEmptyView({ currentFilter: this.#filterModel.filter });
+    const currentFilter = (this.#getBoardMode() !== TripBoardMode.LOADING) ? this.#filterModel.filter : null;
+    this.#noPointsComponent = new TripEventsListEmptyView({ currentFilter });
     render(this.#noPointsComponent, this.#tripEventsListContainer.element);
   }
 
@@ -135,6 +139,7 @@ export default class TripContentPresenter {
       onBeforeEditCallback: this.#pointBeforeEditHandler,
       setBoardMode: this.#setBoardMode,
       isNewPoint,
+      isOptionsLoaded: this.#checkOptionsLoading(),
     });
 
     pointPresenter.init();
@@ -148,14 +153,18 @@ export default class TripContentPresenter {
 
   #getCurrentPrice() {
     return [...this.#pointsModel.points].reduce((accumulator, point) => {
+      let totalPointOffersPrice = 0;
       const pointOffers = this.#offersModel.getOffersByPointType(point.type);
-      const totalPointOffersPrice = pointOffers.reduce((offersPrice, offer) => {
-        if(point.offers.has(offer.id)) {
-          return offersPrice + offer.price;
-        }
 
-        return offersPrice;
-      }, 0);
+      if(pointOffers.length) {
+        totalPointOffersPrice = pointOffers.reduce((offersPrice, offer) => {
+          if(point.offers.has(offer.id)) {
+            return offersPrice + offer.price;
+          }
+
+          return offersPrice;
+        }, 0);
+      }
 
       return accumulator + Number(point.cost + totalPointOffersPrice);
     }, 0);
@@ -165,7 +174,7 @@ export default class TripContentPresenter {
     return [...this.#pointsModel.points].map(({ destination, dates }) => {
       const destinationInfo = findObjectByID(destination, this.#destinationsModel.destinations)?.name;
       return {
-        destination: destinationInfo, // <- перевести id пунктов назначения в названия
+        destination: destinationInfo,
         dateFrom: dates.start,
         dateTo: dates.end
       };
@@ -193,6 +202,11 @@ export default class TripContentPresenter {
     if(resetSort && this.#sortModel.sort !== SortType.DAY) {
       this.#sortModel.setSort(updateType, SortType.DAY);
     }
+  }
+
+  #checkOptionsLoading() {
+    return (this.#destinationsModel.destinations.length > 0 &&
+            this.#offersModel.offers.length > 0);
   }
 
   /** Обработчики */
@@ -248,6 +262,13 @@ export default class TripContentPresenter {
       }
 
       case UpdateType.MAJOR: {
+        this.#reRenderHeader();
+        this.#reRenderTripBoard();
+        break;
+      }
+
+      case UpdateType.INIT: {
+        this.#setBoardMode(TripBoardMode.DEFAULT);
         this.#reRenderHeader();
         this.#reRenderTripBoard();
         break;

@@ -6,7 +6,6 @@ import EditPointView from '../view/edit-point-view.js';
 
 export default class TripPointPresenter {
   #point = null;
-  #isNewPoint = false;
   #pointDefaultState = null;
   #pointsContainer = null;
   #destinationsList = null;
@@ -18,7 +17,10 @@ export default class TripPointPresenter {
 
   #prevPointComponent = null;
   #prevEditPointComponent = null;
+
+  #isNewPoint = false;
   #isEditing = false;
+  #isOptionsLoaded = null;
 
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
@@ -33,6 +35,7 @@ export default class TripPointPresenter {
     onBeforeEditCallback,
     setBoardMode,
     isNewPoint,
+    isOptionsLoaded,
   }) {
     this.#point = point;
     this.#pointsContainer = container;
@@ -42,6 +45,7 @@ export default class TripPointPresenter {
     this.#onBeforeEditCallback = onBeforeEditCallback;
     this.#setBoardMode = setBoardMode;
     this.#isNewPoint = isNewPoint;
+    this.#isOptionsLoaded = isOptionsLoaded;
   }
 
   init(point = this.#point) {
@@ -69,6 +73,7 @@ export default class TripPointPresenter {
     this.#editPointComponent = new EditPointView({
       ...pointData,
       isNewPoint: this.#isNewPoint,
+      isOptionsLoaded: this.#isOptionsLoaded ,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
       onDestinationChangeCallback: this.#pointDestinationChangeHandler,
       onDateChangeCallback: this.#pointDateChangeHandler,
@@ -196,7 +201,10 @@ export default class TripPointPresenter {
   };
 
   #pointDateChangeHandler = (pointWithNewDates) => this.#updateView(pointWithNewDates);
-  #pointPriceChangeCallback = (pointWithNewPrice) => this.#updateView(pointWithNewPrice);
+  #pointPriceChangeCallback = (pointWithNewPrice) => {
+    this.#updateView(pointWithNewPrice);
+    this.#setKeyDownHandler();
+  };
 
   #favoriteToggleHandler = (isFavorite) => {
     this.#point.isFavorite = isFavorite;
@@ -213,7 +221,14 @@ export default class TripPointPresenter {
 
     this.#pointDefaultState = null;
     this.#onChangeCallback(actionType, UpdateType.MAJOR, point);
-    this.#replaceFormToPoint();
+    /**
+     *  т.к. при обновлении точки список перерисовывается,
+     * нет смысла скрывать форму редактирования вручную + так
+     * мы можем в дальнейшем заблокировать эту форму на время отправки
+     * данных на сервер, тем самым показывая пользователю, что данные
+     * действительно отправляются на сервер
+     */
+    // this.#replaceFormToPoint();
   };
 
   #pointDeleteHandler = (deletedPoint) => {

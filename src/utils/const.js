@@ -1,12 +1,10 @@
-import { DateFormats } from './utils.js';
-
-const RANDOM_PHOTOS_SERVICE_URL = 'https://loremflickr.com/248/152?random=';
-const CITY_NAMES = ['Moskow', 'London', 'Amsterdam', 'New Zealand', 'Switzerland', 'China', 'Japan'];
-const OFFER_NAMES = ['Transfer', 'Meet in Airport', 'Extra Luggage', 'Lunch', 'Switch to comfort'];
+const END_POINT = 'https://21.objects.pages.academy/big-trip';
+const AUTH_TOKEN = 'Basic 44b7-b4ca-e34f0eb25871';
 const POINT_TYPES = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
+const DEFAULT_POINT_TYPE = 'Flight';
 const BLANK_POINT = {
   id: crypto.randomUUID(),
-  type: POINT_TYPES[5],
+  type: DEFAULT_POINT_TYPE,
   destination: '',
   dates: {
     start: '',
@@ -16,7 +14,19 @@ const BLANK_POINT = {
   cost: 0,
   isFavorite: false,
 };
-const POINTS_COUNT = 4;
+const DateFormats = {
+  FLATPICKR: 'd/m/y H:i', // Для Флэтпикера
+  DATE_TIME: 'YYYY-MM-DD[T]hh:mm', // Для тега datetime
+  PATH: 'DD/MM/YY',
+  DAY: 'DD',
+  CHOSED_DATE: 'DD/MM/YY HH:mm', // Дата и время начала события
+  FOR_POINT_PERIODS: 'HH:mm', // Для периодов, выбранных для точки маршрута
+  FOR_POINT: 'MMM DD', // Дата для каждой конкретной точки маршрута
+  // Форматирование продолжительности нахождения в точке маршрута
+  LESS_THAN_HOUR: 'mm', // Менее часа
+  LESS_THAN_DAY: 'HH mm', // Менее суток
+  MORE_THAN_DAY: 'DD HH mm' // Более суток
+};
 const FLATPIKR_SETTINGS = {
   enableTime: true,
   dateFormat: DateFormats.FLATPICKR,
@@ -32,30 +42,43 @@ const ActionType = {
   RESET_FILTERS: 'RESET_FILTERS'
 };
 const UpdateType = {
+  INIT: 'INIT',
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR'
 };
 const TripBoardMode = {
+  LOADING: 'LOADING',
   DEFAULT: 'DEFAULT',
   EDITING: 'EDITING',
   ADDING_NEW_POINT: 'ADDING_NEW_POINT'
+};
+const API_URL = {
+  POINTS: 'points',
+  DESTINATIONS: 'destinations',
+  OFFERS: 'offers',
+};
+const Method = {
+  GET: 'GET',
+  PUT: 'PUT',
+  POST: 'POST',
 };
 
 const TRIP_EVENTS_LIST_TEMPLATE = '<ul class="trip-events__list"></ul>';
 const TRIP_INFO_TEMPLATE = '<section class="trip-main__trip-info  trip-info"></section>';
 
 export {
-  CITY_NAMES,
-  RANDOM_PHOTOS_SERVICE_URL,
-  OFFER_NAMES,
+  END_POINT,
+  AUTH_TOKEN,
   POINT_TYPES,
   BLANK_POINT,
-  POINTS_COUNT,
   FLATPIKR_SETTINGS,
+  API_URL,
   TRIP_EVENTS_LIST_TEMPLATE,
   TRIP_INFO_TEMPLATE,
+  DateFormats,
   ActionType,
   UpdateType,
-  TripBoardMode
+  TripBoardMode,
+  Method,
 };

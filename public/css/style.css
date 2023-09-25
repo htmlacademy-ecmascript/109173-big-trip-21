@@ -765,6 +765,10 @@ main {
     margin-bottom: 8px;
     margin-left: 20px; }
 
+  .event__section-title--loading-failed {
+    margin-bottom: 8px;
+    margin-left: 20px; }
+
 .event__available-offers {
   display: -ms-flexbox;
   display: flex;

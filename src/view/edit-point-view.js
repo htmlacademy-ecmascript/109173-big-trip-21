@@ -1,6 +1,6 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { DateFormats, upperCaseFirst, findObjectByID, removeChars } from '../utils/utils.js';
-import { POINT_TYPES, FLATPIKR_SETTINGS } from '../utils/const.js';
+import { findObjectByID, removeChars } from '../utils/utils.js';
+import { POINT_TYPES, FLATPIKR_SETTINGS, DateFormats } from '../utils/const.js';
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -9,6 +9,8 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(customParseFormat);
+
+const OPTIONS_LOADING_FAILED_MESSAGE = 'Sorry... Destinations/Offers wasn`t loaded fully.<br> Please, reload this page or try again later.';
 
 const AbortBtnText = {CANCEL: 'Cancel', DELETE: 'Delete'};
 
@@ -86,12 +88,14 @@ function createEditPointTemplate({
   isTypeHasOffers,
   isHasDestination,
   isNewPoint,
+  isOptionsLoaded,
 }) {
   const eventTypeTemplate = createEventTypeTemplate(type);
   const offersTemplate = isTypeHasOffers ? createOffersTemplate(offers, typedOffersList) : '';
   const destinationsTemplate = createDestinationsTemplate(destinationsList);
   const photosTemplate = destination?.pictures ? createPhotosTemplate(destination.pictures) : '';
   const abortBtnText = isNewPoint ? AbortBtnText.CANCEL : AbortBtnText.DELETE;
+  const disabledState = !isOptionsLoaded ? 'disabled' : '';
 
   return /*html*/`
     <li class="trip-events__item">
@@ -102,7 +106,7 @@ function createEditPointTemplate({
               <span class="visually-hidden">Choose event type</span>
               <img class="event__type-icon" width="17" height="17" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
             </label>
-            <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+            <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" ${disabledState}>
 
             <div class="event__type-list">
               <fieldset class="event__type-group">
@@ -117,7 +121,15 @@ function createEditPointTemplate({
             <label class="event__label  event__type-output" for="event-destination-1">
               ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination ? destination.name : ''}" list="destination-list-1">
+            <input
+              class="event__input  event__input--destination"
+              id="event-destination-1"
+              type="text"
+              name="event-destination"
+              value="${destination ? destination.name : ''}"
+              list="destination-list-1"
+              ${disabledState}
+            >
             <datalist id="destination-list-1">
               ${destinationsTemplate}
             </datalist>
@@ -125,10 +137,10 @@ function createEditPointTemplate({
 
           <div class="event__field-group  event__field-group--time">
             <label class="visually-hidden" for="event-start-time-1">From</label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom}">
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom}" ${disabledState}>
             &mdash;
             <label class="visually-hidden" for="event-end-time-1">To</label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo}">
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo}" ${disabledState}>
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -136,11 +148,11 @@ function createEditPointTemplate({
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${cost}">
+            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${cost}" ${disabledState}>
           </div>
 
-          <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-          <button class="event__reset-btn" type="reset">${abortBtnText}</button>
+          <button class="event__save-btn  btn  btn--blue" type="submit" ${disabledState}>Save</button>
+          <button class="event__reset-btn" type="reset" ${(!isNewPoint) ? disabledState : ''}>${abortBtnText}</button>
           ${!isNewPoint ? /*html*/`
             <button class="event__rollup-btn" type="button">
               <span class="visually-hidden">Open event</span>
@@ -148,25 +160,32 @@ function createEditPointTemplate({
           ` : ''}
         </header>
         <section class="event__details">
-          <!-- Если у точки есть доп. услуги - выводим их -->
-          ${offersTemplate ? `
-            <section class="event__section  event__section--offers">
-              <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+          ${!isOptionsLoaded ? /*html*/`
+            <section class="event__section  event__section--loading-failed">
+              <h3 class="event__section-title  event__section-title--loading-failed">Loading failed</h3>
+              <p class="event__destination-description"> ${OPTIONS_LOADING_FAILED_MESSAGE}</div>
+            </section>
+          ` : `
+            ${offersTemplate ? `
+              <section class="event__section  event__section--offers">
+                <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
-              <div class="event__available-offers">
-                ${offersTemplate}
-              </div>
-            </section>` : ''}
+                <div class="event__available-offers">
+                  ${offersTemplate}
+                </div>
+              </section>
+            ` : ''}
 
-          <!-- Есть есть пункт назначения - показываем блок -->
-          ${isHasDestination ? `
-            <section class="event__section  event__section--destination">
-              <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-              <p class="event__destination-description">${destination.description}</p>
+            ${(isHasDestination && destination.description) ? `
+              <section class="event__section  event__section--destination">
+                <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+                <p class="event__destination-description">${destination.description}</p>
 
-              <!-- Вывод фотографий точки маршрута -->
-              ${photosTemplate}
-            </section>` : ''}
+                <!-- Вывод фотографий точки маршрута -->
+                ${photosTemplate}
+              </section>
+            ` : ''}
+          `}
         </section>
       </form>
     </li>`;
@@ -175,6 +194,7 @@ function createEditPointTemplate({
 export default class EditPointView extends AbstractStatefulView {
   #point = null;
   #isNewPoint = null;
+  #isOptionsLoaded = null;
   #destinationsList = null;
   #typedOffersList = null;
   #datepickrFrom = null;
@@ -195,6 +215,7 @@ export default class EditPointView extends AbstractStatefulView {
   constructor({
     point,
     isNewPoint,
+    isOptionsLoaded,
     destinationsList,
     typedOffersList,
     onTypeChangeCallback,
@@ -210,6 +231,7 @@ export default class EditPointView extends AbstractStatefulView {
     const convertedData = EditPointView.convertDataToState({
       ...point,
       isNewPoint,
+      isOptionsLoaded,
       destinationsList,
       typedOffersList
     });
@@ -217,6 +239,7 @@ export default class EditPointView extends AbstractStatefulView {
     this._setState(convertedData);
     this.#point = point;
     this.#isNewPoint = isNewPoint;
+    this.#isOptionsLoaded = isOptionsLoaded;
     this.#destinationsList = destinationsList;
     this.#typedOffersList = typedOffersList;
 
@@ -228,7 +251,6 @@ export default class EditPointView extends AbstractStatefulView {
     this.#onCancelEditCallback = onCancelEditCallback;
     this.#onDeletePointCallback = onDeletePointCallback;
 
-    this.#initDatepickr();
     this._restoreHandlers();
   }
 
@@ -237,8 +259,19 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   _restoreHandlers() {
+    this.#initDatepickr();
+
     const pointAbortHandler = this.#isNewPoint ? this.#pointCancelAddHandler : this.#pointDeleteHanler;
 
+    if(!this.#isNewPoint) {
+      this.element
+        .querySelector(CSSClasses.ROLLUP_BTN)
+        .addEventListener('click', this.#pointCancelEditHandler);
+    }
+
+    if(!this.#isOptionsLoaded) {
+      return;
+    }
     this.element
       .querySelector(CSSClasses.EVENT_EDIT)
       .addEventListener('submit', this.#pointSubmitHandler);
@@ -257,12 +290,6 @@ export default class EditPointView extends AbstractStatefulView {
     this.element
       .querySelector(CSSClasses.DELETE_BTN)
       .addEventListener('click', pointAbortHandler);
-
-    if(!this.#isNewPoint) {
-      this.element
-        .querySelector(CSSClasses.ROLLUP_BTN)
-        .addEventListener('click', this.#pointCancelEditHandler);
-    }
 
     if(this._state.isTypeHasOffers) {
       this.element
@@ -321,7 +348,7 @@ export default class EditPointView extends AbstractStatefulView {
       return;
     }
 
-    const chosePointType = upperCaseFirst(evt.target.value);
+    const chosePointType = evt.target.value;
 
     this. #updateStateView(
       { type: chosePointType, offers: new Set() },
@@ -330,17 +357,11 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #dateFromChangeHandler = (_, dateStr) => {
-    this.#updateStateView(
-      { dateFrom: dateStr },
-      this.#onDateChangeCallback
-    );
+    this.updateElement({ dateFrom: dateStr });
   };
 
   #dateToChangeHandler = (_, dateStr) => {
-    this.#updateStateView(
-      { dateTo: dateStr },
-      this.#onDateChangeCallback
-    );
+    this.updateElement({ dateTo: dateStr });
   };
 
   #pointDestinationChangeHandler = (evt) => {
@@ -376,10 +397,7 @@ export default class EditPointView extends AbstractStatefulView {
     const target = evt.target;
     const newPrice = !removeChars(target.value) ? 0 : Number(target.value);
 
-    this.#updateStateView(
-      { cost: newPrice },
-      this.#onPriceChangeCallback
-    );
+    this.updateElement({ cost: newPrice });
   };
 
   #pointPriceInputHandler = (evt) => {
@@ -398,16 +416,19 @@ export default class EditPointView extends AbstractStatefulView {
     const destinationsList = this.#destinationsList;
     const typedOffersList = this.#typedOffersList;
 
-    this.#updateStateView({
+    this.updateElement({
       ...this.#point,
       isNewPoint: this.#isNewPoint,
       destinationsList,
       typedOffersList
-    },
-    this.#onCancelEditCallback);
+    });
+    this.#onCancelEditCallback?.();
   };
 
-  #pointDeleteHanler = () => this.#onDeletePointCallback?.(this.#point);
+  #pointDeleteHanler = () => {
+    this.#onDeletePointCallback?.(this.#point);
+  };
+
   #pointCancelAddHandler = () => this.#onCancelEditCallback?.(this.#point);
 
   static convertDataToState({
@@ -420,6 +441,7 @@ export default class EditPointView extends AbstractStatefulView {
     dates,
     isFavorite,
     isNewPoint,
+    isOptionsLoaded,
   }) {
 
     const dateFrom = dates?.start ? dayjs(dates.start, DateFormats.CHOSED_DATE).format(DateFormats.CHOSED_DATE) : '';
@@ -438,6 +460,7 @@ export default class EditPointView extends AbstractStatefulView {
       isTypeHasOffers: typedOffersList.length > 0,
       isFavorite,
       isNewPoint,
+      isOptionsLoaded,
     };
   }
 

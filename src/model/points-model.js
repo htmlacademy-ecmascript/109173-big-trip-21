@@ -1,20 +1,23 @@
+import PointsApiService from '../points-api-service.js';
+import Adapter from '../adapter.js';
 import Observable from '../framework/observable.js';
-import { getRandomPoint } from '../mock/way-point.js';
-import { POINTS_COUNT } from '../utils/const.js';
+import { UpdateType } from '../utils/const.js';
+
+const ERROR = {
+  UPDATE: 'Can`t update point'
+};
 export default class PointsModel extends Observable {
-  #points = null;
+  #points = [];
   #destinationsModel = null;
   #offersModel = null;
+  #pointsApiService = null;
 
   constructor({ destinationsModel, offersModel }) {
     super();
 
+    this.#pointsApiService = new PointsApiService();
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
-    this.#points = Array.from({length: POINTS_COUNT}, () => getRandomPoint({
-      destinationsModel: this.#destinationsModel,
-      offersModel: this.#offersModel,
-    }));
   }
 
   get points() {
@@ -25,10 +28,30 @@ export default class PointsModel extends Observable {
     this.#points = points;
   }
 
-  updatePoint(updateType, updatedPoint) {
-    this.#points = this.#points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
+  async init() {
+    try {
+      await this.#destinationsModel.init();
+      await this.#offersModel.init();
 
-    this._notify(updateType, updatedPoint);
+      const points = await this.#pointsApiService.points;
+      this.#points = points.map(Adapter.adaptPointToClient);
+    } catch(err) {
+      this.#points = [];
+    }
+
+    this._notify(UpdateType.INIT);
+  }
+
+  async updatePoint(updateType, update) {
+    try {
+      const response = await this.#pointsApiService.updatePoint(update);
+      const updatedPoint = Adapter.adaptPointToClient(response);
+
+      this.#points = this.#points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
+      this._notify(updateType, updatedPoint);
+    } catch(err) {
+      throw new Error(ERROR.UPDATE);
+    }
   }
 
   addPoint(updateType, newPoint) {
