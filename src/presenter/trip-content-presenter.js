@@ -51,7 +51,6 @@ export default class TripContentPresenter {
     pointsModel
   }) {
     this.#mainHeaderContainer = mainHeaderContainer;
-    this.#tripInfoContainer = new TripInfoView(); // Контейнер для отрисовки информации о маршруте, датах и стоимости путешествия
     this.#tripEventsContainer = eventsContainer;
     this.#tripEventsListContainer = new TripEventsListView(); // Контейнер для списка точек маршрута
 
@@ -88,6 +87,7 @@ export default class TripContentPresenter {
     render(this.#addNewPointBtnComponent, this.#mainHeaderContainer); // Отрисовываем кнопку добавления новой точки
 
     if(this.points.length > 0) {
+      this.#tripInfoContainer = new TripInfoView(); // Контейнер для отрисовки информации о маршруте, датах и стоимости путешествия
       this.#tripInfoComponent = new TripInfoMainView({ pointsInfo: this.#getPointsInfo() });
       this.#priceComponent = new TripInfoPriceView({ price: this.#getCurrentPrice() });
 
@@ -126,6 +126,7 @@ export default class TripContentPresenter {
   }
 
   #reRenderHeader() {
+    remove(this.#tripInfoContainer);
     remove(this.#tripInfoComponent);
     remove(this.#priceComponent);
     remove(this.#addNewPointBtnComponent);

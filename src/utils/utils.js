@@ -14,7 +14,8 @@ dayjs.extend(customParseFormat);
 const TimeInMillis = {
   MINUTE: 60 * 1000, // 60000
   HOUR: 3600 * 1000, // 3600000
-  DAY: 24 * 3600 * 1000, // 86400000
+  DAY: 24 * 3600000, // 86 400 000
+  YEAR: 365 * 86400000, // 31 536 000 000
 };
 
 // v.2 (на нативной функции)
@@ -34,9 +35,16 @@ function getDateDiff(dateFrom, dateTo) {
 // Функция для получения дней, часов и минут в миллисекундах
 function parseDateFromMillis(millis) {
   let milliseconds = millis;
+  let years = 0;
   let days = 0;
   let hours = 0;
   let minutes = 0;
+
+
+  if(milliseconds >= TimeInMillis.YEAR) {
+    years = Math.round(milliseconds / TimeInMillis.YEAR);
+    milliseconds -= years * TimeInMillis.YEAR;
+  }
 
   if (milliseconds >= TimeInMillis.DAY) {
     days = Math.round(milliseconds / TimeInMillis.DAY);
@@ -54,11 +62,12 @@ function parseDateFromMillis(millis) {
   }
 
   // Дополняем строку до двух символов 00D 00H 00M
+  years = getPadded2ZeroNum(years);
   days = getPadded2ZeroNum(days);
   hours = getPadded2ZeroNum(hours);
   minutes = getPadded2ZeroNum(minutes);
 
-  return {days, hours, minutes};
+  return {years, days, hours, minutes};
 }
 
 function isPastDate(dateTo) {

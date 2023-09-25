@@ -13,6 +13,7 @@ export default class OffersModel {
       this.#offers = offers;
     } catch(err) {
       this.#offers = [];
+      throw new Error(err);
     }
   }
 
