@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { normalizeDate } from '../utils/utils.js';
-import { DateFormats } from '../utils/const.js';
+import { DatesFormat } from '../utils/const.js';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -45,13 +45,13 @@ function createTripInfoMainTemplate({ pointsInfo }) {
     }
   }
 
-  const pathDateFrom = dayjs(startPoint.dateFrom, DateFormats.PATH);
-  const pathDateTo = dayjs(endPoint.dateTo, DateFormats.PATH);
+  const pathDateFrom = dayjs(startPoint.dateFrom, DatesFormat.PATH);
+  const pathDateTo = dayjs(endPoint.dateTo, DatesFormat.PATH);
   // const dateToFormat = (pathDateFrom.isSame(pathDateTo, 'year') && pathDateFrom.isSame(pathDateTo, 'month'))
-  //   ? DateFormats.DAY
-  //   : DateFormats.FOR_HEAD_DATES;
+  //   ? DatesFormat.DAY
+  //   : DatesFormat.FOR_HEAD_DATES;
 
-  datesStr = `${normalizeDate(pathDateFrom, DateFormats.FOR_HEAD_DATES, '...')} &mdash; ${normalizeDate(pathDateTo, DateFormats.FOR_HEAD_DATES, '...')}`;
+  datesStr = `${normalizeDate(pathDateFrom, DatesFormat.FOR_HEAD_DATES, '...')} &mdash; ${normalizeDate(pathDateTo, DatesFormat.FOR_HEAD_DATES, '...')}`;
 
   return /*html*/`
     <div class="trip-info__main">

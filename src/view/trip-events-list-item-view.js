@@ -4,7 +4,7 @@ import {
   findObjectByID,
   normalizeDate,
 } from '../utils/utils.js';
-import { DateFormats } from '../utils/const.js';
+import { DatesFormat } from '../utils/const.js';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -46,15 +46,15 @@ function createTripEventsListTemplate({
 
   const destinationInfo = findObjectByID(destination, destinationsList);
   const offersTemplate = offers.size > 0 ? createOffersTemplate(offers, typedOffersList) : '';
-  const dateFrom = dayjs(dates.start, DateFormats.CHOSED_DATE);
-  const dateTo = dayjs(dates.end, DateFormats.CHOSED_DATE);
+  const dateFrom = dayjs(dates.start, DatesFormat.CHOSED_DATE);
+  const dateTo = dayjs(dates.end, DatesFormat.CHOSED_DATE);
   const favoriteBtnActiveClass = (isFavorite) ? CSSClasses.FAVORITE_BTN_ACTIVE.slice(1) : '';
 
-  const pointDate = normalizeDate(dateFrom, DateFormats.FOR_POINT);
-  const dateStart = normalizeDate(dateFrom, DateFormats.FOR_POINT_PERIODS);
-  const dateEnd = normalizeDate(dateTo, DateFormats.FOR_POINT_PERIODS);
-  const dateTimeStart = normalizeDate(dateFrom, DateFormats.DATE_TIME);
-  const dateTimeEnd = normalizeDate(dateTo, DateFormats.DATE_TIME);
+  const pointDate = normalizeDate(dateFrom, DatesFormat.FOR_POINT);
+  const dateStart = normalizeDate(dateFrom, DatesFormat.FOR_POINT_PERIODS);
+  const dateEnd = normalizeDate(dateTo, DatesFormat.FOR_POINT_PERIODS);
+  const dateTimeStart = normalizeDate(dateFrom, DatesFormat.DATE_TIME);
+  const dateTimeEnd = normalizeDate(dateTo, DatesFormat.DATE_TIME);
   const datesDiff = getFormattedDateDiff(dateFrom, dateTo);
 
   return /*html*/`

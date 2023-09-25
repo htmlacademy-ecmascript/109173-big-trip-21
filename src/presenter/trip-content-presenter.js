@@ -101,23 +101,18 @@ export default class TripContentPresenter {
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
 
     if(this.points.length <= 0) {
-      switch(this.#getBoardMode()) {
-        case TripBoardMode.LOADING_FAILED: {
-          this.#renderNoPoints({
-            isDataLoadingFailed: true
-          });
-          break;
-        }
+      const boardMode = this.#getBoardMode();
 
-        case TripBoardMode.ADDING_NEW_POINT: {
-          break;
-        }
-
-        default: {
-          this.#renderNoPoints();
-          break;
-        }
+      if(boardMode === TripBoardMode.ADDING_NEW_POINT) {
+        return;
       }
+
+      this.#renderNoPoints({
+        currentFilter: (this.#getBoardMode() === TripBoardMode.LOADING)
+          ? null
+          : this.#filterModel.filter,
+        boardMode
+      });
 
       return;
     }
@@ -142,11 +137,8 @@ export default class TripContentPresenter {
     this.#renderTripBoard();
   }
 
-  #renderNoPoints(isDataLoadingFailed = false) {
-    const currentFilter = (this.#getBoardMode() !== TripBoardMode.LOADING)
-      ? this.#filterModel.filter
-      : null;
-    this.#noPointsComponent = new TripEventsListEmptyView({ currentFilter, isDataLoadingFailed });
+  #renderNoPoints({ currentFilter, boardMode }) {
+    this.#noPointsComponent = new TripEventsListEmptyView({ currentFilter, boardMode });
     render(this.#noPointsComponent, this.#tripEventsListContainer.element);
   }
 
@@ -161,13 +153,12 @@ export default class TripContentPresenter {
       point,
       container: this.#tripEventsListContainer.element,
       destinationsList,
-      offersModel: this.#offersModel,
+      getOffersByType: this.#offersModel.getByPointType.bind(this.#offersModel),
       onChangeCallback: this.#viewChangeHandler,
       onBeforeEditCallback: this.#pointBeforeEditHandler,
       setBoardMode: this.#setBoardMode,
       getBoardMode: this.#getBoardMode,
       isNewPoint,
-      isOptionsLoaded: this.#checkOptionsLoading(),
     });
 
     pointPresenter.init();
@@ -233,11 +224,6 @@ export default class TripContentPresenter {
     if(resetSort && this.#sortModel.sort !== SortType.DAY) {
       this.#sortModel.setSort(updateType, SortType.DAY);
     }
-  }
-
-  #checkOptionsLoading() {
-    return (this.#destinationsModel.destinations.length > 0 &&
-            this.#offersModel.offers.length > 0);
   }
 
   /** Обработчики */

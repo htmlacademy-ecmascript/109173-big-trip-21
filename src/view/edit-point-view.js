@@ -1,6 +1,6 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { findObjectByID, removeChars } from '../utils/utils.js';
-import { POINT_TYPES, FLATPIKR_SETTINGS, DateFormats } from '../utils/const.js';
+import { POINT_TYPES, FlatpickrSettings, DatesFormat } from '../utils/const.js';
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -8,8 +8,8 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(customParseFormat);
+
 const PRICE_MIN_VALUE = 1;
-const OPTIONS_LOADING_FAILED_MESSAGE = 'Sorry... Destinations/Offers wasn`t loaded fully.<br> Please, reload this page or try again later.';
 const PlaceholderText = {
   DESTINATION: 'Destination name',
   PRICE: 'Price',
@@ -23,12 +23,10 @@ const BtnText = {
   DELETE: 'Delete',
   DELETING: 'Deleting...'
 };
-
 const CSSIDs = {
   DATE_TIME_START: '#event-start-time-1',
   DATE_TIME_END: '#event-end-time-1',
 };
-
 const CSSClasses = {
   EVENT_EDIT: '.event--edit',
   ROLLUP_BTN: '.event__rollup-btn',
@@ -102,7 +100,6 @@ function createEditPointTemplate({
   destinationsList,
   typedOffersList,
   isNewPoint,
-  isOptionsLoaded,
   isSaving,
   isDeleting,
   isDisabled,
@@ -111,7 +108,7 @@ function createEditPointTemplate({
   const offersTemplate = (typedOffersList.length) ? createOffersTemplate(offers, typedOffersList) : '';
   const destinationsTemplate = createDestinationsTemplate(destinationsList);
   const photosTemplate = (destination?.pictures?.length) ? createPhotosTemplate(destination.pictures) : '';
-  const disabledState = (!isOptionsLoaded || isDisabled) ? 'disabled' : '';
+  const disabledState = (isDisabled) ? 'disabled' : '';
   const saveBtnText = (isSaving) ? BtnText.SAVING : BtnText.SAVE;
   const abortBtnDefaultText = (isNewPoint) ? BtnText.CANCEL : BtnText.DELETE;
   const abortBtnText = (isDeleting) ? BtnText.DELETING : abortBtnDefaultText;
@@ -203,32 +200,25 @@ function createEditPointTemplate({
           ` : ''}
         </header>
         <section class="event__details">
-          ${!isOptionsLoaded ? /*html*/`
-            <section class="event__section  event__section--loading-failed">
-              <h3 class="event__section-title  event__section-title--loading-failed">Loading failed</h3>
-              <p class="event__destination-description"> ${OPTIONS_LOADING_FAILED_MESSAGE}</div>
+          ${offersTemplate ? /*html*/`
+            <section class="event__section  event__section--offers">
+              <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+
+              <div class="event__available-offers">
+                ${offersTemplate}
+              </div>
             </section>
-          ` : `
-            ${offersTemplate ? `
-              <section class="event__section  event__section--offers">
-                <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+          ` : ''}
 
-                <div class="event__available-offers">
-                  ${offersTemplate}
-                </div>
-              </section>
-            ` : ''}
+          ${(Boolean(destination) && destination.description) ? /*html*/`
+            <section class="event__section  event__section--destination">
+              <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+              <p class="event__destination-description">${destination.description}</p>
 
-            ${(Boolean(destination) && destination.description) ? `
-              <section class="event__section  event__section--destination">
-                <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-                <p class="event__destination-description">${destination.description}</p>
-
-                <!-- Вывод фотографий точки маршрута -->
-                ${photosTemplate}
-              </section>
-            ` : ''}
-          `}
+              <!-- Вывод фотографий точки маршрута -->
+              ${photosTemplate}
+            </section>
+          ` : ''}
         </section>
       </form>
     </li>`;
@@ -237,7 +227,6 @@ function createEditPointTemplate({
 export default class EditPointView extends AbstractStatefulView {
   #point = null;
   #isNewPoint = null;
-  #isOptionsLoaded = null;
   #destinationsList = null;
   #typedOffersList = null;
   #datepickrFrom = null;
@@ -256,7 +245,6 @@ export default class EditPointView extends AbstractStatefulView {
   constructor({
     point,
     isNewPoint,
-    isOptionsLoaded,
     isSaving,
     isDeleting,
     isDisabled,
@@ -274,7 +262,6 @@ export default class EditPointView extends AbstractStatefulView {
     const convertedData = EditPointView.convertDataToState({
       ...point,
       isNewPoint,
-      isOptionsLoaded,
       isDisabled,
       isSaving,
       isDeleting,
@@ -285,7 +272,6 @@ export default class EditPointView extends AbstractStatefulView {
     this._setState(convertedData);
     this.#point = point;
     this.#isNewPoint = isNewPoint;
-    this.#isOptionsLoaded = isOptionsLoaded;
     this.#destinationsList = destinationsList;
     this.#typedOffersList = typedOffersList;
 
@@ -311,10 +297,6 @@ export default class EditPointView extends AbstractStatefulView {
       this.element
         .querySelector(CSSClasses.ROLLUP_BTN)
         .addEventListener('click', this.#pointCancelEditHandler);
-    }
-
-    if(!this.#isOptionsLoaded) {
-      return;
     }
 
     this.element
@@ -373,7 +355,7 @@ export default class EditPointView extends AbstractStatefulView {
     const dateStartElem = this.element.querySelector(CSSIDs.DATE_TIME_START);
 
     this.#datepickrFrom = flatpickr(dateStartElem, {
-      ...FLATPIKR_SETTINGS,
+      ...FlatpickrSettings,
       onChange: this.#dateFromChangeHandler
     });
   }
@@ -382,14 +364,14 @@ export default class EditPointView extends AbstractStatefulView {
     this.#resetDatepickrTo();
     const dateEndElem = this.element.querySelector(CSSIDs.DATE_TIME_END);
 
-    const parsedDateTo = dayjs(this._state.dateTo, DateFormats.CHOSED_DATE);
-    const parsetInitialDate = dayjs(initialDate, DateFormats.CHOSED_DATE);
+    const parsedDateTo = dayjs(this._state.dateTo, DatesFormat.CHOSED_DATE);
+    const parsetInitialDate = dayjs(initialDate, DatesFormat.CHOSED_DATE);
     const isSameOrAfter = parsetInitialDate.isSameOrAfter(parsedDateTo);
 
     const defaultDateFrom = (isSameOrAfter) ? this._state.dateFrom : this._state.dateTo;
 
     this.#datepickrTo = flatpickr(dateEndElem, {
-      ...FLATPIKR_SETTINGS,
+      ...FlatpickrSettings,
       defaultDate: defaultDateFrom,
       minDate: defaultDateFrom,
       onChange: this.#dateToChangeHandler
@@ -512,14 +494,13 @@ export default class EditPointView extends AbstractStatefulView {
     dates,
     isFavorite,
     isNewPoint,
-    isOptionsLoaded,
     isSaving,
     isDeleting,
     isDisabled,
   }) {
 
-    const dateFrom = dates?.start ? dayjs(dates.start, DateFormats.CHOSED_DATE).format(DateFormats.CHOSED_DATE) : '';
-    const dateTo = dates?.end ? dayjs(dates.end, DateFormats.CHOSED_DATE).format(DateFormats.CHOSED_DATE) : '';
+    const dateFrom = dates?.start ? dayjs(dates.start, DatesFormat.CHOSED_DATE).format(DatesFormat.CHOSED_DATE) : '';
+    const dateTo = dates?.end ? dayjs(dates.end, DatesFormat.CHOSED_DATE).format(DatesFormat.CHOSED_DATE) : '';
 
     return {
       type,
@@ -532,7 +513,6 @@ export default class EditPointView extends AbstractStatefulView {
       destination: findObjectByID(destination, destinationsList) || '',
       isFavorite,
       isNewPoint,
-      isOptionsLoaded,
       isSaving,
       isDeleting,
       isDisabled,

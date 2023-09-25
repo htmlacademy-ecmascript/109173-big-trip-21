@@ -8,7 +8,7 @@ export default class TripPointPresenter {
   #pointsContainer = null;
   #destinationsList = null;
 
-  #offersModel = null;
+  #getOffersByType = null;
 
   #pointComponent = null;
   #editPointComponent = null;
@@ -18,7 +18,6 @@ export default class TripPointPresenter {
 
   #isNewPoint = false;
   #isEditing = false;
-  #isOptionsLoaded = null;
 
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
@@ -29,31 +28,29 @@ export default class TripPointPresenter {
     point,
     container,
     destinationsList,
-    offersModel,
+    getOffersByType,
     onChangeCallback,
     onBeforeEditCallback,
     setBoardMode,
     getBoardMode,
     isNewPoint,
-    isOptionsLoaded,
   }) {
     this.#point = point;
     this.#pointsContainer = container;
     this.#destinationsList = destinationsList;
-    this.#offersModel = offersModel;
+    this.#getOffersByType = getOffersByType;
     this.#onChangeCallback = onChangeCallback;
     this.#onBeforeEditCallback = onBeforeEditCallback;
     this.#setBoardMode = setBoardMode;
     this.#getBoardMode = getBoardMode;
     this.#isNewPoint = isNewPoint;
-    this.#isOptionsLoaded = isOptionsLoaded;
   }
 
   init(point = this.#point) {
     const pointData = {
       point,
       destinationsList: [...this.#destinationsList],
-      typedOffersList: [...this.#offersModel.getByPointType(point.type)],
+      typedOffersList: [...this.#getOffersByType(point.type)],
     };
 
     // Компоненты предыдущей точки маршрута
@@ -70,7 +67,6 @@ export default class TripPointPresenter {
     this.#editPointComponent = new EditPointView({
       ...pointData,
       isNewPoint: this.#isNewPoint,
-      isOptionsLoaded: this.#isOptionsLoaded ,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
       onDestinationChangeCallback: this.#pointDestinationChangeHandler,
       onSubmitCallback: this.#pointSubmitHandler,

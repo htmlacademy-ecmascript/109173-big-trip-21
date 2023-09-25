@@ -1,4 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
+import { TripBoardMode } from '../utils/const.js';
 import { FilterType } from '../utils/filter.js';
 
 const MessageText = {
@@ -10,15 +11,24 @@ const MessageText = {
   [FilterType.FUTURE]: 'There are no future events now'
 };
 
-function getTripEventsListEmptyTemplate({ currentFilter, isDataLoadingFailed }) {
+function getTripEventsListEmptyTemplate({ currentFilter, boardMode }) {
   let eventMessage = '';
 
-  if(isDataLoadingFailed) {
-    eventMessage = MessageText.LOADING_FAILED;
-  } else {
-    eventMessage = MessageText[currentFilter] || MessageText.LOADING;
-  }
+  switch(boardMode) {
+    case TripBoardMode.LOADING_FAILED: {
+      eventMessage = MessageText.LOADING_FAILED;
+      break;
+    }
 
+    case TripBoardMode.LOADING: {
+      eventMessage = MessageText.LOADING;
+      break;
+    }
+
+    default: {
+      eventMessage = MessageText[currentFilter];
+    }
+  }
 
   return `<p class="trip-events__msg">${eventMessage}</p>`;
 }
@@ -29,19 +39,19 @@ function getTripEventsListEmptyTemplate({ currentFilter, isDataLoadingFailed }) 
  */
 export default class TripEventsListEmptyView extends AbstractView {
   #currentFilter = null;
-  #isDataLoadingFailed = null;
+  #boardMode = null;
 
-  constructor({ currentFilter, isDataLoadingFailed }) {
+  constructor({ currentFilter, boardMode }) {
     super();
 
     this.#currentFilter = currentFilter;
-    this.#isDataLoadingFailed = isDataLoadingFailed;
+    this.#boardMode = boardMode;
   }
 
   get template() {
     return getTripEventsListEmptyTemplate({
       currentFilter: this.#currentFilter,
-      isDataLoadingFailed: this.#isDataLoadingFailed,
+      boardMode: this.#boardMode,
     });
   }
 }

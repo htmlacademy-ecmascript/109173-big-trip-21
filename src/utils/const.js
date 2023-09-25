@@ -1,11 +1,8 @@
 const END_POINT = 'https://21.objects.pages.academy/big-trip';
 const AUTH_TOKEN = 'Basic 44b7-b4ca-e34f0eb25871';
-const TRIP_EVENTS_LIST_TEMPLATE = '<ul class="trip-events__list"></ul>';
-const TRIP_INFO_TEMPLATE = '<section class="trip-main__trip-info  trip-info"></section>';
 const POINT_TYPES = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
-const DEFAULT_POINT_TYPE = 'flight';
 const BLANK_POINT = {
-  type: DEFAULT_POINT_TYPE,
+  type: POINT_TYPES[0].toLowerCase(),
   destination: '',
   dates: {
     start: '',
@@ -15,7 +12,7 @@ const BLANK_POINT = {
   cost: 0,
   isFavorite: false,
 };
-const DateFormats = {
+const DatesFormat = {
   FLATPICKR: 'd/m/y H:i', // Для Флэтпикера
   DATE_TIME: 'YYYY-MM-DD[T]hh:mm', // Для тега datetime
   PATH: 'DD/MM/YY',
@@ -29,9 +26,9 @@ const DateFormats = {
   LESS_THAN_DAY: 'HH mm', // Менее суток
   MORE_THAN_DAY: 'DD HH mm' // Более суток
 };
-const FLATPIKR_SETTINGS = {
+const FlatpickrSettings = {
   enableTime: true,
-  dateFormat: DateFormats.FLATPICKR,
+  dateFormat: DatesFormat.FLATPICKR,
   minuteIncrement: 1,
   'time_24hr': true,
 };
@@ -75,15 +72,13 @@ const TimeLimit = {
 };
 
 export {
-  TRIP_EVENTS_LIST_TEMPLATE,
-  TRIP_INFO_TEMPLATE,
   END_POINT,
   AUTH_TOKEN,
   POINT_TYPES,
   BLANK_POINT,
-  FLATPIKR_SETTINGS,
+  FlatpickrSettings,
   ApiUrl,
-  DateFormats,
+  DatesFormat,
   ActionType,
   UpdateType,
   TripBoardMode,
