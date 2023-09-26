@@ -4,15 +4,25 @@ import { POINT_TYPES, FLATPIKR_SETTINGS, DateFormats } from '../utils/const.js';
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
-
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(customParseFormat);
-
+const PRICE_MIN_VALUE = 1;
 const OPTIONS_LOADING_FAILED_MESSAGE = 'Sorry... Destinations/Offers wasn`t loaded fully.<br> Please, reload this page or try again later.';
-
-const AbortBtnText = {CANCEL: 'Cancel', DELETE: 'Delete'};
+const PlaceholderText = {
+  DESTINATION: 'Destination name',
+  PRICE: 'Price',
+  DATE_FROM: 'Date from',
+  DATE_TO: 'Date to'
+};
+const BtnText = {
+  CANCEL: 'Cancel',
+  SAVE: 'Save',
+  SAVING: 'Saving...',
+  DELETE: 'Delete',
+  DELETING: 'Deleting...'
+};
 
 const CSSIDs = {
   DEFAULT_POINT_TYPE: '#event-type-toggle-1',
@@ -89,13 +99,18 @@ function createEditPointTemplate({
   isHasDestination,
   isNewPoint,
   isOptionsLoaded,
+  isSaving,
+  isDeleting,
+  isDisabled,
 }) {
   const eventTypeTemplate = createEventTypeTemplate(type);
   const offersTemplate = isTypeHasOffers ? createOffersTemplate(offers, typedOffersList) : '';
   const destinationsTemplate = createDestinationsTemplate(destinationsList);
   const photosTemplate = destination?.pictures ? createPhotosTemplate(destination.pictures) : '';
-  const abortBtnText = isNewPoint ? AbortBtnText.CANCEL : AbortBtnText.DELETE;
-  const disabledState = !isOptionsLoaded ? 'disabled' : '';
+  const disabledState = (!isOptionsLoaded || isDisabled) ? 'disabled' : '';
+  const saveBtnText = (isSaving) ? BtnText.SAVING : BtnText.SAVE;
+  const abortBtnDefaultText = (isNewPoint) ? BtnText.CANCEL : BtnText.DELETE;
+  const abortBtnText = (isDeleting) ? BtnText.DELETING : abortBtnDefaultText;
 
   return /*html*/`
     <li class="trip-events__item">
@@ -118,9 +133,7 @@ function createEditPointTemplate({
           </div>
 
           <div class="event__field-group  event__field-group--destination">
-            <label class="event__label  event__type-output" for="event-destination-1">
-              ${type}
-            </label>
+            <label class="event__label  event__type-output" for="event-destination-1">${type}</label>
             <input
               class="event__input  event__input--destination"
               id="event-destination-1"
@@ -128,19 +141,34 @@ function createEditPointTemplate({
               name="event-destination"
               value="${destination ? destination.name : ''}"
               list="destination-list-1"
+              placeholder="${PlaceholderText.DESTINATION}"
+              required
               ${disabledState}
             >
-            <datalist id="destination-list-1">
-              ${destinationsTemplate}
-            </datalist>
+            <datalist id="destination-list-1">${destinationsTemplate}</datalist>
           </div>
 
           <div class="event__field-group  event__field-group--time">
             <label class="visually-hidden" for="event-start-time-1">From</label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom}" ${disabledState}>
+            <input
+              class="event__input  event__input--time"
+              id="event-start-time-1"
+              type="text"
+              name="event-start-time"
+              value="${dateFrom}"
+              placeholder="${PlaceholderText.DATE_FROM}"
+              ${disabledState}
+            >
             &mdash;
             <label class="visually-hidden" for="event-end-time-1">To</label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo}" ${disabledState}>
+            <input
+              class="event__input  event__input--time"
+              id="event-end-time-1"
+              type="text" name="event-end-time"
+              value="${dateTo}"
+              placeholder="${PlaceholderText.DATE_TO}"
+              ${disabledState}
+            >
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -148,10 +176,20 @@ function createEditPointTemplate({
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${cost}" ${disabledState}>
+            <input
+              class="event__input  event__input--price"
+              id="event-price-1"
+              type="number"
+              name="event-price"
+              value="${cost}"
+              placeholder="${PlaceholderText.PRICE}"
+              min="${PRICE_MIN_VALUE}"
+              required
+              ${disabledState}
+            >
           </div>
 
-          <button class="event__save-btn  btn  btn--blue" type="submit" ${disabledState}>Save</button>
+          <button class="event__save-btn  btn  btn--blue" type="submit" ${disabledState}>${saveBtnText}</button>
           <button class="event__reset-btn" type="reset" ${(!isNewPoint) ? disabledState : ''}>${abortBtnText}</button>
           ${!isNewPoint ? /*html*/`
             <button class="event__rollup-btn" type="button">
@@ -200,10 +238,9 @@ export default class EditPointView extends AbstractStatefulView {
   #datepickrFrom = null;
   #datepickrTo = null;
 
+  #validator = null;
   #onTypeChangeCallback = null;
   #onDestinationChangeCallback = null;
-  #onDateChangeCallback = null;
-  #onPriceChangeCallback = null;
   #onSubmitCallback = null;
   #onCancelEditCallback = null;
   #onDeletePointCallback = null;
@@ -216,12 +253,14 @@ export default class EditPointView extends AbstractStatefulView {
     point,
     isNewPoint,
     isOptionsLoaded,
+    isSaving,
+    isDeleting,
+    isDisabled,
     destinationsList,
     typedOffersList,
+
     onTypeChangeCallback,
     onDestinationChangeCallback,
-    onDateChangeCallback,
-    onPriceChangeCallback,
     onSubmitCallback,
     onCancelEditCallback,
     onDeletePointCallback
@@ -232,6 +271,9 @@ export default class EditPointView extends AbstractStatefulView {
       ...point,
       isNewPoint,
       isOptionsLoaded,
+      isDisabled,
+      isSaving,
+      isDeleting,
       destinationsList,
       typedOffersList
     });
@@ -245,8 +287,6 @@ export default class EditPointView extends AbstractStatefulView {
 
     this.#onTypeChangeCallback = onTypeChangeCallback;
     this.#onDestinationChangeCallback = onDestinationChangeCallback;
-    this.#onDateChangeCallback = onDateChangeCallback;
-    this.#onPriceChangeCallback = onPriceChangeCallback;
     this.#onSubmitCallback = onSubmitCallback;
     this.#onCancelEditCallback = onCancelEditCallback;
     this.#onDeletePointCallback = onDeletePointCallback;
@@ -301,11 +341,8 @@ export default class EditPointView extends AbstractStatefulView {
   removeElement() {
     super.removeElement();
 
-    this.#datepickrFrom?.destroy();
-    this.#datepickrTo?.destroy();
-
-    this.#datepickrFrom = null;
-    this.#datepickrTo = null;
+    this. #resetDatepickrFrom();
+    this. #resetDatepickrTo();
   }
 
   #updateStateView(data, callback) {
@@ -322,20 +359,46 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   #initDatepickr() {
-    const defaultDateFrom = this._state.dateFrom;
+    this.#reInitDatepickrFrom();
+    this.#reInitDatepickrTo();
+  }
+
+  #reInitDatepickrFrom() {
+    this.#resetDatepickrFrom();
     const dateStartElem = this.element.querySelector(CSSIDs.DATE_TIME_START);
-    const dateEndElem = this.element.querySelector(CSSIDs.DATE_TIME_END);
 
     this.#datepickrFrom = flatpickr(dateStartElem, {
       ...FLATPIKR_SETTINGS,
       onChange: this.#dateFromChangeHandler
     });
+  }
+
+  #reInitDatepickrTo(initialDate) {
+    this.#resetDatepickrTo();
+    const dateEndElem = this.element.querySelector(CSSIDs.DATE_TIME_END);
+
+    const parsedDateTo = dayjs(this._state.dateTo, DateFormats.CHOSED_DATE);
+    const parsetInitialDate = dayjs(initialDate, DateFormats.CHOSED_DATE);
+    const isSameOrAfter = parsetInitialDate.isSameOrAfter(parsedDateTo);
+
+    const defaultDateFrom = (isSameOrAfter) ? this._state.dateFrom : this._state.dateTo;
 
     this.#datepickrTo = flatpickr(dateEndElem, {
       ...FLATPIKR_SETTINGS,
+      defaultDate: defaultDateFrom,
       minDate: defaultDateFrom,
       onChange: this.#dateToChangeHandler
     });
+  }
+
+  #resetDatepickrFrom() {
+    this.#datepickrFrom?.destroy();
+    this.#datepickrFrom = null;
+  }
+
+  #resetDatepickrTo() {
+    this.#datepickrTo?.destroy();
+    this.#datepickrTo = null;
   }
 
   /** Обработчики */
@@ -357,12 +420,11 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #dateFromChangeHandler = (_, dateStr) => {
-    this.updateElement({ dateFrom: dateStr });
+    this._setState({ dateFrom: dateStr });
+    this.#reInitDatepickrTo(this._state.dateFrom);
   };
 
-  #dateToChangeHandler = (_, dateStr) => {
-    this.updateElement({ dateTo: dateStr });
-  };
+  #dateToChangeHandler = (_, dateStr) => this._setState({ dateTo: dateStr });
 
   #pointDestinationChangeHandler = (evt) => {
     const target = evt.target;
@@ -395,7 +457,8 @@ export default class EditPointView extends AbstractStatefulView {
 
   #pointPriceChangeHandler = (evt) => {
     const target = evt.target;
-    const newPrice = !removeChars(target.value) ? 0 : Number(target.value);
+    const normillizedPrice = removeChars(target.value);
+    const newPrice = (!normillizedPrice || normillizedPrice <= 0) ? 1 : Number(target.value);
 
     this.updateElement({ cost: newPrice });
   };
@@ -431,6 +494,7 @@ export default class EditPointView extends AbstractStatefulView {
 
   #pointCancelAddHandler = () => this.#onCancelEditCallback?.(this.#point);
 
+  // TODO: Попробовать отрефакторить эти методы более презентабельно
   static convertDataToState({
     type,
     cost,
@@ -442,6 +506,9 @@ export default class EditPointView extends AbstractStatefulView {
     isFavorite,
     isNewPoint,
     isOptionsLoaded,
+    isSaving,
+    isDeleting,
+    isDisabled,
   }) {
 
     const dateFrom = dates?.start ? dayjs(dates.start, DateFormats.CHOSED_DATE).format(DateFormats.CHOSED_DATE) : '';
@@ -461,11 +528,13 @@ export default class EditPointView extends AbstractStatefulView {
       isFavorite,
       isNewPoint,
       isOptionsLoaded,
+      isSaving,
+      isDeleting,
+      isDisabled,
     };
   }
 
   static convertStateToData({
-    id,
     type,
     cost,
     destination,
@@ -476,7 +545,6 @@ export default class EditPointView extends AbstractStatefulView {
   }) {
 
     return {
-      id,
       type,
       cost,
       destination: destination?.id || '',

@@ -1,6 +1,6 @@
 import Adapter from './adapter.js';
 import ApiService from './framework/api-service.js';
-import { API_URL, AUTH_TOKEN, END_POINT, Method } from './utils/const.js';
+import { ApiUrl, AUTH_TOKEN, END_POINT, Method } from './utils/const.js';
 
 
 export default class PointsApiService extends ApiService {
@@ -9,19 +9,51 @@ export default class PointsApiService extends ApiService {
   }
 
   get points() {
-    return this._load({ url: API_URL.POINTS })
+    return this._load({ url: ApiUrl.POINTS })
       .then(ApiService.parseResponse);
   }
 
   async updatePoint(updatedPoint) {
-    const adaptedPoint = Adapter.adaptPointToServer(updatedPoint);
-    const response = await this._load({
-      url: `${API_URL.POINTS}/${updatedPoint.id}`,
-      method: Method.PUT,
-      body: JSON.stringify(adaptedPoint),
-      headers: new Headers({'Content-Type': 'application/json'}),
+    return await this.#sendResponse({
+      point: updatedPoint,
+      uri: updatedPoint.id,
+      method: Method.PUT
     });
-    const parsedResponse = await ApiService.parseResponse(response);
+  }
+
+  async addPoint(newPoint) {
+    return await this.#sendResponse({
+      point: newPoint,
+      method: Method.POST
+    });
+  }
+
+  async deletePoint(deletingPoint) {
+    return await this.#sendResponse({
+      point: deletingPoint,
+      method: Method.DELETE
+    });
+  }
+
+  async #sendResponse({ point, uri = '', method }) {
+    let data = null;
+
+    if(method === Method.DELETE) {
+      data = { url: `${ApiUrl.POINTS}/${point.id}`, method };
+    } else {
+      const sendingPoint = Adapter.pointToServer(point);
+
+      data = {
+        url: `${ApiUrl.POINTS}/${uri}`,
+        method,
+        body: JSON.stringify(sendingPoint),
+        headers: new Headers({'Content-type': 'application/json'})
+      };
+    }
+    const responce = await this._load(data);
+    const parsedResponse = (method === Method.DELETE)
+      ? responce
+      : await ApiService.parseResponse(responce);
 
     return parsedResponse;
   }

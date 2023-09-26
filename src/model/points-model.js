@@ -3,8 +3,11 @@ import Adapter from '../adapter.js';
 import Observable from '../framework/observable.js';
 import { UpdateType } from '../utils/const.js';
 
-const ERROR = {
-  UPDATE: 'Can`t update point'
+const ErrorText = {
+  ADD: 'Can`t add new point',
+  UPDATE: 'Can`t update this point',
+  DELETE: 'Can`t delete this point',
+  UNEXIST: 'Can`t delete unexisting point',
 };
 export default class PointsModel extends Observable {
   #points = [];
@@ -34,7 +37,7 @@ export default class PointsModel extends Observable {
       await this.#offersModel.init();
 
       const points = await this.#pointsApiService.points;
-      this.#points = points.map(Adapter.adaptPointToClient);
+      this.#points = points.map(Adapter.pointToClient);
     } catch(err) {
       this.#points = [];
     }
@@ -45,28 +48,45 @@ export default class PointsModel extends Observable {
   async updatePoint(updateType, update) {
     try {
       const response = await this.#pointsApiService.updatePoint(update);
-      const updatedPoint = Adapter.adaptPointToClient(response);
+      const updatedPoint = Adapter.pointToClient(response);
 
       this.#points = this.#points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
       this._notify(updateType, updatedPoint);
     } catch(err) {
-      throw new Error(ERROR.UPDATE);
+      throw new Error(ErrorText.UPDATE);
     }
   }
 
-  addPoint(updateType, newPoint) {
-    this.#points.push({ ...newPoint, id: crypto.randomUUID() });
-    this._notify(updateType, newPoint);
+  async addPoint(updateType, update) {
+    try {
+      const response = await this.#pointsApiService.addPoint(update);
+      const addedPoint = Adapter.pointToClient(response);
+
+      this.#points.push({ ...addedPoint});
+      this._notify(updateType, addedPoint);
+    } catch(err) {
+      throw new Error(ErrorText.ADD);
+    }
   }
 
-  deletePoint(updateType, deletedPoint) {
+  async deletePoint(updateType, deletedPoint) {
     const index = this.#points.findIndex((point) => point.id === deletedPoint.id);
 
-    this.#points = [
-      ...this.#points.slice(0, index),
-      ...this.#points.slice(index + 1)
-    ];
+    if(index === -1) {
+      throw new Error(ErrorText.UNEXIST);
+    }
 
-    this._notify(updateType, { remainingPointsCount: this.#points.length });
+    try {
+      await this.#pointsApiService.deletePoint(deletedPoint);
+
+      this.#points = [
+        ...this.#points.slice(0, index),
+        ...this.#points.slice(index + 1)
+      ];
+
+      this._notify(updateType, { remainingPointsCount: this.#points.length });
+    } catch(err) {
+      throw new Error(ErrorText.DELETE);
+    }
   }
 }

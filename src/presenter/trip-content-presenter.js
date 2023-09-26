@@ -1,4 +1,6 @@
 import { render, remove, RenderPosition } from '../framework/render.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+import { TimeLimit } from '../utils/const.js';
 import { FilterType, filters } from '../utils/filter.js';
 import { findObjectByID } from '../utils/utils.js';
 import { SortType, sorts } from '../utils/sort.js';
@@ -16,12 +18,12 @@ import TripEventsListEmptyView from '../view/trip-events-list-empty-view.js';
 export default class TripContentPresenter {
   #mainHeaderContainer = null;
   #tripInfoContainer = null;
-  #tripInfoComponent = null;
-  #addNewPointBtnComponent = null;
-  #priceComponent = null;
   #tripEventsContainer = null;
   #tripEventsListContainer = null;
 
+  #tripInfoComponent = null;
+  #addNewPointBtnComponent = null;
+  #priceComponent = null;
   #sortComponent = null;
   #noPointsComponent = null;
 
@@ -34,6 +36,10 @@ export default class TripContentPresenter {
   #pointPresenters = new Map();
 
   #currentTripBoardMode = TripBoardMode.LOADING;
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER,
+    upperLimit: TimeLimit.UPPER,
+  });
 
   constructor({
     mainHeaderContainer,
@@ -118,7 +124,9 @@ export default class TripContentPresenter {
   }
 
   #renderNoPoints() {
-    const currentFilter = (this.#getBoardMode() !== TripBoardMode.LOADING) ? this.#filterModel.filter : null;
+    const currentFilter = (this.#getBoardMode() !== TripBoardMode.LOADING)
+      ? this.#filterModel.filter
+      : null;
     this.#noPointsComponent = new TripEventsListEmptyView({ currentFilter });
     render(this.#noPointsComponent, this.#tripEventsListContainer.element);
   }
@@ -152,12 +160,15 @@ export default class TripContentPresenter {
   }
 
   #getCurrentPrice() {
+    /* Берем точки напрямую из модели, чтобы немного оптимизаровать производительность
+    и не сортировать их лишний раз т.к. нам для подсчета цены, по сути, без разницы,
+    отсортированы точки или нет */
     return [...this.#pointsModel.points].reduce((accumulator, point) => {
-      let totalPointOffersPrice = 0;
-      const pointOffers = this.#offersModel.getOffersByPointType(point.type);
+      let offersTotalPrice = 0;
+      const pointOffers = this.#offersModel.getByPointType(point.type);
 
       if(pointOffers.length) {
-        totalPointOffersPrice = pointOffers.reduce((offersPrice, offer) => {
+        offersTotalPrice = pointOffers.reduce((offersPrice, offer) => {
           if(point.offers.has(offer.id)) {
             return offersPrice + offer.price;
           }
@@ -166,12 +177,12 @@ export default class TripContentPresenter {
         }, 0);
       }
 
-      return accumulator + Number(point.cost + totalPointOffersPrice);
+      return accumulator + Number(point.cost + offersTotalPrice);
     }, 0);
   }
 
   #getPointsInfo() {
-    return [...this.#pointsModel.points].map(({ destination, dates }) => {
+    return [...this.points].map(({ destination, dates }) => {
       const destinationInfo = findObjectByID(destination, this.#destinationsModel.destinations)?.name;
       return {
         destination: destinationInfo,
@@ -213,7 +224,9 @@ export default class TripContentPresenter {
   /**
    * Вью с моделью взаимодействует только через данный метод
    */
-  #viewChangeHandler = (actionType, updateType, data) => {
+  #viewChangeHandler = async (actionType, updateType, data) => {
+    this.#uiBlocker.block();
+
     switch(actionType) {
       case ActionType.CREATE_POINT: {
         // Создание точки без добавления в модель (например, при клике на кнопку + New event)
@@ -232,20 +245,37 @@ export default class TripContentPresenter {
       }
 
       case ActionType.ADD_POINT: {
-        this.#pointsModel.addPoint(updateType, data);
+        this.#pointPresenters.get(data.id).setSavingState();
+        try {
+          await this.#pointsModel.addPoint(updateType, data);
+        } catch(err) {
+          this.#pointPresenters.get(data.id).setErrorState();
+        }
         break;
       }
 
       case ActionType.UPDATE_POINT: {
-        this.#pointsModel.updatePoint(updateType, data);
+        this.#pointPresenters.get(data.id).setSavingState();
+        try {
+          await this.#pointsModel.updatePoint(updateType, data);
+        } catch(err) {
+          this.#pointPresenters.get(data.id).setErrorState();
+        }
         break;
       }
 
       case ActionType.DELETE_POINT: {
-        this.#pointsModel.deletePoint(updateType, data);
+        this.#pointPresenters.get(data.id).setDeletingState();
+        try {
+          await this.#pointsModel.deletePoint(updateType, data);
+        } catch(err) {
+          this.#pointPresenters.get(data.id).setErrorState();
+        }
         break;
       }
     }
+
+    this.#uiBlocker.unblock();
   };
 
   // Отслеживание изменения данных на сервере
@@ -257,11 +287,13 @@ export default class TripContentPresenter {
       }
 
       case UpdateType.MINOR: {
+        this.#setBoardMode(TripBoardMode.DEFAULT);
         this.#reRenderTripBoard();
         break;
       }
 
       case UpdateType.MAJOR: {
+        this.#setBoardMode(TripBoardMode.DEFAULT);
         this.#reRenderHeader();
         this.#reRenderTripBoard();
         break;

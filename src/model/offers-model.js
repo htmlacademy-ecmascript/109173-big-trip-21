@@ -16,7 +16,7 @@ export default class OffersModel {
     }
   }
 
-  getOffersByPointType(type) {
+  getByPointType(type) {
     let typedOffers = null;
 
     if(this.#offers.length) {

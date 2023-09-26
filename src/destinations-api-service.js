@@ -1,5 +1,5 @@
 import ApiService from './framework/api-service.js';
-import { API_URL, AUTH_TOKEN, END_POINT } from './utils/const.js';
+import { ApiUrl, AUTH_TOKEN, END_POINT } from './utils/const.js';
 
 
 export default class DestinationsApiService extends ApiService {
@@ -8,7 +8,7 @@ export default class DestinationsApiService extends ApiService {
   }
 
   get destinations() {
-    return this._load({ url: API_URL.DESTINATIONS })
+    return this._load({ url: ApiUrl.DESTINATIONS })
       .then(ApiService.parseResponse);
   }
 }

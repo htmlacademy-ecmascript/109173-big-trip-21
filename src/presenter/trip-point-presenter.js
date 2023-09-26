@@ -3,7 +3,6 @@ import { isEscKey } from '../utils/utils.js';
 import { ActionType, TripBoardMode, UpdateType } from '../utils/const.js';
 import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
-
 export default class TripPointPresenter {
   #point = null;
   #pointDefaultState = null;
@@ -25,6 +24,7 @@ export default class TripPointPresenter {
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
   #setBoardMode = null;
+  #validator = null;
 
   constructor({
     point,
@@ -56,7 +56,7 @@ export default class TripPointPresenter {
     const pointData = {
       point,
       destinationsList: this.#destinationsList,
-      typedOffersList: this.#offersModel.getOffersByPointType(point.type),
+      typedOffersList: this.#offersModel.getByPointType(point.type),
     };
 
     // Компоненты предыдущей точки маршрута
@@ -76,8 +76,6 @@ export default class TripPointPresenter {
       isOptionsLoaded: this.#isOptionsLoaded ,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
       onDestinationChangeCallback: this.#pointDestinationChangeHandler,
-      onDateChangeCallback: this.#pointDateChangeHandler,
-      onPriceChangeCallback: this.#pointPriceChangeCallback,
       onSubmitCallback: this.#pointSubmitHandler,
       onDeletePointCallback: this.#pointDeleteHandler,
       onCancelEditCallback: this.#pointCancelEditHandler
@@ -111,6 +109,35 @@ export default class TripPointPresenter {
     this.#removeKeyDownHandler();
   }
 
+  setSavingState() {
+    this.#editPointComponent
+      .updateElement({
+        isSaving: true,
+        isDisabled: true,
+      });
+  }
+
+  setDeletingState() {
+    this.#editPointComponent
+      .updateElement({
+        isDeleting: true,
+        isDisabled: true,
+      });
+  }
+
+  setErrorState() {
+    const onErrorStateCallback = () => {
+      this.#editPointComponent
+        .updateElement({
+          isSaving: false,
+          isDeleting: false,
+          isDisabled: false,
+        });
+    };
+
+    this.#editPointComponent.shake(onErrorStateCallback);
+  }
+
   #renderPoint() {
     const renderPosition = this.#isNewPoint ? RenderPosition.AFTERBEGIN : RenderPosition.BEFOREEND;
 
@@ -141,7 +168,9 @@ export default class TripPointPresenter {
 
   #replacePointToForm() {
     this.#onBeforeEditCallback();
+
     replace(this.#editPointComponent, this.#pointComponent);
+
     this.#setKeyDownHandler();
     this.#isEditing = true;
 
@@ -200,12 +229,6 @@ export default class TripPointPresenter {
     this.#setKeyDownHandler();
   };
 
-  #pointDateChangeHandler = (pointWithNewDates) => this.#updateView(pointWithNewDates);
-  #pointPriceChangeCallback = (pointWithNewPrice) => {
-    this.#updateView(pointWithNewPrice);
-    this.#setKeyDownHandler();
-  };
-
   #favoriteToggleHandler = (isFavorite) => {
     this.#point.isFavorite = isFavorite;
     this.#pointDefaultState.isFavorite = isFavorite;
@@ -219,16 +242,10 @@ export default class TripPointPresenter {
   #pointSubmitHandler = (point) => {
     const actionType = this.#isNewPoint ? ActionType.ADD_POINT : ActionType.UPDATE_POINT;
 
+    point.cost = (point.cost <= 0) ? 1 : point.cost;
+
     this.#pointDefaultState = null;
     this.#onChangeCallback(actionType, UpdateType.MAJOR, point);
-    /**
-     *  т.к. при обновлении точки список перерисовывается,
-     * нет смысла скрывать форму редактирования вручную + так
-     * мы можем в дальнейшем заблокировать эту форму на время отправки
-     * данных на сервер, тем самым показывая пользователю, что данные
-     * действительно отправляются на сервер
-     */
-    // this.#replaceFormToPoint();
   };
 
   #pointDeleteHandler = (deletedPoint) => {
@@ -237,6 +254,5 @@ export default class TripPointPresenter {
       UpdateType.MAJOR,
       deletedPoint,
     );
-    this.#replaceFormToPoint();
   };
 }

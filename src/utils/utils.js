@@ -91,12 +91,12 @@ function getPadded2ZeroNum(num) {
   return String(num).padStart(2, 0);
 }
 
-function findObjectByID(id, obj) {
-  if(typeof obj !== 'object') {
+function findObjectByID(id, objectsList) {
+  if(typeof objectsList !== 'object') {
     return;
   }
 
-  return obj.find((item) => item.id === id);
+  return objectsList.find((object) => object.id === id);
 }
 
 function removeChars(str) {
