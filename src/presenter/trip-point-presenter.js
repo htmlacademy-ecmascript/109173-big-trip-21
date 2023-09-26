@@ -127,17 +127,18 @@ export default class TripPointPresenter {
       }
 
       default: {
-        const onErrorStateCallback = () => {
-          this.#editPointComponent
-            .updateElement({
-              isSaving: false,
-              isDeleting: false,
-              isDisabled: false,
-            });
-        };
-        this.#editPointComponent.shake(onErrorStateCallback);
+        this.#editPointComponent.shake(this.clearState.bind(this));
       }
     }
+  }
+
+  clearState() {
+    this.#editPointComponent
+      .updateElement({
+        isSaving: false,
+        isDeleting: false,
+        isDisabled: false,
+      });
   }
 
   #renderPoint() {

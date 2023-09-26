@@ -2,6 +2,7 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { findObjectByID, removeChars } from '../utils/utils.js';
 import { POINT_TYPES, FlatpickrSettings, DatesFormat } from '../utils/const.js';
 
+import he from 'he';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import dayjs from 'dayjs';
@@ -140,7 +141,7 @@ function createEditPointTemplate({
               id="event-destination-1"
               type="text"
               name="event-destination"
-              value="${destination ? destination.name : ''}"
+              value="${(destination.name) ? he.encode(destination.name) : ''}"
               list="destination-list-1"
               placeholder="${PlaceholderText.DESTINATION}"
               required
@@ -498,6 +499,8 @@ export default class EditPointView extends AbstractStatefulView {
     const dateFrom = dates?.start ? dayjs(dates.start, DatesFormat.CHOSED_DATE).format(DatesFormat.CHOSED_DATE) : '';
     const dateTo = dates?.end ? dayjs(dates.end, DatesFormat.CHOSED_DATE).format(DatesFormat.CHOSED_DATE) : '';
 
+    destination = findObjectByID(destination, destinationsList) || '';
+
     return {
       type,
       cost,
@@ -506,7 +509,7 @@ export default class EditPointView extends AbstractStatefulView {
       dateTo,
       typedOffersList,
       destinationsList,
-      destination: findObjectByID(destination, destinationsList) || '',
+      destination,
       isFavorite,
       isNewPoint,
       isSaving,
