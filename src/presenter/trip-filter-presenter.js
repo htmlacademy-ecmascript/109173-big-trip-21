@@ -1,6 +1,6 @@
 import TripFilterView from '../view/trip-filter-view.js';
 import { render, replace, remove } from '../framework/render.js';
-import { upperCaseFirst } from '../utils/utils.js';
+import { capitalize } from '../utils/utils.js';
 import { UpdateType } from '../utils/const.js';
 import { FilterType, filters } from '../utils/filter.js';
 
@@ -56,7 +56,6 @@ export default class TripFilterPresenter {
   }
 
   /** Обработчики */
-  // Отслеживание изменения данных на сервере
   #modelChangeHandler = () => this.init();
   #pointsModelChangeHandler = () => this.init();
 
@@ -65,7 +64,7 @@ export default class TripFilterPresenter {
       return;
     }
 
-    const capitalizedFilterName = upperCaseFirst(filterType);
+    const capitalizedFilterName = capitalize(filterType);
 
     this.#filterModel.setFilter(
       UpdateType.MINOR,

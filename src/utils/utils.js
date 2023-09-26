@@ -18,7 +18,6 @@ const TimeInMillis = {
   YEAR: 365 * 86400000, // 31 536 000 000
 };
 
-// v.2 (на нативной функции)
 function getFormattedDateDiff(dateFrom, dateTo) {
   const dateDiff = getDateDiff(dateFrom, dateTo);
   const parsedDate = parseDateFromMillis(dateDiff);
@@ -127,7 +126,7 @@ function isEscKey(evt) {
   return evt.key === 'Escape';
 }
 
-function upperCaseFirst(str) {
+function capitalize(str) {
   return `${str.charAt(0).toUpperCase()}${str.slice(1)}`;
 }
 
@@ -143,7 +142,7 @@ export {
   isFutureDate,
   normalizeDate,
   findObjectByID,
-  upperCaseFirst,
+  capitalize,
   removeChars,
   isEscKey,
   getIDs

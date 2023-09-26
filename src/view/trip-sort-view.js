@@ -8,7 +8,16 @@ function createTripSortItemsTemplate({ sorts, currentSort }) {
 
     return /*html*/`
       <div class="trip-sort__item  trip-sort__item--${loweredSortType}">
-        <input id="sort-${loweredSortType}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" data-sort-type="${sort}" value="sort-${loweredSortType}" ${checkedState} ${disabledState}>
+        <input
+          id="sort-${loweredSortType}"
+          class="trip-sort__input  visually-hidden"
+          type="radio"
+          name="trip-sort"
+          data-sort-type="${sort}"
+          value="sort-${loweredSortType}"
+          ${checkedState}
+          ${disabledState}
+        >
         <label class="trip-sort__btn" for="sort-${loweredSortType}">${sort}</label>
       </div>
     `;
@@ -16,11 +25,15 @@ function createTripSortItemsTemplate({ sorts, currentSort }) {
 }
 
 function createTripSortTemplate({ sorts, currentSort, pointsCount }) {
+  if (pointsCount < 0) {
+    return '';
+  }
+
   const sortItemsTemplate = createTripSortItemsTemplate({ sorts, currentSort });
 
   return /*html*/`
     <form class="trip-events__trip-sort  trip-sort" action="#" method="get">
-      ${pointsCount > 0 ? sortItemsTemplate : ''}
+      ${ sortItemsTemplate }
     </form>`;
 }
 export default class TripSortView extends AbstractView {

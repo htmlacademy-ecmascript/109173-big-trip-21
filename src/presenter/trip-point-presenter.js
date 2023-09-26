@@ -172,7 +172,7 @@ export default class TripPointPresenter {
     this.#onBeforeEditCallback();
 
     replace(this.#editPointComponent, this.#pointComponent);
-
+    this.#setBoardMode(TripBoardMode.EDITING);
     this.#setKeyDownHandler();
     this.#isEditing = true;
 

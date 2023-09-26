@@ -47,9 +47,6 @@ function createTripInfoMainTemplate({ pointsInfo }) {
 
   const pathDateFrom = dayjs(startPoint.dateFrom, DatesFormat.PATH);
   const pathDateTo = dayjs(endPoint.dateTo, DatesFormat.PATH);
-  // const dateToFormat = (pathDateFrom.isSame(pathDateTo, 'year') && pathDateFrom.isSame(pathDateTo, 'month'))
-  //   ? DatesFormat.DAY
-  //   : DatesFormat.FOR_HEAD_DATES;
 
   datesStr = `${normalizeDate(pathDateFrom, DatesFormat.FOR_HEAD_DATES, '...')} &mdash; ${normalizeDate(pathDateTo, DatesFormat.FOR_HEAD_DATES, '...')}`;
 

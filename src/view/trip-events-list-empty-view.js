@@ -33,10 +33,6 @@ function getTripEventsListEmptyTemplate({ currentFilter, boardMode }) {
   return `<p class="trip-events__msg">${eventMessage}</p>`;
 }
 
-/**
- * @param {object} templateData Объект с данными для формирования шаблона
- * @param {string} templateData.filterType Название применяемого фильтра
- */
 export default class TripEventsListEmptyView extends AbstractView {
   #currentFilter = null;
   #boardMode = null;

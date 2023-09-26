@@ -238,10 +238,6 @@ export default class EditPointView extends AbstractStatefulView {
   #onCancelEditCallback = null;
   #onDeletePointCallback = null;
 
-  /**
-   * Создание/Редкатирование точки маршрута
-   * @param {Object} templateData Объект данных для формирования шаблона
-   */
   constructor({
     point,
     isNewPoint,
@@ -439,7 +435,7 @@ export default class EditPointView extends AbstractStatefulView {
       offers.delete(target.dataset.id);
     }
 
-    this.updateElement({ offers });
+    this._setState({ offers });
   };
 
   #pointPriceChangeHandler = (evt) => {
@@ -447,7 +443,7 @@ export default class EditPointView extends AbstractStatefulView {
     const normillizedPrice = removeChars(target.value);
     const newPrice = (!normillizedPrice) ? 0 : Number(target.value);
 
-    this.updateElement({ cost: newPrice });
+    this._setState({ cost: newPrice });
   };
 
   #pointPriceInputHandler = (evt) => {

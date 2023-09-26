@@ -1,9 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import {
-  getFormattedDateDiff,
-  findObjectByID,
-  normalizeDate,
-} from '../utils/utils.js';
+import { getFormattedDateDiff, findObjectByID, normalizeDate } from '../utils/utils.js';
 import { DatesFormat } from '../utils/const.js';
 
 import dayjs from 'dayjs';
@@ -81,7 +77,8 @@ function createTripEventsListTemplate({
           <h4 class="visually-hidden">Offers:</h4>
           <ul class="event__selected-offers">
             ${offersTemplate}
-          </ul>` : ''}
+          </ul>
+        ` : ''}
         <button class="event__favorite-btn ${favoriteBtnActiveClass}" type="button">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">

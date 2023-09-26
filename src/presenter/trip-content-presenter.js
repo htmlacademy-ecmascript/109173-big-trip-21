@@ -74,11 +74,24 @@ export default class TripContentPresenter {
 
   init() {
     this.#renderHeader();
-    // this.#renderTripBoard();
+  }
+
+  setBoardMode(mode) {
+    const modes = Object.values(TripBoardMode);
+
+    if(this.#currentTripBoardMode === mode || !modes.includes(mode)) {
+      return;
+    }
+
+    this.#currentTripBoardMode = mode;
+  }
+
+  getBoardMode() {
+    return this.#currentTripBoardMode;
   }
 
   #renderHeader() {
-    if(this.#getBoardMode() === TripBoardMode.LOADING) {
+    if(this.getBoardMode() === TripBoardMode.LOADING) {
       return;
     }
 
@@ -89,7 +102,7 @@ export default class TripContentPresenter {
     if(this.points.length > 0) {
       this.#tripInfoContainer = new TripInfoView(); // Контейнер для отрисовки информации о маршруте, датах и стоимости путешествия
       this.#tripInfoComponent = new TripInfoMainView({ pointsInfo: this.#getPointsInfo() });
-      this.#priceComponent = new TripInfoPriceView({ price: this.#getCurrentPrice() });
+      this.#priceComponent = new TripInfoPriceView({ price: this.#getTotalPrice() });
 
       render(this.#tripInfoContainer, this.#mainHeaderContainer, RenderPosition.AFTERBEGIN); // Отрисовываем контейнер для общей информации о маршруте
       render(this.#tripInfoComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о маршруте и датах
@@ -101,14 +114,14 @@ export default class TripContentPresenter {
     render(this.#tripEventsListContainer, this.#tripEventsContainer); // Отрисовываем контейнер для точек маршрута
 
     if(this.points.length <= 0) {
-      const boardMode = this.#getBoardMode();
+      const boardMode = this.getBoardMode();
 
       if(boardMode === TripBoardMode.ADDING_NEW_POINT) {
         return;
       }
 
       this.#renderNoPoints({
-        currentFilter: (this.#getBoardMode() === TripBoardMode.LOADING)
+        currentFilter: (this.getBoardMode() === TripBoardMode.LOADING)
           ? null
           : this.#filterModel.filter,
         boardMode
@@ -156,8 +169,8 @@ export default class TripContentPresenter {
       getOffersByType: this.#offersModel.getByPointType.bind(this.#offersModel),
       onChangeCallback: this.#viewChangeHandler,
       onBeforeEditCallback: this.#pointBeforeEditHandler,
-      setBoardMode: this.#setBoardMode.bind(this),
-      getBoardMode: this.#getBoardMode.bind(this),
+      setBoardMode: this.setBoardMode.bind(this),
+      getBoardMode: this.getBoardMode.bind(this),
       isNewPoint,
     });
 
@@ -170,7 +183,7 @@ export default class TripContentPresenter {
     this.#pointPresenters.clear();
   }
 
-  #getCurrentPrice() {
+  #getTotalPrice() {
     /* Берем точки напрямую из модели, чтобы немного оптимизаровать производительность
     и не сортировать их лишний раз т.к. нам для подсчета цены, по сути, без разницы,
     отсортированы точки или нет */
@@ -203,21 +216,6 @@ export default class TripContentPresenter {
     });
   }
 
-  // Используем стрелку для привязки контекста
-  #setBoardMode(mode) {
-    const modes = Object.values(TripBoardMode);
-
-    if(this.#currentTripBoardMode === mode || !modes.includes(mode)) {
-      return;
-    }
-
-    this.#currentTripBoardMode = mode;
-  }
-
-  #getBoardMode() {
-    return this.#currentTripBoardMode;
-  }
-
   #resetFilters({ updateType, resetFilter, resetSort }) {
     if(resetFilter && this.#filterModel.filter !== FilterType.EVERYTHING) {
       this.#filterModel.setFilter(updateType, FilterType.EVERYTHING);
@@ -238,7 +236,7 @@ export default class TripContentPresenter {
         // Создание точки без добавления в модель (например, при клике на кнопку + New event)
         this.#addNewPointBtnComponent.disableBtn();
         this.#resetFilters({ updateType, resetFilter: true, resetSort: true });
-        this.#setBoardMode(TripBoardMode.ADDING_NEW_POINT);
+        this.setBoardMode(TripBoardMode.ADDING_NEW_POINT);
         this.#reRenderTripBoard();
         this.#renderEventPoint();
         break;
@@ -296,26 +294,26 @@ export default class TripContentPresenter {
       }
 
       case UpdateType.MINOR: {
-        this.#setBoardMode(TripBoardMode.DEFAULT);
+        this.setBoardMode(TripBoardMode.DEFAULT);
         this.#reRenderTripBoard();
         break;
       }
 
       case UpdateType.MAJOR: {
-        this.#setBoardMode(TripBoardMode.DEFAULT);
+        this.setBoardMode(TripBoardMode.DEFAULT);
         this.#reRenderHeader();
         this.#reRenderTripBoard();
         break;
       }
 
       case UpdateType.INIT: {
-        this.#setBoardMode(TripBoardMode.LOADING);
+        this.setBoardMode(TripBoardMode.LOADING);
         this.#reRenderTripBoard();
         break;
       }
 
       case UpdateType.INIT_FAILED: {
-        this.#setBoardMode(TripBoardMode.LOADING_FAILED);
+        this.setBoardMode(TripBoardMode.LOADING_FAILED);
         this.#reRenderHeader();
         this.#addNewPointBtnComponent.disableBtn();
         this.#reRenderTripBoard();
@@ -323,7 +321,7 @@ export default class TripContentPresenter {
       }
 
       case UpdateType.INIT_SUCCESS: {
-        this.#setBoardMode(TripBoardMode.DEFAULT);
+        this.setBoardMode(TripBoardMode.DEFAULT);
         this.#reRenderHeader();
         this.#reRenderTripBoard();
         break;
@@ -340,8 +338,8 @@ export default class TripContentPresenter {
       }
     }
 
-    if(this.#getBoardMode() === TripBoardMode.ADDING_NEW_POINT) {
-      this.#setBoardMode(TripBoardMode.DEFAULT);
+    if(this.getBoardMode() === TripBoardMode.ADDING_NEW_POINT) {
+      this.setBoardMode(TripBoardMode.DEFAULT);
       this.#addNewPointBtnComponent.enableBtn();
     }
   };
@@ -354,14 +352,14 @@ export default class TripContentPresenter {
       }
     }
 
-    if(this.#getBoardMode() === TripBoardMode.ADDING_NEW_POINT) {
-      this.#setBoardMode(TripBoardMode.DEFAULT);
+    if(this.getBoardMode() === TripBoardMode.ADDING_NEW_POINT) {
+      this.setBoardMode(TripBoardMode.DEFAULT);
       this.#addNewPointBtnComponent.enableBtn();
     }
   };
 
   #addNewPointBtnClickHandler = () => {
-    if(this.#getBoardMode() === TripBoardMode.ADDING_NEW_POINT) {
+    if(this.getBoardMode() === TripBoardMode.ADDING_NEW_POINT) {
       return;
     }
 
@@ -371,7 +369,7 @@ export default class TripContentPresenter {
   #pointBeforeEditHandler = () => {
     this.#pointPresenters.forEach((pointPresenter) => pointPresenter.reset());
 
-    if(this.#getBoardMode() === TripBoardMode.DEFAULT) {
+    if(this.getBoardMode() === TripBoardMode.DEFAULT) {
       this.#addNewPointBtnComponent.enableBtn();
     }
   };
