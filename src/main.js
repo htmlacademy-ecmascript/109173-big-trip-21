@@ -1,13 +1,11 @@
-// т.к. задание module8-task3 было выполнено ранее. Данный комит просто для сохранение последовательности ДЗ
-// TODO: Нужно ли запрещать отправку формы с пустыми датами? (может блокировать кнопку?)
-import TripFilterPresenter from './presenter/trip-filter-presenter.js';
-import TripSortPresenter from './presenter/trip-sort-presenter.js';
-import TripContentPresenter from './presenter/trip-content-presenter.js';
 import FilterModel from './model/filter-model.js';
 import SortModel from './model/sort-model.js';
 import DestinationsModel from './model/destinations-model.js';
 import OffersModel from './model/offers-model.js';
 import PointsModel from './model/points-model.js';
+import TripFilterPresenter from './presenter/trip-filter-presenter.js';
+import TripSortPresenter from './presenter/trip-sort-presenter.js';
+import TripContentPresenter from './presenter/trip-content-presenter.js';
 
 const CSSClasses = {
   TRIP_MAIN_CONTAINER: '.trip-main',

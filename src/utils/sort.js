@@ -15,18 +15,18 @@ const SortType = Object.freeze({
 
 const sorts = {
   [SortType.DAY]: (points) => [...points].sort((pointA, pointB) => {
-    const pointBDateFrom = dayjs(pointB.dates.start, DatesFormat.CHOSED_DATE);
-    const pointADateFrom = dayjs(pointA.dates.start, DatesFormat.CHOSED_DATE);
+    const pointBDateFrom = dayjs(pointB.dates.start, DatesFormat.CHOSEN_DATE);
+    const pointADateFrom = dayjs(pointA.dates.start, DatesFormat.CHOSEN_DATE);
 
     // return pointBDateFrom - pointADateFrom; // По убыванию (вверху - самая поздняя точка маршрута)
     return pointADateFrom - pointBDateFrom; // По возрастанию (вверху - самая ближайшая точка маршрута)
   }),
   [SortType.EVENT]: null,
   [SortType.TIME]: (points) => [...points].sort((pointA, pointB) => {
-    const pointADateFrom = dayjs(pointA.dates.start, DatesFormat.CHOSED_DATE);
-    const pointADateTo = dayjs(pointA.dates.end, DatesFormat.CHOSED_DATE);
-    const pointBDateFrom = dayjs(pointB.dates.start, DatesFormat.CHOSED_DATE);
-    const pointBDateTo = dayjs(pointB.dates.end, DatesFormat.CHOSED_DATE);
+    const pointADateFrom = dayjs(pointA.dates.start, DatesFormat.CHOSEN_DATE);
+    const pointADateTo = dayjs(pointA.dates.end, DatesFormat.CHOSEN_DATE);
+    const pointBDateFrom = dayjs(pointB.dates.start, DatesFormat.CHOSEN_DATE);
+    const pointBDateTo = dayjs(pointB.dates.end, DatesFormat.CHOSEN_DATE);
 
     const deltaA = getDateDiff(pointADateFrom, pointADateTo);
     const deltaB = getDateDiff(pointBDateFrom, pointBDateTo);

@@ -120,16 +120,11 @@ export default class TripPointPresenter {
   }
 
   setErrorState() {
-    switch(this.#getBoardMode()) {
-      case TripBoardMode.DEFAULT: {
-        this.#pointComponent.shake();
-        break;
-      }
-
-      default: {
-        this.#editPointComponent.shake(this.clearState.bind(this));
-      }
+    if(this.#getBoardMode() === TripBoardMode.DEFAULT) {
+      return this.#pointComponent.shake();
     }
+
+    this.#editPointComponent.shake(this.clearState.bind(this));
   }
 
   clearState() {

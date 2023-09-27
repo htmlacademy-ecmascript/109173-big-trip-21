@@ -8,7 +8,7 @@ import { BLANK_POINT, ActionType, UpdateType, TripBoardMode } from '../utils/con
 
 import TripInfoView from '../view/trip-info-view.js';
 import TripInfoMainView from '../view/trip-info-main-view.js';
-import TripInfoPriceView from '../view/trip-info-price-view.js';
+import TripInfoCostView from '../view/trip-info-cost-view.js';
 import AddNewPointBtnView from '../view/add-new-point-btn-view.js';
 
 import TripPointPresenter from './trip-point-presenter.js';
@@ -23,7 +23,7 @@ export default class TripContentPresenter {
 
   #tripInfoComponent = null;
   #addNewPointBtnComponent = null;
-  #priceComponent = null;
+  #costComponent = null;
   #sortComponent = null;
   #noPointsComponent = null;
 
@@ -102,11 +102,11 @@ export default class TripContentPresenter {
     if(this.points.length > 0) {
       this.#tripInfoContainer = new TripInfoView(); // Контейнер для отрисовки информации о маршруте, датах и стоимости путешествия
       this.#tripInfoComponent = new TripInfoMainView({ pointsInfo: this.#getPointsInfo() });
-      this.#priceComponent = new TripInfoPriceView({ price: this.#getTotalPrice() });
+      this.#costComponent = new TripInfoCostView({ cost: this.#getTotalCost() });
 
       render(this.#tripInfoContainer, this.#mainHeaderContainer, RenderPosition.AFTERBEGIN); // Отрисовываем контейнер для общей информации о маршруте
       render(this.#tripInfoComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о маршруте и датах
-      render(this.#priceComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о цене
+      render(this.#costComponent, this.#tripInfoContainer.element); // Отрисовываем информацию о цене
     }
   }
 
@@ -136,7 +136,7 @@ export default class TripContentPresenter {
   #reRenderHeader() {
     remove(this.#tripInfoContainer);
     remove(this.#tripInfoComponent);
-    remove(this.#priceComponent);
+    remove(this.#costComponent);
     remove(this.#addNewPointBtnComponent);
 
     this.#renderHeader();
@@ -183,7 +183,7 @@ export default class TripContentPresenter {
     this.#pointPresenters.clear();
   }
 
-  #getTotalPrice() {
+  #getTotalCost() {
     /* Берем точки напрямую из модели, чтобы немного оптимизаровать производительность
     и не сортировать их лишний раз т.к. нам для подсчета цены, по сути, без разницы,
     отсортированы точки или нет */

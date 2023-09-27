@@ -141,7 +141,7 @@ function createEditPointTemplate({
               id="event-destination-1"
               type="text"
               name="event-destination"
-              value="${(destination.name) ? he.encode(destination.name) : ''}"
+              value="${(destination?.name) ? he.encode(destination.name) : ''}"
               list="destination-list-1"
               placeholder="${PlaceholderText.DESTINATION}"
               required
@@ -158,7 +158,7 @@ function createEditPointTemplate({
               id="event-start-time-1"
               type="text"
               name="event-start-time"
-              value="${dateFrom}"
+              value="${he.encode(dateFrom)}"
               placeholder="${PlaceholderText.DATE_FROM}"
               ${disabledState}
             >
@@ -168,7 +168,7 @@ function createEditPointTemplate({
               class="event__input  event__input--time"
               id="event-end-time-1"
               type="text" name="event-end-time"
-              value="${dateTo}"
+              value="${he.encode(dateTo)}"
               placeholder="${PlaceholderText.DATE_TO}"
               ${disabledState}
             >
@@ -184,7 +184,7 @@ function createEditPointTemplate({
               id="event-price-1"
               type="number"
               name="event-price"
-              value="${cost}"
+              value="${(typeof cost !== 'number') ? he.encode(cost) : cost}"
               placeholder="${PlaceholderText.PRICE}"
               min="${PRICE_MIN_VALUE}"
               required
@@ -361,8 +361,8 @@ export default class EditPointView extends AbstractStatefulView {
     this.#resetDatepickrTo();
     const dateEndElem = this.element.querySelector(CSSIDs.DATE_TIME_END);
 
-    const parsedDateTo = dayjs(this._state.dateTo, DatesFormat.CHOSED_DATE);
-    const parsetInitialDate = dayjs(initialDate, DatesFormat.CHOSED_DATE);
+    const parsedDateTo = dayjs(this._state.dateTo, DatesFormat.CHOSEN_DATE);
+    const parsetInitialDate = dayjs(initialDate, DatesFormat.CHOSEN_DATE);
     const isSameOrAfter = parsetInitialDate.isSameOrAfter(parsedDateTo);
 
     const defaultDateFrom = (isSameOrAfter) ? this._state.dateFrom : this._state.dateTo;
@@ -455,7 +455,7 @@ export default class EditPointView extends AbstractStatefulView {
   #pointSubmitHandler = (evt) => {
     evt.preventDefault();
 
-    const cost = (this._state.cost <= 0) ? 1 : this._state.cost;
+    const cost = (this._state.cost <= 0) ? PRICE_MIN_VALUE : this._state.cost;
 
     this.#updateStateView({ cost }, this.#onSubmitCallback);
   };
@@ -496,8 +496,8 @@ export default class EditPointView extends AbstractStatefulView {
     isDisabled,
   }) {
 
-    const dateFrom = dates?.start ? dayjs(dates.start, DatesFormat.CHOSED_DATE).format(DatesFormat.CHOSED_DATE) : '';
-    const dateTo = dates?.end ? dayjs(dates.end, DatesFormat.CHOSED_DATE).format(DatesFormat.CHOSED_DATE) : '';
+    const dateFrom = dates?.start ? dates.start : '';
+    const dateTo = dates?.end ? dates.end : '';
 
     destination = findObjectByID(destination, destinationsList) || '';
 

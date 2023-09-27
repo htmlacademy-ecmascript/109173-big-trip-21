@@ -2,6 +2,7 @@ import AbstractView from '../framework/view/abstract-view.js';
 import { getFormattedDateDiff, findObjectByID, normalizeDate } from '../utils/utils.js';
 import { DatesFormat } from '../utils/const.js';
 
+import he from 'he';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
@@ -41,9 +42,9 @@ function createTripEventsListTemplate({
 }) {
 
   const destinationInfo = findObjectByID(destination, destinationsList);
-  const offersTemplate = offers.size > 0 ? createOffersTemplate(offers, typedOffersList) : '';
-  const dateFrom = dayjs(dates.start, DatesFormat.CHOSED_DATE);
-  const dateTo = dayjs(dates.end, DatesFormat.CHOSED_DATE);
+  const offersTemplate = (offers.size > 0) ? createOffersTemplate(offers, typedOffersList) : '';
+  const dateFrom = dayjs(dates.start, DatesFormat.CHOSEN_DATE);
+  const dateTo = dayjs(dates.end, DatesFormat.CHOSEN_DATE);
   const favoriteBtnActiveClass = (isFavorite) ? CSSClasses.FAVORITE_BTN_ACTIVE.slice(1) : '';
 
   const pointDate = normalizeDate(dateFrom, DatesFormat.FOR_POINT);
@@ -60,17 +61,17 @@ function createTripEventsListTemplate({
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${type} ${destinationInfo ? destinationInfo.name : ''}</h3>
+        <h3 class="event__title">${type} ${(destinationInfo?.name) ? he.encode(destinationInfo.name) : ''}</h3>
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="${dateTimeStart}">${dateStart}</time>
+            <time class="event__start-time" datetime="${dateTimeStart}">${he.encode(dateStart)}</time>
             &mdash;
-            <time class="event__end-time" datetime="${dateTimeEnd}">${dateEnd}</time>
+            <time class="event__end-time" datetime="${dateTimeEnd}">${he.encode(dateEnd)}</time>
           </p>
           <p class="event__duration">${datesDiff}</p>
         </div>
         <p class="event__price">
-          &euro;&nbsp;<span class="event__price-value">${cost}</span>
+          &euro;&nbsp;<span class="event__price-value">${(typeof cost !== 'number') ? he.encode(cost) : cost}</span>
         </p>
         <!-- Если у точки есть доп. услуги - выводим их -->
         ${offersTemplate ? /*html*/`

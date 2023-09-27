@@ -83,20 +83,20 @@ function parseDateFromMillis(millis) {
 }
 
 function isPastDate(dateTo) {
-  dateTo = dayjs(dateTo, DatesFormat.CHOSED_DATE);
+  dateTo = dayjs(dateTo, DatesFormat.CHOSEN_DATE);
 
   return dateTo && dayjs().isAfter(dateTo, 'H');
 }
 
 function isPresentDate(dateFrom, dateTo) {
-  dateFrom = dayjs(dateFrom, DatesFormat.CHOSED_DATE);
-  dateTo = dayjs(dateTo, DatesFormat.CHOSED_DATE);
+  dateFrom = dayjs(dateFrom, DatesFormat.CHOSEN_DATE);
+  dateTo = dayjs(dateTo, DatesFormat.CHOSEN_DATE);
 
   return dayjs().isSameOrAfter(dateFrom, 'H') && dayjs().isSameOrBefore(dateTo, 'H');
 }
 
 function isFutureDate(dateFrom) {
-  dateFrom = dayjs(dateFrom, DatesFormat.CHOSED_DATE);
+  dateFrom = dayjs(dateFrom, DatesFormat.CHOSEN_DATE);
   return dateFrom && dayjs().isBefore(dateFrom, 'H');
 }
 

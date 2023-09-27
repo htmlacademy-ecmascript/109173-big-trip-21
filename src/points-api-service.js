@@ -1,6 +1,6 @@
 import Adapter from './adapter.js';
 import ApiService from './framework/api-service.js';
-import { ApiUrl, AUTH_TOKEN, END_POINT, Method } from './utils/const.js';
+import { AUTH_TOKEN, END_POINT, ApiUrl, Method } from './utils/const.js';
 
 
 export default class PointsApiService extends ApiService {
@@ -50,6 +50,7 @@ export default class PointsApiService extends ApiService {
         headers: new Headers({'Content-type': 'application/json'})
       };
     }
+
     const responce = await this._load(data);
     const parsedResponse = (method === Method.DELETE)
       ? responce

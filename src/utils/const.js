@@ -17,7 +17,7 @@ const DatesFormat = {
   DATE_TIME: 'YYYY-MM-DD[T]hh:mm', // Для тега datetime
   PATH: 'DD/MM/YY',
   DAY: 'DD',
-  CHOSED_DATE: 'DD/MM/YY HH:mm', // Дата и время начала события
+  CHOSEN_DATE: 'DD/MM/YY HH:mm', // Дата и время начала события
   FOR_POINT_PERIODS: 'HH:mm', // Для периодов, выбранных для точки маршрута
   FOR_POINT: 'MMM DD', // Дата для каждой конкретной точки маршрута
   FOR_HEAD_DATES: 'DD MMM',
