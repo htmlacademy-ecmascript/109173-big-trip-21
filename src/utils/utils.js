@@ -3,7 +3,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import duration from 'dayjs/plugin/duration'; // Расширение для подсчета длительности (https://day.js.org/docs/en/durations/durations)
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'; // (https://day.js.org/docs/en/plugin/is-same-or-before)
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'; // (https://day.js.org/docs/en/plugin/is-same-or-after)
-import { DateFormats } from './const';
+import { DatesFormat } from './const';
 
 // Добавляем расширение в библиотеку
 dayjs.extend(duration);
@@ -13,20 +13,38 @@ dayjs.extend(customParseFormat);
 
 const TimeInMillis = {
   MINUTE: 60 * 1000, // 60000
-  HOUR: 3600 * 1000, // 3600000
-  DAY: 24 * 3600 * 1000, // 86400000
+  HOUR: 60 * 60000, // 3 600 000
+  DAY: 24 * 3600000, // 86 400 000
+  YEAR: 365 * 86400000, // 31 536 000 000
 };
 
-// v.2 (на нативной функции)
-function getFormattedDateDiff(date1, date2) {
-  const dateFrom = dayjs(date1);
-  const dateTo = dayjs(date2);
+function getFormattedDateDiff(dateFrom, dateTo) {
   const dateDiff = getDateDiff(dateFrom, dateTo);
-  const formattedDate = parseDateFromMillis(dateDiff);
-  const formattedNums = [`${formattedDate.days}D`, `${formattedDate.hours}H`, `${formattedDate.minutes}M`];
-  const filteredNums = Array.from(formattedNums).filter((datePart) => !/00\w/.test(datePart));
+  const parsedDate = parseDateFromMillis(dateDiff);
+  const daysStr = `${getPadded2ZeroNum(parsedDate.days)}D`;
+  const hoursStr = `${getPadded2ZeroNum(parsedDate.hours)}H`;
+  const minutesStr = `${getPadded2ZeroNum(parsedDate.minutes)}M`;
 
-  return filteredNums.join(' ');
+  let datesDeltaStr = '';
+
+  switch(true) {
+    case (parsedDate.days > 0): {
+      datesDeltaStr = `${daysStr} ${hoursStr} ${minutesStr}`;
+      break;
+    }
+
+    case (parsedDate.hours > 0): {
+      datesDeltaStr = `${hoursStr} ${minutesStr}`;
+      break;
+    }
+
+    case (parsedDate.minutes > 0): {
+      datesDeltaStr = `${minutesStr}`;
+      break;
+    }
+  }
+
+  return datesDeltaStr;
 }
 
 function getDateDiff(dateFrom, dateTo) {
@@ -36,48 +54,49 @@ function getDateDiff(dateFrom, dateTo) {
 // Функция для получения дней, часов и минут в миллисекундах
 function parseDateFromMillis(millis) {
   let milliseconds = millis;
+  let years = 0;
   let days = 0;
   let hours = 0;
   let minutes = 0;
 
+  if(milliseconds >= TimeInMillis.YEAR) {
+    years = Math.trunc(milliseconds / TimeInMillis.YEAR);
+    milliseconds -= years * TimeInMillis.YEAR;
+  }
+
   if (milliseconds >= TimeInMillis.DAY) {
-    days = Math.round(milliseconds / TimeInMillis.DAY);
+    days = Math.trunc(milliseconds / TimeInMillis.DAY);
     milliseconds -= days * TimeInMillis.DAY;
   }
 
   if (milliseconds >= TimeInMillis.HOUR) {
-    hours = Math.round(milliseconds / TimeInMillis.HOUR);
+    hours = Math.trunc(milliseconds / TimeInMillis.HOUR);
     milliseconds -= hours * TimeInMillis.DAY;
   }
 
   if (milliseconds > TimeInMillis.MINUTE) {
-    minutes = Math.round(milliseconds / TimeInMillis.MINUTE);
-    milliseconds -= hours * TimeInMillis.MINUTE;
+    minutes = Math.trunc(milliseconds / TimeInMillis.MINUTE);
+    milliseconds -= minutes * TimeInMillis.MINUTE;
   }
 
-  // Дополняем строку до двух символов 00D 00H 00M
-  days = getPadded2ZeroNum(days);
-  hours = getPadded2ZeroNum(hours);
-  minutes = getPadded2ZeroNum(minutes);
-
-  return {days, hours, minutes};
+  return { days, hours, minutes };
 }
 
 function isPastDate(dateTo) {
-  dateTo = dayjs(dateTo, DateFormats.CHOSED_DATE);
+  dateTo = dayjs(dateTo, DatesFormat.CHOSEN_DATE);
 
   return dateTo && dayjs().isAfter(dateTo, 'H');
 }
 
 function isPresentDate(dateFrom, dateTo) {
-  dateFrom = dayjs(dateFrom, DateFormats.CHOSED_DATE);
-  dateTo = dayjs(dateTo, DateFormats.CHOSED_DATE);
+  dateFrom = dayjs(dateFrom, DatesFormat.CHOSEN_DATE);
+  dateTo = dayjs(dateTo, DatesFormat.CHOSEN_DATE);
 
   return dayjs().isSameOrAfter(dateFrom, 'H') && dayjs().isSameOrBefore(dateTo, 'H');
 }
 
 function isFutureDate(dateFrom) {
-  dateFrom = dayjs(dateFrom, DateFormats.CHOSED_DATE);
+  dateFrom = dayjs(dateFrom, DatesFormat.CHOSEN_DATE);
   return dateFrom && dayjs().isBefore(dateFrom, 'H');
 }
 
@@ -107,7 +126,7 @@ function isEscKey(evt) {
   return evt.key === 'Escape';
 }
 
-function upperCaseFirst(str) {
+function capitalize(str) {
   return `${str.charAt(0).toUpperCase()}${str.slice(1)}`;
 }
 
@@ -118,13 +137,12 @@ function getIDs(itemsObj) {
 export {
   getDateDiff,
   getFormattedDateDiff,
-  DateFormats,
   isPastDate,
   isPresentDate,
   isFutureDate,
   normalizeDate,
   findObjectByID,
-  upperCaseFirst,
+  capitalize,
   removeChars,
   isEscKey,
   getIDs

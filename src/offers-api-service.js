@@ -1,5 +1,5 @@
 import ApiService from './framework/api-service.js';
-import { ApiUrl, AUTH_TOKEN, END_POINT } from './utils/const.js';
+import { AUTH_TOKEN, END_POINT, ApiUrl } from './utils/const.js';
 
 
 export default class OffersApiService extends ApiService {

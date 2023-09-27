@@ -5,11 +5,10 @@ import TripEventsListItemView from '../view/trip-events-list-item-view.js';
 import EditPointView from '../view/edit-point-view.js';
 export default class TripPointPresenter {
   #point = null;
-  #pointDefaultState = null;
   #pointsContainer = null;
   #destinationsList = null;
 
-  #offersModel = null;
+  #getOffersByType = null;
 
   #pointComponent = null;
   #editPointComponent = null;
@@ -19,44 +18,39 @@ export default class TripPointPresenter {
 
   #isNewPoint = false;
   #isEditing = false;
-  #isOptionsLoaded = null;
 
   #onChangeCallback = null;
   #onBeforeEditCallback = null;
   #setBoardMode = null;
-  #validator = null;
+  #getBoardMode = null;
 
   constructor({
     point,
     container,
     destinationsList,
-    offersModel,
+    getOffersByType,
     onChangeCallback,
     onBeforeEditCallback,
     setBoardMode,
+    getBoardMode,
     isNewPoint,
-    isOptionsLoaded,
   }) {
     this.#point = point;
     this.#pointsContainer = container;
     this.#destinationsList = destinationsList;
-    this.#offersModel = offersModel;
+    this.#getOffersByType = getOffersByType;
     this.#onChangeCallback = onChangeCallback;
     this.#onBeforeEditCallback = onBeforeEditCallback;
     this.#setBoardMode = setBoardMode;
+    this.#getBoardMode = getBoardMode;
     this.#isNewPoint = isNewPoint;
-    this.#isOptionsLoaded = isOptionsLoaded;
   }
 
   init(point = this.#point) {
-    if(this.#pointDefaultState === null) { // Сохранение точки для возможности последующего восстановления
-      this.#pointDefaultState = structuredClone(point);
-    }
-
     const pointData = {
       point,
-      destinationsList: this.#destinationsList,
-      typedOffersList: this.#offersModel.getByPointType(point.type),
+      destinationsList: [...this.#destinationsList],
+      typedOffersList: [...this.#getOffersByType(point.type)],
     };
 
     // Компоненты предыдущей точки маршрута
@@ -73,7 +67,6 @@ export default class TripPointPresenter {
     this.#editPointComponent = new EditPointView({
       ...pointData,
       isNewPoint: this.#isNewPoint,
-      isOptionsLoaded: this.#isOptionsLoaded ,
       onTypeChangeCallback: this.#pointTypeChangeHandler,
       onDestinationChangeCallback: this.#pointDestinationChangeHandler,
       onSubmitCallback: this.#pointSubmitHandler,
@@ -99,6 +92,7 @@ export default class TripPointPresenter {
       this.destroy();
     }
 
+    this.#updateView(this.#point);
     this.#replaceFormToPoint();
   }
 
@@ -126,16 +120,20 @@ export default class TripPointPresenter {
   }
 
   setErrorState() {
-    const onErrorStateCallback = () => {
-      this.#editPointComponent
-        .updateElement({
-          isSaving: false,
-          isDeleting: false,
-          isDisabled: false,
-        });
-    };
+    if(this.#getBoardMode() === TripBoardMode.DEFAULT) {
+      return this.#pointComponent.shake();
+    }
 
-    this.#editPointComponent.shake(onErrorStateCallback);
+    this.#editPointComponent.shake(this.clearState.bind(this));
+  }
+
+  clearState() {
+    this.#editPointComponent
+      .updateElement({
+        isSaving: false,
+        isDeleting: false,
+        isDisabled: false,
+      });
   }
 
   #renderPoint() {
@@ -170,7 +168,7 @@ export default class TripPointPresenter {
     this.#onBeforeEditCallback();
 
     replace(this.#editPointComponent, this.#pointComponent);
-
+    this.#setBoardMode(TripBoardMode.EDITING);
     this.#setKeyDownHandler();
     this.#isEditing = true;
 
@@ -205,7 +203,10 @@ export default class TripPointPresenter {
     this.#removeKeyDownHandler();
   };
 
-  #pointEditHandler = () => this.#replacePointToForm();
+  #pointEditHandler = () => {
+    this.#setBoardMode(TripBoardMode.EDITING);
+    this.#replacePointToForm();
+  };
 
   #pointCancelEditHandler = () => {
     if(this.#isNewPoint) {
@@ -230,12 +231,10 @@ export default class TripPointPresenter {
   };
 
   #favoriteToggleHandler = (isFavorite) => {
-    this.#point.isFavorite = isFavorite;
-    this.#pointDefaultState.isFavorite = isFavorite;
     this.#onChangeCallback(
       ActionType.UPDATE_POINT,
       UpdateType.PATCH,
-      this.#point
+      {...this.#point, isFavorite}
     );
   };
 
@@ -244,7 +243,6 @@ export default class TripPointPresenter {
 
     point.cost = (point.cost <= 0) ? 1 : point.cost;
 
-    this.#pointDefaultState = null;
     this.#onChangeCallback(actionType, UpdateType.MAJOR, point);
   };
 

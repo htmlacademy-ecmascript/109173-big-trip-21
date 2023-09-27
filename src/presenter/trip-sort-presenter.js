@@ -2,7 +2,7 @@ import TripSortView from '../view/trip-sort-view.js';
 import { render, replace, remove } from '../framework/render.js';
 import { UpdateType } from '../utils/const.js';
 import { sorts } from '../utils/sort.js';
-import { upperCaseFirst } from '../utils/utils.js';
+import { capitalize } from '../utils/utils.js';
 
 export default class TripSortPresenter {
   #sortContainer = null;
@@ -29,12 +29,12 @@ export default class TripSortPresenter {
     return sorts;
   }
 
-  init(remainingPointsCount) {
+  init(remainingPointsCount = this.#pointsModel.points.length) {
     this.#previousSortComponent = this.#sortComponent;
     this.#sortComponent = new TripSortView({
       sorts: this.sorts,
       currentSort: this.#sortModel.sort,
-      pointsCount: remainingPointsCount || this.#pointsModel.points.length,
+      pointsCount: remainingPointsCount,
       onChangeCallback: this.#sortChangeHandler
     });
 
@@ -52,7 +52,6 @@ export default class TripSortPresenter {
   }
 
   /** Обработчики */
-  // Отслеживание изменения данных на сервере
   #modelChangeHandler = () => this.init();
   #pointsModelChangeHandler = (_, { remainingPointsCount } = {}) => {
     if(remainingPointsCount > 0) {
@@ -67,7 +66,7 @@ export default class TripSortPresenter {
       return;
     }
 
-    const capitalizedSortName = upperCaseFirst(sortType);
+    const capitalizedSortName = capitalize(sortType);
 
     this.#sortModel.setSort(
       UpdateType.MINOR,

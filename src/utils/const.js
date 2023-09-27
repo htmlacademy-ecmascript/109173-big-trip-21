@@ -1,36 +1,34 @@
 const END_POINT = 'https://21.objects.pages.academy/big-trip';
 const AUTH_TOKEN = 'Basic 44b7-b4ca-e34f0eb25871';
-const TRIP_EVENTS_LIST_TEMPLATE = '<ul class="trip-events__list"></ul>';
-const TRIP_INFO_TEMPLATE = '<section class="trip-main__trip-info  trip-info"></section>';
 const POINT_TYPES = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
-const DEFAULT_POINT_TYPE = 'flight';
 const BLANK_POINT = {
-  type: DEFAULT_POINT_TYPE,
+  type: POINT_TYPES[5].toLowerCase(),
   destination: '',
   dates: {
     start: '',
     end: '',
   },
   offers: new Set(),
-  cost: 1,
+  cost: 0,
   isFavorite: false,
 };
-const DateFormats = {
+const DatesFormat = {
   FLATPICKR: 'd/m/y H:i', // Для Флэтпикера
   DATE_TIME: 'YYYY-MM-DD[T]hh:mm', // Для тега datetime
   PATH: 'DD/MM/YY',
   DAY: 'DD',
-  CHOSED_DATE: 'DD/MM/YY HH:mm', // Дата и время начала события
+  CHOSEN_DATE: 'DD/MM/YY HH:mm', // Дата и время начала события
   FOR_POINT_PERIODS: 'HH:mm', // Для периодов, выбранных для точки маршрута
   FOR_POINT: 'MMM DD', // Дата для каждой конкретной точки маршрута
+  FOR_HEAD_DATES: 'DD MMM',
   // Форматирование продолжительности нахождения в точке маршрута
   LESS_THAN_HOUR: 'mm', // Менее часа
   LESS_THAN_DAY: 'HH mm', // Менее суток
   MORE_THAN_DAY: 'DD HH mm' // Более суток
 };
-const FLATPIKR_SETTINGS = {
+const FlatpickrSettings = {
   enableTime: true,
-  dateFormat: DateFormats.FLATPICKR,
+  dateFormat: DatesFormat.FLATPICKR,
   minuteIncrement: 1,
   'time_24hr': true,
 };
@@ -44,12 +42,15 @@ const ActionType = {
 };
 const UpdateType = {
   INIT: 'INIT',
+  INIT_SUCCESS: 'INIT_SUCCESS',
+  INIT_FAILED: 'INIT_FAILED',
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR'
 };
 const TripBoardMode = {
   LOADING: 'LOADING',
+  LOADING_FAILED: 'LOADING_FAILED',
   DEFAULT: 'DEFAULT',
   EDITING: 'EDITING',
   ADDING_NEW_POINT: 'ADDING_NEW_POINT'
@@ -71,15 +72,13 @@ const TimeLimit = {
 };
 
 export {
-  TRIP_EVENTS_LIST_TEMPLATE,
-  TRIP_INFO_TEMPLATE,
   END_POINT,
   AUTH_TOKEN,
   POINT_TYPES,
   BLANK_POINT,
-  FLATPIKR_SETTINGS,
+  FlatpickrSettings,
   ApiUrl,
-  DateFormats,
+  DatesFormat,
   ActionType,
   UpdateType,
   TripBoardMode,

@@ -32,17 +32,20 @@ export default class PointsModel extends Observable {
   }
 
   async init() {
+    this._notify(UpdateType.INIT);
+
     try {
       await this.#destinationsModel.init();
       await this.#offersModel.init();
 
       const points = await this.#pointsApiService.points;
       this.#points = points.map(Adapter.pointToClient);
+      this._notify(UpdateType.INIT_SUCCESS);
+
     } catch(err) {
       this.#points = [];
+      this._notify(UpdateType.INIT_FAILED);
     }
-
-    this._notify(UpdateType.INIT);
   }
 
   async updatePoint(updateType, update) {
