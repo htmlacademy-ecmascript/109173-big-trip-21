@@ -14,7 +14,7 @@ const SortType = Object.freeze({
 });
 
 const sorts = {
-  [SortType.DAY]: (points) => [...points].sort((pointA, pointB) => {
+  [SortType.DAY]: (points) => points?.slice().sort((pointA, pointB) => {
     const pointBDateFrom = dayjs(pointB.dates.start, DatesFormat.CHOSEN_DATE);
     const pointADateFrom = dayjs(pointA.dates.start, DatesFormat.CHOSEN_DATE);
 
@@ -22,7 +22,7 @@ const sorts = {
     return pointADateFrom - pointBDateFrom; // По возрастанию (вверху - самая ближайшая точка маршрута)
   }),
   [SortType.EVENT]: null,
-  [SortType.TIME]: (points) => [...points].sort((pointA, pointB) => {
+  [SortType.TIME]: (points) => points?.slice().sort((pointA, pointB) => {
     const pointADateFrom = dayjs(pointA.dates.start, DatesFormat.CHOSEN_DATE);
     const pointADateTo = dayjs(pointA.dates.end, DatesFormat.CHOSEN_DATE);
     const pointBDateFrom = dayjs(pointB.dates.start, DatesFormat.CHOSEN_DATE);
@@ -33,7 +33,7 @@ const sorts = {
 
     return deltaB - deltaA;
   }),
-  [SortType.PRICE]: (points) => [...points].sort((pointA, pointB) => pointB.cost - pointA.cost),
+  [SortType.PRICE]: (points) => points?.slice().sort((pointA, pointB) => pointB.cost - pointA.cost),
   [SortType.OFFERS]: null,
 };
 

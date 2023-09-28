@@ -6,7 +6,7 @@ import EditPointView from '../view/edit-point-view.js';
 export default class TripPointPresenter {
   #point = null;
   #pointsContainer = null;
-  #destinationsList = null;
+  #allDestinations = null;
 
   #getOffersByType = null;
 
@@ -27,7 +27,7 @@ export default class TripPointPresenter {
   constructor({
     point,
     container,
-    destinationsList,
+    allDestinations,
     getOffersByType,
     onChangeCallback,
     onBeforeEditCallback,
@@ -37,7 +37,7 @@ export default class TripPointPresenter {
   }) {
     this.#point = point;
     this.#pointsContainer = container;
-    this.#destinationsList = destinationsList;
+    this.#allDestinations = allDestinations;
     this.#getOffersByType = getOffersByType;
     this.#onChangeCallback = onChangeCallback;
     this.#onBeforeEditCallback = onBeforeEditCallback;
@@ -49,8 +49,8 @@ export default class TripPointPresenter {
   init(point = this.#point) {
     const pointData = {
       point,
-      destinationsList: [...this.#destinationsList],
-      typedOffersList: [...this.#getOffersByType(point.type)],
+      allDestinations: [...this.#allDestinations],
+      typedOffers: [...this.#getOffersByType(point.type)],
     };
 
     // Компоненты предыдущей точки маршрута
@@ -137,7 +137,9 @@ export default class TripPointPresenter {
   }
 
   #renderPoint() {
-    const renderPosition = this.#isNewPoint ? RenderPosition.AFTERBEGIN : RenderPosition.BEFOREEND;
+    const renderPosition = this.#isNewPoint
+      ? RenderPosition.AFTERBEGIN
+      : RenderPosition.BEFOREEND;
 
     render(this.#pointComponent, this.#pointsContainer, renderPosition);
 
@@ -239,9 +241,9 @@ export default class TripPointPresenter {
   };
 
   #pointSubmitHandler = (point) => {
-    const actionType = this.#isNewPoint ? ActionType.ADD_POINT : ActionType.UPDATE_POINT;
-
-    point.cost = (point.cost <= 0) ? 1 : point.cost;
+    const actionType = this.#isNewPoint
+      ? ActionType.ADD_POINT
+      : ActionType.UPDATE_POINT;
 
     this.#onChangeCallback(actionType, UpdateType.MAJOR, point);
   };

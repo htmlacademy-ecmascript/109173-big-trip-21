@@ -10,7 +10,7 @@ export default class TripSortPresenter {
   #pointsModel = null;
 
   #sortComponent = null;
-  #previousSortComponent = null;
+  #prevSortComponent = null;
 
   constructor({
     sortContainer,
@@ -30,7 +30,7 @@ export default class TripSortPresenter {
   }
 
   init(remainingPointsCount = this.#pointsModel.points.length) {
-    this.#previousSortComponent = this.#sortComponent;
+    this.#prevSortComponent = this.#sortComponent;
     this.#sortComponent = new TripSortView({
       sorts: this.sorts,
       currentSort: this.#sortModel.sort,
@@ -38,7 +38,7 @@ export default class TripSortPresenter {
       onChangeCallback: this.#sortChangeHandler
     });
 
-    if(this.#previousSortComponent === null) {
+    if(this.#prevSortComponent === null) {
       render(this.#sortComponent, this.#sortContainer);
       return;
     }
@@ -47,8 +47,8 @@ export default class TripSortPresenter {
   }
 
   #reRenderSort() {
-    replace(this.#sortComponent, this.#previousSortComponent);
-    remove(this.#previousSortComponent);
+    replace(this.#sortComponent, this.#prevSortComponent);
+    remove(this.#prevSortComponent);
   }
 
   /** Обработчики */
