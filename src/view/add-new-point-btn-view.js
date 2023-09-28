@@ -11,7 +11,8 @@ export default class AddNewPointBtnView extends AbstractView{
     super();
 
     this.#onAddNewPointCallback = onAddNewPointCallback;
-    this.element.addEventListener('click', this.#addNewPointBtnClickHandler);
+    this.element
+      .addEventListener('click', this.#addNewPointBtnClickHandler);
   }
 
   get template() {

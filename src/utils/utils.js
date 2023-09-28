@@ -21,30 +21,30 @@ const TimeInMillis = {
 function getFormattedDateDiff(dateFrom, dateTo) {
   const dateDiff = getDateDiff(dateFrom, dateTo);
   const parsedDate = parseDateFromMillis(dateDiff);
-  const daysStr = `${getPadded2ZeroNum(parsedDate.days)}D`;
-  const hoursStr = `${getPadded2ZeroNum(parsedDate.hours)}H`;
-  const minutesStr = `${getPadded2ZeroNum(parsedDate.minutes)}M`;
+  const days = `${getPadded2ZeroNum(parsedDate.days)}D`;
+  const hours = `${getPadded2ZeroNum(parsedDate.hours)}H`;
+  const minutes = `${getPadded2ZeroNum(parsedDate.minutes)}M`;
 
-  let datesDeltaStr = '';
+  let datesDelta = '';
 
   switch(true) {
     case (parsedDate.days > 0): {
-      datesDeltaStr = `${daysStr} ${hoursStr} ${minutesStr}`;
+      datesDelta = `${days} ${hours} ${minutes}`;
       break;
     }
 
     case (parsedDate.hours > 0): {
-      datesDeltaStr = `${hoursStr} ${minutesStr}`;
+      datesDelta = `${hours} ${minutes}`;
       break;
     }
 
     case (parsedDate.minutes > 0): {
-      datesDeltaStr = `${minutesStr}`;
+      datesDelta = `${minutes}`;
       break;
     }
   }
 
-  return datesDeltaStr;
+  return datesDelta;
 }
 
 function getDateDiff(dateFrom, dateTo) {
@@ -109,13 +109,18 @@ function normalizeDate(date, format, filler = '') {
 function getPadded2ZeroNum(num) {
   return String(num).padStart(2, 0);
 }
-
-function findObjectByID(id, objectsList) {
-  if(typeof objectsList !== 'object') {
+/**
+ *
+ * @param {string} id  - идентификатор искомого объекта
+ * @param {object[]} items - массив объектов, в котором производится поиск
+ * @returns {object|undefined} найденный объект
+ */
+function findObjectByID(id, items) {
+  if(typeof items !== 'object') {
     return;
   }
 
-  return objectsList.find((object) => object.id === id);
+  return items.find((item) => item.id === id);
 }
 
 function removeChars(str) {
@@ -130,8 +135,13 @@ function capitalize(str) {
   return `${str.charAt(0).toUpperCase()}${str.slice(1)}`;
 }
 
-function getIDs(itemsObj) {
-  return itemsObj.map((item) => item.id);
+/**
+ *
+ * @param {object[]} items - массив объектов
+ * @returns {String[]} массив идентификаторов переданных объектов
+ */
+function getIDs(items) {
+  return items.map((item) => item.id);
 }
 
 export {

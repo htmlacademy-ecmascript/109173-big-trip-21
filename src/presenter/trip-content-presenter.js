@@ -101,7 +101,7 @@ export default class TripContentPresenter {
 
     if(this.points.length > 0) {
       this.#tripInfoContainer = new TripInfoView(); // Контейнер для отрисовки информации о маршруте, датах и стоимости путешествия
-      this.#tripInfoComponent = new TripInfoMainView({ pointsInfo: this.#getPointsInfo() });
+      this.#tripInfoComponent = new TripInfoMainView({ destinationsAndDates: this.#getPointsInfo() });
       this.#costComponent = new TripInfoCostView({ cost: this.#getTotalCost() });
 
       render(this.#tripInfoContainer, this.#mainHeaderContainer, RenderPosition.AFTERBEGIN); // Отрисовываем контейнер для общей информации о маршруте
@@ -161,11 +161,11 @@ export default class TripContentPresenter {
 
   #renderEventPoint(point = BLANK_POINT) {
     const isNewPoint = (point === BLANK_POINT);
-    const destinationsList = this.#destinationsModel.destinations;
+    const allDestinations = this.#destinationsModel.destinations;
     const pointPresenter = new TripPointPresenter({
       point,
       container: this.#tripEventsListContainer.element,
-      destinationsList,
+      allDestinations,
       getOffersByType: this.#offersModel.getByPointType.bind(this.#offersModel),
       onChangeCallback: this.#viewChangeHandler,
       onBeforeEditCallback: this.#pointBeforeEditHandler,

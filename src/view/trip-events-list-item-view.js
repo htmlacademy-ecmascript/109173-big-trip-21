@@ -14,9 +14,9 @@ const CSSClasses = {
   FAVORITE_BTN_ACTIVE: '.event__favorite-btn--active'
 };
 
-function createOffersTemplate(offers, offersList) {
-  return offersList.map(({id, title, price}) => {
-    if (offers.has(id)) {
+function createOffersTemplate(pointOffers, typedOffers) {
+  return typedOffers.map(({id, title, price}) => {
+    if (pointOffers.has(id)) {
       return /* html */`
         <li class="event__offer">
           <span class="event__offer-title">${title}</span>
@@ -37,15 +37,19 @@ function createTripEventsListTemplate({
   dates,
   cost,
   isFavorite,
-  destinationsList,
-  typedOffersList
+  allDestinations,
+  typedOffers
 }) {
 
-  const destinationInfo = findObjectByID(destination, destinationsList);
-  const offersTemplate = (offers.size > 0) ? createOffersTemplate(offers, typedOffersList) : '';
+  const destinationInfo = findObjectByID(destination, allDestinations);
+  const offersTemplate = (offers.size > 0)
+    ? createOffersTemplate(offers, typedOffers)
+    : '';
   const dateFrom = dayjs(dates.start, DatesFormat.CHOSEN_DATE);
   const dateTo = dayjs(dates.end, DatesFormat.CHOSEN_DATE);
-  const favoriteBtnActiveClass = (isFavorite) ? CSSClasses.FAVORITE_BTN_ACTIVE.slice(1) : '';
+  const favoriteBtnActiveClass = (isFavorite)
+    ? CSSClasses.FAVORITE_BTN_ACTIVE.slice(1)
+    : '';
 
   const pointDate = normalizeDate(dateFrom, DatesFormat.FOR_POINT);
   const dateStart = normalizeDate(dateFrom, DatesFormat.FOR_POINT_PERIODS);
@@ -95,22 +99,22 @@ function createTripEventsListTemplate({
 
 export default class TripEventsListItemView extends AbstractView {
   #point = null;
-  #destinationsList = null;
-  #typedOffersList = null;
+  #allDestinations = null;
+  #typedOffers = null;
   #onEditCallback = null;
   #onFavoriteToggleCallback = null;
 
   constructor({
     point,
-    destinationsList,
-    typedOffersList,
+    allDestinations,
+    typedOffers,
     onEditCallback,
     onFavoriteToggleCallback
   }) {
     super();
     this.#point = point;
-    this.#destinationsList = destinationsList;
-    this.#typedOffersList = typedOffersList;
+    this.#allDestinations = allDestinations;
+    this.#typedOffers = typedOffers;
     this.#onEditCallback = onEditCallback;
     this.#onFavoriteToggleCallback = onFavoriteToggleCallback;
 
@@ -123,8 +127,8 @@ export default class TripEventsListItemView extends AbstractView {
   get template() {
     return createTripEventsListTemplate({
       ...this.#point,
-      destinationsList: this.#destinationsList,
-      typedOffersList: this.#typedOffersList,
+      allDestinations: this.#allDestinations,
+      typedOffers: this.#typedOffers,
     });
   }
 

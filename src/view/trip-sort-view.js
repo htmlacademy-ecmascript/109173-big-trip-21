@@ -42,14 +42,6 @@ export default class TripSortView extends AbstractView {
   #pointsCount = null;
   #onChangeCallback = null;
 
-  get template() {
-    return createTripSortTemplate({
-      sorts: this.#sorts,
-      currentSort: this.#currentSort,
-      pointsCount: this.#pointsCount
-    });
-  }
-
   constructor({
     sorts,
     currentSort,
@@ -64,8 +56,17 @@ export default class TripSortView extends AbstractView {
     this.#onChangeCallback = onChangeCallback;
 
     if(this.#pointsCount > 0) {
-      this.element.addEventListener('change', this.#sortChangeHandler);
+      this.element
+        .addEventListener('change', this.#sortChangeHandler);
     }
+  }
+
+  get template() {
+    return createTripSortTemplate({
+      sorts: this.#sorts,
+      currentSort: this.#currentSort,
+      pointsCount: this.#pointsCount
+    });
   }
 
   #sortChangeHandler = (evt) => {

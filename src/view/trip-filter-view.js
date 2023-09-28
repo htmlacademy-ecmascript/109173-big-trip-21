@@ -59,7 +59,8 @@ export default class TripFilterView extends AbstractView{
   }
 
   _restoreHandlers() {
-    this.element.addEventListener('change', this.#filterChangeHandler);
+    this.element
+      .addEventListener('change', this.#filterChangeHandler);
   }
 
   #filterChangeHandler = (evt) => {

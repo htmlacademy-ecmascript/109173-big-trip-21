@@ -7,39 +7,45 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(customParseFormat);
 
-function createTripInfoMainTemplate({ pointsInfo }) {
-  let destinationsStr = '&mdash; ... &mdash;';
-  let datesStr = '... &mdash; ...';
+const Delimiter = {
+  DASH: '&mdash;',
+  DOTS: '...'
+};
 
-  if(pointsInfo.length <= 0) {
+function createTripInfoMainTemplate({ destinationsAndDates }) {
+  let destinationsTemplate = `${Delimiter.DASH} ${Delimiter.DOTS} ${Delimiter.DASH}`;
+  let datesTemplate = `${Delimiter.DOTS} ${Delimiter.DASH} ${Delimiter.DOTS}`;
+
+  if(destinationsAndDates.length <= 0) {
     return '';
   }
 
-  const startPoint = pointsInfo[0];
-  const endPoint = pointsInfo[pointsInfo.length - 1];
+  const startPoint = destinationsAndDates[0];
+  const endPoint = destinationsAndDates[destinationsAndDates.length - 1];
   const startDestination = startPoint.destination;
   const endDestination = endPoint.destination;
 
-  if(pointsInfo[0].destination) {
-    switch(Boolean(pointsInfo.length)) {
-      case (pointsInfo.length > 3): {
-        destinationsStr = `${startDestination} ${destinationsStr} ${endDestination}`;
+  if(destinationsAndDates[0].destination) {
+    switch(Boolean(destinationsAndDates.length)) {
+      case (destinationsAndDates.length > 3): {
+        destinationsTemplate = `${startDestination} ${destinationsTemplate} ${endDestination}`;
         break;
       }
 
-      case (pointsInfo.length === 2): {
-        destinationsStr = `${startDestination} &mdash; ${endDestination}`;
+      case (destinationsAndDates.length === 2): {
+        destinationsTemplate = `${startDestination} ${Delimiter.DASH} ${endDestination}`;
         break;
       }
 
-      case (pointsInfo.length === 1): {
-        destinationsStr = startDestination;
+      case (destinationsAndDates.length === 1): {
+        destinationsTemplate = startDestination;
         break;
       }
 
       default: {
         if(startDestination) {
-          destinationsStr = Object.values(pointsInfo).map((pointInfo) => pointInfo.destination).join(' &mdash; ');
+          destinationsTemplate = Object.values(destinationsAndDates)
+            .map((pointInfo) => pointInfo.destination).join(` ${Delimiter.DASH} `);
         }
       }
     }
@@ -48,25 +54,26 @@ function createTripInfoMainTemplate({ pointsInfo }) {
   const pathDateFrom = dayjs(startPoint.dateFrom, DatesFormat.PATH);
   const pathDateTo = dayjs(endPoint.dateTo, DatesFormat.PATH);
 
-  datesStr = `${normalizeDate(pathDateFrom, DatesFormat.FOR_HEAD_DATES, '...')} &mdash; ${normalizeDate(pathDateTo, DatesFormat.FOR_HEAD_DATES, '...')}`;
+  datesTemplate = `${normalizeDate(pathDateFrom, DatesFormat.FOR_HEAD_DATES, Delimiter.DOTS)}
+    &mdash; ${normalizeDate(pathDateTo, DatesFormat.FOR_HEAD_DATES, Delimiter.DOTS)}`;
 
   return /*html*/`
     <div class="trip-info__main">
-        <h1 class="trip-info__title">${destinationsStr}</h1>
+        <h1 class="trip-info__title">${destinationsTemplate}</h1>
 
-        <p class="trip-info__dates">${datesStr}</p>
+        <p class="trip-info__dates">${datesTemplate}</p>
     </div>`;
 }
 
 export default class TripInfoMainView extends AbstractView {
-  #pointsInfo = null;
-  constructor({ pointsInfo }) {
+  #destinationsAndDates = null;
+  constructor({ destinationsAndDates }) {
     super();
 
-    this.#pointsInfo = pointsInfo;
+    this.#destinationsAndDates = destinationsAndDates;
   }
 
   get template() {
-    return createTripInfoMainTemplate({ pointsInfo: this.#pointsInfo });
+    return createTripInfoMainTemplate({ destinationsAndDates: this.#destinationsAndDates });
   }
 }
